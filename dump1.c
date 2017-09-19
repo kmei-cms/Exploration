@@ -111,6 +111,10 @@ void dump1::Loop( int display_event )
       int top2_gpi(-1) ;
       int w1_gpi(-1) ;
       int w2_gpi(-1) ;
+      int w1_d1_gpi(-1) ;
+      int w1_d2_gpi(-1) ;
+      int w2_d1_gpi(-1) ;
+      int w2_d2_gpi(-1) ;
       int stop1_gpi(-1) ;
       int stop2_gpi(-1) ;
       int chi1_gpi(-1) ;
@@ -130,6 +134,26 @@ void dump1::Loop( int display_event )
 
          if ( spdgid ==  6 && momidx >= 0 && stop1_gpi >= 0 && top1_gpi < 0 ) top1_gpi = gpi ;
          if ( spdgid == -6 && momidx >= 0 && stop2_gpi >= 0 && top2_gpi < 0 ) top2_gpi = gpi ;
+
+         if ( spdgid ==  24 && smomid == 6 && w1_gpi < 0 ) { w1_gpi = gpi ; }
+         if ( spdgid == -24 && smomid ==-6 && w2_gpi < 0 ) { w2_gpi = gpi ; }
+
+         if ( pdgid < 6 && smomid == 24 ) {
+            if ( w1_d1_gpi < 0 ) {
+               w1_d1_gpi = gpi ;
+            } else if ( w1_d2_gpi < 0 ) {
+               w1_d2_gpi = gpi ;
+            }
+         }
+
+         if ( pdgid < 6 && smomid == -24 ) {
+            if ( w2_d1_gpi < 0 ) {
+               w2_d1_gpi = gpi ;
+            } else if ( w2_d2_gpi < 0 ) {
+               w2_d2_gpi = gpi ;
+            }
+         }
+
 
          if ( skip_sl_top_events && ( ( pdgid==11 || pdgid==13 || pdgid==15 ) && momid == 24 ) ) { skip_event = true ; }
          char pname[100] ;
@@ -168,13 +192,13 @@ void dump1::Loop( int display_event )
                } else {
                   marker_gp -> SetMarkerStyle( 25 ) ;
                }
-            } else if ( (pdgid == 5 && momidx == top1_gpi) || momidx == w1_gpi ) {
+            } else if ( (pdgid == 5 && momidx == top1_gpi) || gpi == w1_d1_gpi || gpi == w1_d2_gpi  ) {
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 22 ) ;
                } else {
                   marker_gp -> SetMarkerStyle( 26 ) ;
                }
-            } else if ( (pdgid == 5 && momidx == top2_gpi) || momidx == w2_gpi ) {
+            } else if ( (pdgid == 5 && momidx == top2_gpi) || gpi == w2_d1_gpi || gpi == w2_d2_gpi ) {
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 23 ) ;
                } else {
