@@ -25,6 +25,8 @@ void rpv_analysis1::Loop( int max_events, bool verb )
    TH1F* h_chi_pt = new TH1F( "h_chi_pt", "Chi pt", 100, 0., 1000. ) ;
    TH1F* h_w_pt = new TH1F( "h_w_pt", "w pt", 100, 0., 1000. ) ;
    TH1F* h_b_pt = new TH1F( "h_b_pt", "b pt", 100, 0., 1000. ) ;
+   TH1F* h_w_dh_pt = new TH1F( "h_w_dh_pt", "W daughter pt (harder one)", 100, 0., 1000. ) ;
+   TH1F* h_w_ds_pt = new TH1F( "h_w_ds_pt", "W daughter pt (softer one)", 100, 0., 1000. ) ;
 
    TH1F* h_stop_eta = new TH1F( "h_stop_eta", "Stop eta", 100, -6., 6. ) ;
    TH1F* h_top_eta = new TH1F( "h_top_eta", "top eta", 100, -6., 6.  ) ;
@@ -153,6 +155,8 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
    Long64_t nbytes = 0, nb = 0;
 
+   int n_missing_b(0) ;
+
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
       Long64_t ientry = LoadTree(jentry);
@@ -164,39 +168,6 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
 
 
-
-
-
-
-    //--- Approximate a hadronic trigger
-
-      int rec_njet_pt40(0) ;
-      int rec_njet_pt32(0) ;
-
-      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
-
-            TLorentzVector jlv( Jets->at(rji) ) ;
-
-            if ( jlv.Pt() > 40 ) rec_njet_pt40++ ;
-            if ( jlv.Pt() > 32 ) rec_njet_pt32++ ;
-
-      } // rji
-
-      h_rec_njet40 -> Fill( rec_njet_pt40 ) ;
-      if ( HT > 450 ) h_rec_njet40_ht450 -> Fill( rec_njet_pt40 ) ;
-      if ( HT > 1100 ) h_rec_njet40_ht1100 -> Fill( rec_njet_pt40 ) ;
-
-      h_rec_njet32 -> Fill( rec_njet_pt32 ) ;
-      if ( HT > 380 ) h_rec_njet32_ht380 -> Fill( rec_njet_pt32 ) ;
-      if ( HT > 1100 ) h_rec_njet32_ht1100 -> Fill( rec_njet_pt32 ) ;
-
-      h_rec_ht -> Fill( HT ) ;
-      if ( rec_njet_pt40 >= 6 ) h_rec_ht_njet40ge6 -> Fill( HT ) ;
-      if ( rec_njet_pt32 >= 6 ) h_rec_ht_njet32ge6 -> Fill( HT ) ;
-
-      if ( !( HT>450 && rec_njet_pt40>=6 ) ) continue ;
-
-      //if ( HT < 1100 ) continue ; //************ HT cut *****************
 
 
 
@@ -277,8 +248,8 @@ void rpv_analysis1::Loop( int max_events, bool verb )
          if ( spdgid == -24 && smomid ==-6 && w2_gpi < 0 ) { w2_gpi = gpi ; }
 
 
-         if ( spdgid ==  5 && momidx >= 0 && momidx == top1_gpi && b1_gpi < 0 ) { b1_gpi = gpi ; }
-         if ( spdgid == -5 && momidx >= 0 && momidx == top2_gpi && b2_gpi < 0 ) { b2_gpi = gpi ; }
+         if ( spdgid ==  5 && b1_gpi < 0 ) { b1_gpi = gpi ; }
+         if ( spdgid == -5 && b2_gpi < 0 ) { b2_gpi = gpi ; }
 
 
          if ( pdgid < 6 && smomid == 24 ) {
@@ -383,28 +354,29 @@ void rpv_analysis1::Loop( int max_events, bool verb )
          continue ;
       }
       if ( b1_gpi < 0 || b2_gpi < 0 ) {
-   ///   printf("\n\n *** Couldn't find one of the bs.\n") ;
-   ///   printf( " stop1 = %3d ,  top1 = %3d ,  w1 = %3d , chi1 = %d, b1 = %d\n", stop1_gpi, top1_gpi, w1_gpi, chi1_gpi, b1_gpi ) ;
-   ///   printf( " stop2 = %3d ,  top2 = %3d ,  w2 = %3d , chi2 = %d, b2 = %d\n", stop2_gpi, top2_gpi, w2_gpi, chi2_gpi, b2_gpi ) ;
-   ///   for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) {
-   ///      char pname[100] ;
-   ///      char mname[100] ;
-   ///      sprintf( pname, "%s", mcname( GenParticles_PdgId->at(gpi) ) ) ;
-   ///      sprintf( mname, "%s", mcname( GenParticles_ParentId->at(gpi) ) ) ;
-   ///      double eta = 99. ;
-   ///      if ( GenParticles->at(gpi).Pt() > 0 ) eta = GenParticles->at(gpi).Eta() ;
-   ///      double phi = GenParticles->at(gpi).Phi() ;
-   ///      double pt = GenParticles->at(gpi).Pt() ;
-   ///      printf("  %3u :  ID=%9d %10s : MomID=%9d %10s MomIdx=%3d status=%2d :  Pt = %7.1f , Eta = %6.3f, Phi = %6.3f\n",
-   ///          gpi,
-   ///          GenParticles_PdgId->at(gpi), pname,
-   ///          GenParticles_ParentId->at(gpi), mname, GenParticles_ParentIdx->at(gpi),
-   ///          GenParticles_Status->at(gpi),
-   ///          GenParticles->at(gpi).Pt(),
-   ///          eta,
-   ///          phi
-   ///          ) ;
-   ///   } // gpi
+     /// printf("\n\n *** Couldn't find one of the bs.\n") ;
+     /// printf( " stop1 = %3d ,  top1 = %3d ,  w1 = %3d , chi1 = %d, b1 = %d\n", stop1_gpi, top1_gpi, w1_gpi, chi1_gpi, b1_gpi ) ;
+     /// printf( " stop2 = %3d ,  top2 = %3d ,  w2 = %3d , chi2 = %d, b2 = %d\n", stop2_gpi, top2_gpi, w2_gpi, chi2_gpi, b2_gpi ) ;
+     /// for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) {
+     ///    char pname[100] ;
+     ///    char mname[100] ;
+     ///    sprintf( pname, "%s", mcname( GenParticles_PdgId->at(gpi) ) ) ;
+     ///    sprintf( mname, "%s", mcname( GenParticles_ParentId->at(gpi) ) ) ;
+     ///    double eta = 99. ;
+     ///    if ( GenParticles->at(gpi).Pt() > 0 ) eta = GenParticles->at(gpi).Eta() ;
+     ///    double phi = GenParticles->at(gpi).Phi() ;
+     ///    double pt = GenParticles->at(gpi).Pt() ;
+     ///    printf("  %3u :  ID=%9d %10s : MomID=%9d %10s MomIdx=%3d status=%2d :  Pt = %7.1f , Eta = %6.3f, Phi = %6.3f\n",
+     ///        gpi,
+     ///        GenParticles_PdgId->at(gpi), pname,
+     ///        GenParticles_ParentId->at(gpi), mname, GenParticles_ParentIdx->at(gpi),
+     ///        GenParticles_Status->at(gpi),
+     ///        GenParticles->at(gpi).Pt(),
+     ///        eta,
+     ///        phi
+     ///        ) ;
+     /// } // gpi
+         n_missing_b++ ;
          continue ;
       }
       if ( w1_d1_gpi < 0 || w1_d2_gpi < 0 ) {
@@ -431,6 +403,45 @@ void rpv_analysis1::Loop( int max_events, bool verb )
          printf( " chi2 daughters = %3d, %3d, %3d\n", chi2_d1_gpi, chi2_d2_gpi, chi2_d3_gpi ) ;
          continue ;
       }
+
+
+
+
+
+    //--- Approximate a hadronic trigger
+
+      int rec_njet_pt40(0) ;
+      int rec_njet_pt32(0) ;
+
+      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+
+            TLorentzVector jlv( Jets->at(rji) ) ;
+
+            if ( jlv.Pt() > 40 ) rec_njet_pt40++ ;
+            if ( jlv.Pt() > 32 ) rec_njet_pt32++ ;
+
+      } // rji
+
+      h_rec_njet40 -> Fill( rec_njet_pt40 ) ;
+      if ( HT > 450 ) h_rec_njet40_ht450 -> Fill( rec_njet_pt40 ) ;
+      if ( HT > 1100 ) h_rec_njet40_ht1100 -> Fill( rec_njet_pt40 ) ;
+
+      h_rec_njet32 -> Fill( rec_njet_pt32 ) ;
+      if ( HT > 380 ) h_rec_njet32_ht380 -> Fill( rec_njet_pt32 ) ;
+      if ( HT > 1100 ) h_rec_njet32_ht1100 -> Fill( rec_njet_pt32 ) ;
+
+      h_rec_ht -> Fill( HT ) ;
+      if ( rec_njet_pt40 >= 6 ) h_rec_ht_njet40ge6 -> Fill( HT ) ;
+      if ( rec_njet_pt32 >= 6 ) h_rec_ht_njet32ge6 -> Fill( HT ) ;
+
+      if ( !( HT>450 && rec_njet_pt40>=6 ) ) continue ;
+
+      //if ( HT < 1100 ) continue ; //************ HT cut *****************
+
+
+
+
+
 
 
 
@@ -474,6 +485,30 @@ void rpv_analysis1::Loop( int max_events, bool verb )
       TLorentzVector gplv_top1_dsum = gplv_b1 + gplv_w1 ;
       TLorentzVector gplv_top2_dsum = gplv_b2 + gplv_w2 ;
 
+
+      TLorentzVector gplv_w1_dh ;
+      TLorentzVector gplv_w1_ds ;
+      if ( gplv_w1_d1.Pt() > gplv_w1_d2.Pt() ) {
+         gplv_w1_dh = gplv_w1_d1 ;
+         gplv_w1_ds = gplv_w1_d2 ;
+      } else {
+         gplv_w1_dh = gplv_w1_d2 ;
+         gplv_w1_ds = gplv_w1_d1 ;
+      }
+
+      TLorentzVector gplv_w2_dh ;
+      TLorentzVector gplv_w2_ds ;
+      if ( gplv_w2_d1.Pt() > gplv_w2_d2.Pt() ) {
+         gplv_w2_dh = gplv_w2_d1 ;
+         gplv_w2_ds = gplv_w2_d2 ;
+      } else {
+         gplv_w2_dh = gplv_w2_d2 ;
+         gplv_w2_ds = gplv_w2_d1 ;
+      }
+
+
+
+
       if (verb) {
          if ( gplv_top1.Pt() > 200 && gplv_top2.Pt() > 200 ) { printf(" *** two hard tops.\n") ; }
       }
@@ -511,6 +546,12 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
       h_w_pt -> Fill( gplv_w1.Pt() ) ;
       h_w_pt -> Fill( gplv_w2.Pt() ) ;
+
+      h_w_dh_pt -> Fill( gplv_w1_dh.Pt() ) ;
+      h_w_dh_pt -> Fill( gplv_w2_dh.Pt() ) ;
+
+      h_w_ds_pt -> Fill( gplv_w1_ds.Pt() ) ;
+      h_w_ds_pt -> Fill( gplv_w2_ds.Pt() ) ;
 
 
       TLorentzVector gplv_extras ;
@@ -1312,6 +1353,10 @@ void rpv_analysis1::Loop( int max_events, bool verb )
    printf("\n\n") ;
 
    saveHist( "plots.root", "h*" ) ;
+
+   printf("\n\n") ;
+   printf("  Number of events with missing b in gen particles: %d\n", n_missing_b ) ;
+   printf("\n\n") ;
 
 } // Loop
 
