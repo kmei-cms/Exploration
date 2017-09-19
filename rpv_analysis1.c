@@ -41,6 +41,7 @@ void rpv_analysis1::Loop( int max_events, bool verb )
    TH2F* h_stopstop_pt_vs_cosdphi = new TH2F( "h_stopstop_pt_vs_cosdphi", "stop1,stop2 pt vs cos dphi", 100, -1.1, 1.1, 100, 0., 1000. ) ;
    TH1F* h_stopstop_cosdphi_two_taggable_tops = new TH1F( "h_stopstop_cosdphi_two_taggable_tops", "stop1*stop2 cos dphi, two taggable tops", 110, -1.1, 1.1 ) ;
    TH1F* h_stopstop_costhetasum_cmf = new TH1F( "h_stopstop_costhetasum_cmf", "stop1,stop2 cos thetasum, CMF", 110, -1.1, 1.1 ) ;
+   TH1F* h_stopstop_costhetasum_cmf_two_taggable_tops = new TH1F( "h_stopstop_costhetasum_cmf_two_taggable_tops", "stop1,stop2 cos thetasum, CMF, two taggable tops", 110, -1.1, 1.1 ) ;
 
    TH1F* h_drmin_top_dau = new TH1F( "h_drmin_top_dau", "dR min, top daughters", 100, 0., 5. ) ;
    TH1F* h_drmax_top_dau = new TH1F( "h_drmax_top_dau", "dR max, top daughters", 100, 0., 5. ) ;
@@ -76,6 +77,10 @@ void rpv_analysis1::Loop( int max_events, bool verb )
    TH1F* h_extra_jet_pt = new TH1F( "h_extra_jet_pt", "Extra jet, pt", 100, 0., 1000. ) ;
    TH1F* h_extra_jet_eta = new TH1F( "h_extra_jet_eta", "Extra jet, eta", 100, -6., 6. ) ;
    TH1F* h_extra_njets = new TH1F( "h_extra_njets", "Extra number of jets", 11, -0.5, 10.5 ) ;
+
+   TH1F* h_extra_jet_rank = new TH1F( "h_extra_jet_rank", "Pt rank of extra jet(s)", 15, 0.5, 15.5 ) ;
+   TH2F* h_extra_jet_rank_vs_njets = new TH2F( "h_extra_jet_rank_vs_njets", "Pt rank of extra jet(s) vs Njets", 15, 0.5, 15.5, 15, 0.5, 15.5 ) ;
+   TH1F* h_extra_lead_jet_rank = new TH1F( "h_extra_lead_jet_rank", "Pt rank of leading extra jet", 15, 0.5, 15.5 ) ;
 
 
 
@@ -248,8 +253,8 @@ void rpv_analysis1::Loop( int max_events, bool verb )
          if ( spdgid == -24 && smomid ==-6 && w2_gpi < 0 ) { w2_gpi = gpi ; }
 
 
-         if ( spdgid ==  5 && b1_gpi < 0 ) { b1_gpi = gpi ; }
-         if ( spdgid == -5 && b2_gpi < 0 ) { b2_gpi = gpi ; }
+         if ( spdgid ==  5 && b1_gpi < 0 && GenParticles->at(gpi).Pt() > 1. ) { b1_gpi = gpi ; }
+         if ( spdgid == -5 && b2_gpi < 0 && GenParticles->at(gpi).Pt() > 1. ) { b2_gpi = gpi ; }
 
 
          if ( pdgid < 6 && smomid == 24 ) {
@@ -790,9 +795,10 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
       if ( n_taggable_tops == 2 ) {
          h_toptop_cosdphi_two_taggable_tops -> Fill( toptop_cosdphi ) ;
-         h_stopstop_cosdphi_two_taggable_tops -> Fill( stopstop_cosdphi ) ;
          h_toptop_costhetasum_cmf_two_taggable_tops -> Fill( cos(toptop_thetasum_cmf) ) ;
          h_toptop_cosdphi_vs_costhetasum_cmf_two_taggable_tops -> Fill( cos( toptop_thetasum_cmf ), cos( toptop_dphi ) ) ;
+         h_stopstop_cosdphi_two_taggable_tops -> Fill( stopstop_cosdphi ) ;
+         h_stopstop_costhetasum_cmf_two_taggable_tops -> Fill( cos( stopstop_thetasum_cmf ) ) ;
       }
 
 
@@ -957,6 +963,17 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
 
 
+      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+         for ( int ei=0; ei<extras_rji.size() ; ei++ ) {
+            if ( rji == extras_rji[ei] ) {
+               if ( ei==0 ) {
+                  h_extra_lead_jet_rank -> Fill( rji+1 ) ;
+               }
+               h_extra_jet_rank -> Fill( rji+1 ) ;
+               h_extra_jet_rank_vs_njets -> Fill( Jets->size(), rji+1 ) ;
+            }
+         } // ei
+      } // rji
 
 
 
