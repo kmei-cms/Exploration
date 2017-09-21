@@ -203,6 +203,7 @@ void dump1::Loop( int display_event, float rhophi_scale )
              phi
              ) ;
          arrow -> SetLineColor(1) ;
+         arrow->SetLineStyle(1) ;
          if ( ! (GenParticles_Status->at(gpi) == 1 && GenParticles_ParentIdx->at(gpi) == -1)
               && (GenParticles_Status->at(gpi) < 30 || GenParticles_Status->at(gpi) == 62 ) ) {
             if ( pdgid==1 || pdgid==2 || pdgid==3 || pdgid==4 || pdgid==5 || pdgid==21 ) {
@@ -347,6 +348,7 @@ void dump1::Loop( int display_event, float rhophi_scale )
          TLorentzVector rjlv( Jets->at(ji) ) ;
          can3->cd() ;
          arrow->SetLineColor(4) ;
+         arrow->SetLineStyle(1) ;
          arrow -> DrawArrow( 0., 0., rjlv.Px(), rjlv.Py(), 0.02 ) ;
 
       } // ji
@@ -378,6 +380,13 @@ void dump1::Loop( int display_event, float rhophi_scale )
          circle_fj -> DrawEllipse( eta, phi, circle_fj_radius, circle_fj_radius, 0., 360., 0. ) ;
          fatjet_pt_bar -> DrawLine( eta+fatjet_pt_bar_deta, phi+fatjet_pt_bar_dphi,
                          eta+fatjet_pt_bar_deta + fatjet_pt_bar_scale*pt, phi+fatjet_pt_bar_dphi ) ;
+
+         TLorentzVector rjlv( JetsAK8->at(ji) ) ;
+         can3->cd() ;
+         arrow->SetLineColor(2) ;
+         arrow->SetLineStyle(3) ;
+         arrow -> DrawArrow( 0., 0., rjlv.Px(), rjlv.Py(), 0.02 ) ;
+
       } // ji
 
       can1 -> Update() ; can1 -> Draw() ;
