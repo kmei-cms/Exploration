@@ -124,14 +124,20 @@ void rpv_analysis1::Loop( int max_events, bool verb )
    TH2F* h_rec_njet_unmatched_vs_matched_eta24 = new TH2F( "h_rec_njet_unmatched_vs_matched_eta24", "Reconstructed jets, N unmatched vs N matched, |eta|<2.4", 16, -0.5, 15.5,  16, -0.5, 15.5 ) ;
    TH2F* h_rec_njet_unmatched_vs_matched_eta24_pt40 = new TH2F( "h_rec_njet_unmatched_vs_matched_eta24_pt40", "Reconstructed jets, N unmatched vs N matched, |eta|<2.4, pt>40", 16, -0.5, 15.5,  16, -0.5, 15.5 ) ;
 
-   TH1F* h_rec_njet40 = new TH1F( "h_rec_njet40", "Njets, pt>40", 16, -0.5, 15.5 ) ;
-   TH1F* h_rec_njet32 = new TH1F( "h_rec_njet32", "Njets, pt>32", 16, -0.5, 15.5 ) ;
+   TH1F* h_rec_njet20 = new TH1F( "h_rec_njet20", "Njets, pt>20", 21, -0.5, 20.5 ) ;
+   TH1F* h_rec_njet30 = new TH1F( "h_rec_njet30", "Njets, pt>30", 21, -0.5, 20.5 ) ;
+   TH1F* h_rec_njet40 = new TH1F( "h_rec_njet40", "Njets, pt>40", 21, -0.5, 20.5 ) ;
+   TH1F* h_rec_njet32 = new TH1F( "h_rec_njet32", "Njets, pt>32", 21, -0.5, 20.5 ) ;
 
-   TH1F* h_rec_njet40_ht450 = new TH1F( "h_rec_njet40_ht450", "Njets, pt>40, HT>450", 16, -0.5, 15.5 ) ;
-   TH1F* h_rec_njet32_ht380 = new TH1F( "h_rec_njet32_ht380", "Njets, pt>32, HT>380", 16, -0.5, 15.5 ) ;
+   TH1F* h_rec_njet40_ht450 = new TH1F( "h_rec_njet40_ht450", "Njets, pt>40, HT>450", 21, -0.5, 20.5 ) ;
+   TH1F* h_rec_njet32_ht380 = new TH1F( "h_rec_njet32_ht380", "Njets, pt>32, HT>380", 21, -0.5, 20.5 ) ;
 
-   TH1F* h_rec_njet40_ht1100 = new TH1F( "h_rec_njet40_ht1100", "Njets, pt>40, HT>1100", 16, -0.5, 15.5 ) ;
-   TH1F* h_rec_njet32_ht1100 = new TH1F( "h_rec_njet32_ht1100", "Njets, pt>32, HT>1100", 16, -0.5, 15.5 ) ;
+   TH1F* h_rec_njet40_ht1100 = new TH1F( "h_rec_njet40_ht1100", "Njets, pt>40, HT>1100", 21, -0.5, 20.5 ) ;
+   TH1F* h_rec_njet32_ht1100 = new TH1F( "h_rec_njet32_ht1100", "Njets, pt>32, HT>1100", 21, -0.5, 20.5 ) ;
+
+   TH1F* h_rec_njet20_nottopdau = new TH1F( "h_rec_njet20_nottopdau", "Njets, pt>20, top daughters not included", 21, -0.5, 20.5 ) ;
+   TH1F* h_rec_njet30_nottopdau = new TH1F( "h_rec_njet30_nottopdau", "Njets, pt>30, top daughters not included", 21, -0.5, 20.5 ) ;
+   TH1F* h_rec_njet40_nottopdau = new TH1F( "h_rec_njet40_nottopdau", "Njets, pt>40, top daughters not included", 21, -0.5, 20.5 ) ;
 
    TH1F* h_rec_ht = new TH1F( "h_rec_ht", "HT", 100, 0., 6000. ) ;
    TH1F* h_rec_ht_njet40ge6 = new TH1F( "h_rec_ht_njet40ge6", "HT, Njet40>=6", 100, 0., 6000. ) ;
@@ -180,7 +186,7 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
 
 
-      if ( verb ) printf("\n\n =========== Run %9u , Lumi %9u , Event %9llu\n", RunNum, LumiBlockNum, EvtNum ) ;
+      if ( verb ) printf("\n\n =========== number %9llu : Run %9u , Lumi %9u , Event %9llu\n", jentry, RunNum, LumiBlockNum, EvtNum ) ;
 
       if ( verb ) printf("\n\n GenParticles: %lu\n", GenParticles->size() ) ;
 
@@ -415,6 +421,8 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
     //--- Approximate a hadronic trigger
 
+      int rec_njet_pt20(0) ;
+      int rec_njet_pt30(0) ;
       int rec_njet_pt40(0) ;
       int rec_njet_pt32(0) ;
 
@@ -422,10 +430,15 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
             TLorentzVector jlv( Jets->at(rji) ) ;
 
+            if ( jlv.Pt() > 20 ) rec_njet_pt20++ ;
+            if ( jlv.Pt() > 30 ) rec_njet_pt30++ ;
             if ( jlv.Pt() > 40 ) rec_njet_pt40++ ;
             if ( jlv.Pt() > 32 ) rec_njet_pt32++ ;
 
       } // rji
+
+      h_rec_njet20 -> Fill( rec_njet_pt20 ) ;
+      h_rec_njet30 -> Fill( rec_njet_pt30 ) ;
 
       h_rec_njet40 -> Fill( rec_njet_pt40 ) ;
       if ( HT > 450 ) h_rec_njet40_ht450 -> Fill( rec_njet_pt40 ) ;
@@ -787,7 +800,7 @@ void rpv_analysis1::Loop( int max_events, bool verb )
 
       h_n_taggable_tops -> Fill( n_taggable_tops ) ;
 
-      if ( verb ) printf("\n Number of taggable tops : %d\n\n", n_taggable_tops ) ;
+      if ( verb ) printf("\n Number %9llu : Number of taggable tops : %d\n\n", jentry, n_taggable_tops ) ;
 
 
       if ( top1_taggable ) h_top_pt_taggable -> Fill( gplv_top1.Pt() ) ;
@@ -894,23 +907,34 @@ void rpv_analysis1::Loop( int max_events, bool verb )
       int rec_njets_matched_eta24_pt40(0) ;
       int rec_njets_unmatched_eta24_pt40(0) ;
 
+      int njets_pt20_nottopdau(0) ;
+      int njets_pt30_nottopdau(0) ;
+      int njets_pt40_nottopdau(0) ;
+
       for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
 
          TLorentzVector jlv( Jets->at(rji) ) ;
 
          bool unmatched(true) ;
-         if ( rji == b1_rji      ) unmatched = false ;
-         if ( rji == b2_rji      ) unmatched = false ;
-         if ( rji == w1_d1_rji   ) unmatched = false ;
-         if ( rji == w1_d2_rji   ) unmatched = false ;
-         if ( rji == w2_d1_rji   ) unmatched = false ;
-         if ( rji == w2_d2_rji   ) unmatched = false ;
+         bool istopdau(false) ;
+         if ( rji == b1_rji      ) { unmatched = false ; istopdau = true ; }
+         if ( rji == b2_rji      ) { unmatched = false ; istopdau = true ; }
+         if ( rji == w1_d1_rji   ) { unmatched = false ; istopdau = true ; }
+         if ( rji == w1_d2_rji   ) { unmatched = false ; istopdau = true ; }
+         if ( rji == w2_d1_rji   ) { unmatched = false ; istopdau = true ; }
+         if ( rji == w2_d2_rji   ) { unmatched = false ; istopdau = true ; }
          if ( rji == chi1_d1_rji ) unmatched = false ;
          if ( rji == chi1_d2_rji ) unmatched = false ;
          if ( rji == chi1_d3_rji ) unmatched = false ;
          if ( rji == chi2_d1_rji ) unmatched = false ;
          if ( rji == chi2_d2_rji ) unmatched = false ;
          if ( rji == chi2_d3_rji ) unmatched = false ;
+
+         if ( !istopdau ) {
+            if ( jlv.Pt() > 20 ) njets_pt20_nottopdau++ ;
+            if ( jlv.Pt() > 30 ) njets_pt30_nottopdau++ ;
+            if ( jlv.Pt() > 40 ) njets_pt40_nottopdau++ ;
+         }
 
          if ( unmatched ) {
             rec_njets_unmatched ++ ;
@@ -931,6 +955,10 @@ void rpv_analysis1::Loop( int max_events, bool verb )
          }
 
       } // rji
+
+      h_rec_njet20_nottopdau -> Fill( njets_pt20_nottopdau ) ;
+      h_rec_njet30_nottopdau -> Fill( njets_pt30_nottopdau ) ;
+      h_rec_njet40_nottopdau -> Fill( njets_pt40_nottopdau ) ;
 
       h_rec_njet_unmatched_vs_matched -> Fill( rec_njets_matched, rec_njets_unmatched ) ;
       h_rec_njet_unmatched_vs_matched_pt40 -> Fill( rec_njets_matched_pt40, rec_njets_unmatched_pt40 ) ;

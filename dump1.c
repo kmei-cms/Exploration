@@ -10,7 +10,7 @@ const char* mcname( int pdgid ) ;
 
 double calcDr( double eta1, double eta2, double phi1, double phi2 ) ;
 
-void dump1::Loop( int display_event )
+void dump1::Loop( int display_event, float rhophi_scale )
 {
 
    bool skip_sl_top_events(true) ;
@@ -24,9 +24,21 @@ void dump1::Loop( int display_event )
       can1 = new TCanvas( "can1", "phi vs eta plane", 1200, 800 ) ;
    }
 
+   TCanvas* can2 = (TCanvas*) gDirectory -> FindObject( "can2" ) ;
+   if ( can2 == 0x0 ) {
+      can2 = new TCanvas( "can2", "GenParticle : rho phi plane", 700, 700 ) ;
+   }
+
+   TCanvas* can3 = (TCanvas*) gDirectory -> FindObject( "can3" ) ;
+   if ( can3 == 0x0 ) {
+      can3 = new TCanvas( "can3", "Reco jets : rho phi plane", 700, 700 ) ;
+   }
+
    TH2F* h_dummy = new TH2F( "h_dummy", "Phi vs Eta", 200, -5., 5.,  200, -3.1415926, 3.1415926 ) ;
    h_dummy -> SetXTitle( "Eta" ) ;
    h_dummy -> SetYTitle( "Phi" ) ;
+
+   TH2F* h_dummy_rhophi = new TH2F( "h_dummy_rhophi", "", 200, -1*rhophi_scale, rhophi_scale,  200, -1*rhophi_scale, rhophi_scale ) ;
 
    char label[100] ;
    TText* text = new TText() ;
@@ -76,6 +88,9 @@ void dump1::Loop( int display_event )
    double fatjet_pt_bar_deta = 0.1 ;
    double fatjet_pt_bar_dphi = -0.15 ;
 
+   TArrow* arrow = new TArrow() ;
+   arrow -> SetLineWidth(3) ;
+
    Long64_t nbytes = 0, nb = 0;
 
    int first_event ;
@@ -102,6 +117,18 @@ void dump1::Loop( int display_event )
       gPad -> SetGridy(1) ;
       can1 -> Update() ; can1 -> Draw() ;
 
+      can2 -> cd() ;
+      can2 -> Clear() ;
+      h_dummy_rhophi -> Draw() ;
+      can2 -> Update() ; can2 -> Draw() ;
+
+      can3 -> cd() ;
+      can3 -> Clear() ;
+      h_dummy_rhophi -> Draw() ;
+      can3 -> Update() ; can3 -> Draw() ;
+
+
+
       printf("\n\n =========== Run %9u , Lumi %9u , Event %9llu\n", RunNum, LumiBlockNum, EvtNum ) ;
 
       printf("\n") ;
@@ -125,6 +152,8 @@ void dump1::Loop( int display_event )
          int smomid = GenParticles_ParentId->at(gpi) ;
          int momid = abs( GenParticles_ParentId->at(gpi) ) ;
          int momidx = GenParticles_ParentIdx->at(gpi) ;
+
+         TLorentzVector gplv( GenParticles->at(gpi) ) ;
 
          if ( spdgid ==  1000006 && stop1_gpi < 0 ) stop1_gpi = gpi ;
          if ( spdgid == -1000006 && stop2_gpi < 0 ) stop2_gpi = gpi ;
@@ -173,6 +202,7 @@ void dump1::Loop( int display_event )
              eta,
              phi
              ) ;
+         arrow -> SetLineColor(1) ;
          if ( ! (GenParticles_Status->at(gpi) == 1 && GenParticles_ParentIdx->at(gpi) == -1)
               && (GenParticles_Status->at(gpi) < 30 || GenParticles_Status->at(gpi) == 62 ) ) {
             if ( pdgid==1 || pdgid==2 || pdgid==3 || pdgid==4 || pdgid==5 || pdgid==21 ) {
@@ -180,25 +210,29 @@ void dump1::Loop( int display_event )
             } else {
                marker_gp -> SetMarkerColor(6) ;
             }
-            if ( momidx == chi1_gpi ) {
+            if ( momidx >= 0 && momidx == chi1_gpi ) {
+               arrow -> SetLineColor(2) ;
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 20 ) ;
                } else {
                   marker_gp -> SetMarkerStyle( 24 ) ;
                }
-            } else if ( momidx == chi2_gpi ) {
+            } else if ( momidx >= 0 && momidx == chi2_gpi ) {
+               arrow -> SetLineColor(4) ;
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 21 ) ;
                } else {
                   marker_gp -> SetMarkerStyle( 25 ) ;
                }
-            } else if ( (pdgid == 5 && momidx == top1_gpi) || gpi == w1_d1_gpi || gpi == w1_d2_gpi  ) {
+            } else if ( (spdgid == 5 ) || gpi == w1_d1_gpi || gpi == w1_d2_gpi  ) {
+               arrow -> SetLineColor(3) ;
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 22 ) ;
                } else {
                   marker_gp -> SetMarkerStyle( 26 ) ;
                }
-            } else if ( (pdgid == 5 && momidx == top2_gpi) || gpi == w2_d1_gpi || gpi == w2_d2_gpi ) {
+            } else if ( (spdgid ==-5 ) || gpi == w2_d1_gpi || gpi == w2_d2_gpi ) {
+               arrow -> SetLineColor(6) ;
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 23 ) ;
                } else {
@@ -210,7 +244,6 @@ void dump1::Loop( int display_event )
             if ( pdgid == 1000006 ) {
                marker_gp -> SetMarkerStyle( 27 ) ;
             }
-            marker_gp -> DrawMarker( eta, phi ) ;
             if ( pdgid==6 || pdgid == 1000006 ) {
                text -> SetTextSize(0.035) ;
                text -> SetTextFont( 102 ) ;
@@ -218,7 +251,12 @@ void dump1::Loop( int display_event )
                text -> SetTextSize(0.025) ;
                text -> SetTextFont( 82 ) ;
             }
+            can1->cd() ;
+            marker_gp -> DrawMarker( eta, phi ) ;
             text -> DrawText( eta+0.1, phi+0.1, pname ) ;
+            can2->cd() ;
+            arrow -> DrawArrow( 0., 0., gplv.Px(), gplv.Py(), 0.02 ) ;
+            text -> DrawText( gplv.Px(), gplv.Py(), pname ) ;
          }
       } // gpi
       printf( "\n" ) ;
@@ -238,6 +276,8 @@ void dump1::Loop( int display_event )
   //*********************************************************************************************************
   //*********************************************************************************************************
   //*********************************************************************************************************
+
+      can1 -> cd() ;
 
       printf("\n") ;
       printf("  GenJets: %lu\n", GenJets->size() ) ;
@@ -298,9 +338,16 @@ void dump1::Loop( int display_event )
          double eta = Jets->at(ji).Eta() ;
          double phi = Jets->at(ji).Phi() ;
          double pt = Jets->at(ji).Pt() ;
+
+         can1->cd() ;
          circle_rj -> DrawEllipse( eta, phi, circle_rj_radius, circle_rj_radius, 0., 360., 0. ) ;
          jet_pt_bar -> DrawLine( eta+jet_pt_bar_deta, phi+jet_pt_bar_dphi,
                          eta+jet_pt_bar_deta + jet_pt_bar_scale*pt, phi+jet_pt_bar_dphi ) ;
+
+         TLorentzVector rjlv( Jets->at(ji) ) ;
+         can3->cd() ;
+         arrow->SetLineColor(4) ;
+         arrow -> DrawArrow( 0., 0., rjlv.Px(), rjlv.Py(), 0.02 ) ;
 
       } // ji
 
@@ -334,6 +381,8 @@ void dump1::Loop( int display_event )
       } // ji
 
       can1 -> Update() ; can1 -> Draw() ;
+      can2 -> Update() ; can2 -> Draw() ;
+      can3 -> Update() ; can3 -> Draw() ;
 
       char answer[100] ;
       printf("\n\n Type n for next, q to quit: ") ;

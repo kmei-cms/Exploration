@@ -729,7 +729,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop( int display_event=-1 );
+   virtual void     Loop( int display_event=-1, float rhophi_scale = 500. );
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -757,7 +757,7 @@ dump1::dump1(TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("TreeMaker2/PreSelection","");
-      chain->Add("prod-v3/merged-rpv_stop_350_t3j_uds.root/TreeMaker2/PreSelection");
+      chain->Add("prod-v3/merged-rpv_stop_650_t3j_uds.root/TreeMaker2/PreSelection");
       tree = chain;
 #endif // SINGLE_TREE
 
