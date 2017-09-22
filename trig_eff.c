@@ -48,11 +48,11 @@ void trig_eff::Loop( int max_events, bool verb )
    TH1F* h_rec_njet32_ht1100 = new TH1F( "h_rec_njet32_ht1100", "Njets, pt>32, HT>1100", 21, -0.5, 20.5 ) ;
    TH1F* h_rec_njet40_ht1100 = new TH1F( "h_rec_njet40_ht1100", "Njets, pt>40, HT>1100", 21, -0.5, 20.5 ) ;
 
-   TH1F* h_rec_ht = new TH1F( "h_rec_ht", "HT", 100, 0., 6000. ) ;
-   TH1F* h_rec_ht_njet32ge6 = new TH1F( "h_rec_ht_njet32ge6", "HT, Njet32>=6", 100, 0., 6000. ) ;
-   TH1F* h_rec_ht_njet40ge6 = new TH1F( "h_rec_ht_njet40ge6", "HT, Njet40>=6", 100, 0., 6000. ) ;
-   TH1F* h_rec_ht_njet45ge6 = new TH1F( "h_rec_ht_njet45ge6", "HT, Njet45>=6", 100, 0., 6000. ) ;
-   TH1F* h_rec_ht_njet50ge6 = new TH1F( "h_rec_ht_njet50ge6", "HT, Njet50>=6", 100, 0., 6000. ) ;
+   TH1F* h_rec_ht = new TH1F( "h_rec_ht", "HT", 80, 0., 4000. ) ;
+   TH1F* h_rec_ht_njet32ge6 = new TH1F( "h_rec_ht_njet32ge6", "HT, Njet32>=6", 80, 0., 4000. ) ;
+   TH1F* h_rec_ht_njet40ge6 = new TH1F( "h_rec_ht_njet40ge6", "HT, Njet40>=6", 80, 0., 4000. ) ;
+   TH1F* h_rec_ht_njet45ge6 = new TH1F( "h_rec_ht_njet45ge6", "HT, Njet45>=6", 80, 0., 4000. ) ;
+   TH1F* h_rec_ht_njet50ge6 = new TH1F( "h_rec_ht_njet50ge6", "HT, Njet50>=6", 80, 0., 4000. ) ;
 
 
 
