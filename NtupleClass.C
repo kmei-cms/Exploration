@@ -3,6 +3,7 @@
 #include <TH1D.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <iostream>
 
 //manditory includes to use top tagger
 #include "TopTagger/TopTagger/include/TopTagger.h"
@@ -10,6 +11,14 @@
 #include "TopTagger/TopTagger/include/TopTaggerUtilities.h"
 #include "TopTagger/CfgParser/include/TTException.h"
 
+
+double calcDPhi(double phi1, double phi2)
+{
+    double dphi = phi1 - phi2 ;
+    if ( dphi >  3.14159265 ) dphi -= 2*3.14159265 ;
+    if ( dphi < -3.14159265 ) dphi += 2*3.14159265 ;
+    return dphi;
+}
 
 void NtupleClass::Loop()
 {
@@ -45,6 +54,8 @@ void NtupleClass::Loop()
    // make some histograms
    TH1D *myHisto  = new TH1D("njets","njets", 20, 0, 20);
    TH1D *h_ntops  = new TH1D("ntops","ntops", 5, 0, 5);
+   TH1D *h_ntops_baseline  = new TH1D("ntops_baseline","ntops_baseline", 5, 0, 5);
+   TH1D *h_dphi_2tops  = new TH1D("dphi_2tops","dphi_2tops", 40, -4, 4);
 
    TopTagger tt;
    tt.setCfgFile("TopTagger.cfg");
@@ -61,10 +72,29 @@ void NtupleClass::Loop()
       // if (Cut(ientry) < 0) continue;
 
 
+      // Try to get the hadronic tops in the event
+      // genparticles seem to have a new ordering here, so make a dummy list
+      std::vector<int> mydummylist;
+      for(int d=0; d<GenParticles->size(); ++d)
+          mydummylist.push_back(d);
+/*
+      std::vector<TLorentzVector> hadtops = ttUtility::GetHadTopLVec(*GenParticles, *GenParticles_PdgId, mydummylist, *GenParticles_ParentIdx);
+      for (TLorentzVector hadtop : hadtops){
+          std::cout << hadtop.M() << ", " << hadtop.Pt() << std::endl;
+      }
+*/
       // Use helper function to create input list 
       // Create AK4 inputs object
       ttUtility::ConstAK4Inputs AK4Inputs = ttUtility::ConstAK4Inputs(*Jets, *Jets_bDiscriminatorCSV);
     
+
+      // stick all the subjets in one list for now (this is what the top tagger expects)
+      std::vector<TLorentzVector> JetsAK8_subjets_all;
+      for (std::vector<TLorentzVector> subjets : *JetsAK8_subjets)
+      {
+          for (TLorentzVector subjet : subjets)
+              JetsAK8_subjets_all.push_back(subjet);
+      }
       
       // Create AK8 inputs object
       ttUtility::ConstAK8Inputs AK8Inputs = ttUtility::ConstAK8Inputs(
@@ -72,8 +102,8 @@ void NtupleClass::Loop()
           *JetsAK8_NsubjettinessTau1,
           *JetsAK8_NsubjettinessTau2,
           *JetsAK8_NsubjettinessTau3,
-          *JetsAK8_prunedMass,
-          *JetsAK8    // These should be the subjets!
+          *JetsAK8_softDropMass,
+          JetsAK8_subjets_all    // These should be the subjets!
           );
       
       // Create jets constituents list combining AK4 and AK8 jets, these are used to construct top candiates
@@ -112,13 +142,25 @@ void NtupleClass::Loop()
               //Print properties of individual top constituent jets 
               for(const Constituent* constituent : constituents)
               {
-                  printf("\t\tConstituent properties: Constituent type: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf\n", constituent->getType(), constituent->p().Pt(), constituent->p().Eta(), constituent->p().Phi());
+                  printf("\t\tConstituent properties: Constituent type: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf,   Mass: %6.1lf\n", constituent->getType(), constituent->p().Pt(), constituent->p().Eta(), constituent->p().Phi(), constituent->p().M());
               }        
           }        
       }
+
+      if(! (HT > 450 && NJets >= 6 && (*Jets)[5].Pt() > 40)) continue;
+      
+      h_ntops_baseline->Fill(tops.size());
+      
+      if (tops.size() == 2)
+      {
+          h_dphi_2tops->Fill(calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()));
+      }
+
       
    }
 
    myHisto->Write();
    h_ntops->Write();
+   h_ntops_baseline->Write();
+   h_dphi_2tops->Write();
 }
