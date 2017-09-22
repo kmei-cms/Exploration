@@ -11,6 +11,14 @@
 #include "TopTagger/CfgParser/include/TTException.h"
 
 
+double calcDPhi(double phi1, double phi2)
+{
+    double dphi = phi1 - phi2 ;
+    if ( dphi >  3.14159265 ) dphi -= 2*3.14159265 ;
+    if ( dphi < -3.14159265 ) dphi += 2*3.14159265 ;
+    return dphi;
+}
+
 void NtupleClass::Loop()
 {
 //   In a ROOT session, you can do:
@@ -45,6 +53,8 @@ void NtupleClass::Loop()
    // make some histograms
    TH1D *myHisto  = new TH1D("njets","njets", 20, 0, 20);
    TH1D *h_ntops  = new TH1D("ntops","ntops", 5, 0, 5);
+   TH1D *h_ntops_baseline  = new TH1D("ntops_baseline","ntops_baseline", 5, 0, 5);
+   TH1D *h_dphi_2tops  = new TH1D("dphi_2tops","dphi_2tops", 40, -4, 4);
 
    TopTagger tt;
    tt.setCfgFile("TopTagger.cfg");
@@ -116,9 +126,21 @@ void NtupleClass::Loop()
               }        
           }        
       }
+
+      if(! (HT > 450 && NJets >= 6 && (*Jets)[5].Pt() > 40)) continue;
+      
+      h_ntops_baseline->Fill(tops.size());
+      
+      if (tops.size() == 2)
+      {
+          h_dphi_2tops->Fill(calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()));
+      }
+
       
    }
 
    myHisto->Write();
    h_ntops->Write();
+   h_ntops_baseline->Write();
+   h_dphi_2tops->Write();
 }
