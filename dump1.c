@@ -26,12 +26,12 @@ void dump1::Loop( int display_event, float rhophi_scale )
 
    TCanvas* can2 = (TCanvas*) gDirectory -> FindObject( "can2" ) ;
    if ( can2 == 0x0 ) {
-      can2 = new TCanvas( "can2", "GenParticle : rho phi plane", 700, 700 ) ;
+      can2 = new TCanvas( "can2", "GenParticle : rho phi plane", 10, 10, 700, 700 ) ;
    }
 
    TCanvas* can3 = (TCanvas*) gDirectory -> FindObject( "can3" ) ;
    if ( can3 == 0x0 ) {
-      can3 = new TCanvas( "can3", "Reco jets : rho phi plane", 700, 700 ) ;
+      can3 = new TCanvas( "can3", "Reco jets : rho phi plane", 710, 10, 700, 700 ) ;
    }
 
    TH2F* h_dummy = new TH2F( "h_dummy", "Phi vs Eta", 200, -5., 5.,  200, -3.1415926, 3.1415926 ) ;
@@ -90,6 +90,7 @@ void dump1::Loop( int display_event, float rhophi_scale )
 
    TArrow* arrow = new TArrow() ;
    arrow -> SetLineWidth(3) ;
+   arrow -> SetFillStyle(0) ;
 
    Long64_t nbytes = 0, nb = 0;
 
@@ -203,7 +204,8 @@ void dump1::Loop( int display_event, float rhophi_scale )
              phi
              ) ;
          arrow -> SetLineColor(1) ;
-         arrow->SetLineStyle(1) ;
+         arrow -> SetLineWidth(1) ;
+         arrow -> SetLineStyle(2) ;
          if ( ! (GenParticles_Status->at(gpi) == 1 && GenParticles_ParentIdx->at(gpi) == -1)
               && (GenParticles_Status->at(gpi) < 30 || GenParticles_Status->at(gpi) == 62 ) ) {
             if ( pdgid==1 || pdgid==2 || pdgid==3 || pdgid==4 || pdgid==5 || pdgid==21 ) {
@@ -213,6 +215,8 @@ void dump1::Loop( int display_event, float rhophi_scale )
             }
             if ( momidx >= 0 && momidx == chi1_gpi ) {
                arrow -> SetLineColor(2) ;
+               arrow -> SetLineWidth(3) ;
+               arrow -> SetLineStyle(1) ;
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 20 ) ;
                } else {
@@ -220,6 +224,8 @@ void dump1::Loop( int display_event, float rhophi_scale )
                }
             } else if ( momidx >= 0 && momidx == chi2_gpi ) {
                arrow -> SetLineColor(4) ;
+               arrow -> SetLineWidth(3) ;
+               arrow -> SetLineStyle(1) ;
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 21 ) ;
                } else {
@@ -227,6 +233,8 @@ void dump1::Loop( int display_event, float rhophi_scale )
                }
             } else if ( (spdgid == 5 ) || gpi == w1_d1_gpi || gpi == w1_d2_gpi  ) {
                arrow -> SetLineColor(3) ;
+               arrow -> SetLineWidth(3) ;
+               arrow -> SetLineStyle(1) ;
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 22 ) ;
                } else {
@@ -234,6 +242,8 @@ void dump1::Loop( int display_event, float rhophi_scale )
                }
             } else if ( (spdgid ==-5 ) || gpi == w2_d1_gpi || gpi == w2_d2_gpi ) {
                arrow -> SetLineColor(6) ;
+               arrow -> SetLineWidth(3) ;
+               arrow -> SetLineStyle(1) ;
                if ( pt > 20 ) {
                   marker_gp -> SetMarkerStyle( 23 ) ;
                } else {
@@ -349,6 +359,7 @@ void dump1::Loop( int display_event, float rhophi_scale )
          can3->cd() ;
          arrow->SetLineColor(4) ;
          arrow->SetLineStyle(1) ;
+         arrow->SetLineWidth(3) ;
          arrow -> DrawArrow( 0., 0., rjlv.Px(), rjlv.Py(), 0.02 ) ;
 
       } // ji
@@ -377,6 +388,7 @@ void dump1::Loop( int display_event, float rhophi_scale )
          double eta = JetsAK8->at(ji).Eta() ;
          double phi = JetsAK8->at(ji).Phi() ;
          double pt = JetsAK8->at(ji).Pt() ;
+         can1->cd() ;
          circle_fj -> DrawEllipse( eta, phi, circle_fj_radius, circle_fj_radius, 0., 360., 0. ) ;
          fatjet_pt_bar -> DrawLine( eta+fatjet_pt_bar_deta, phi+fatjet_pt_bar_dphi,
                          eta+fatjet_pt_bar_deta + fatjet_pt_bar_scale*pt, phi+fatjet_pt_bar_dphi ) ;
@@ -385,6 +397,7 @@ void dump1::Loop( int display_event, float rhophi_scale )
          can3->cd() ;
          arrow->SetLineColor(2) ;
          arrow->SetLineStyle(3) ;
+         arrow->SetLineWidth(5) ;
          arrow -> DrawArrow( 0., 0., rjlv.Px(), rjlv.Py(), 0.02 ) ;
 
       } // ji
