@@ -23,11 +23,11 @@ The first step is to install opencv. If you are working locally on the lpc machi
 
 Once you have access to opencv, you can proceed to install the toptagger: 
 
-First check out the code:
+First check out the code. We are now using a branch on top of the StandaloneRelease_v1.0.1, so make sure to check that you have the correct branch. 
 ```
 git clone git@github.com:susy2015/TopTagger.git
 cd TopTagger
-git checkout StandaloneRelease_v1.0.1
+git checkout StandaloneUpdates
 ```
 
 Then configure the tagger:
@@ -39,7 +39,17 @@ make -j4
 Of course, if you are not on the lpc, you should update the OPENCVDIR to match your system.
 This created a shared library, libTopTagger.so that we can use with our simple scripts. 
 
-To make sure that we have access to the library, we should add its location to our path. A setup script was created during configuration for this purpose (CMSSW_8_0_28/src/TopTagger/TopTagger/test/taggerSetup.sh). Note that this is a bash script. If you use tcsh it will not work. I have provided a tcsh script for you to customize based on the first two lines of the bash script (i.e. location of opencv and location of the TopTagger code on your system). You can check that out from the Exploration repository and execute it instead of the taggerSetup.sh script. 
+If you previously checked out a different branch/tag, do the following to update: 
+```
+cd $CMSSW_BASE/src/TopTagger
+git fetch
+git checkout StandaloneUpdates
+cd TopTagger/test
+make -j4
+```
+There is no need to rerun the configure step. 
+
+To make sure that we have access to the created library, we should add its location to our path. A setup script was created during configuration for this purpose (CMSSW_8_0_28/src/TopTagger/TopTagger/test/taggerSetup.sh). Note that this is a bash script. If you use tcsh it will not work. I have provided a tcsh script for you to customize based on the first two lines of the bash script (i.e. location of opencv and location of the TopTagger code on your system). You can check that out from the Exploration repository and execute it instead of the taggerSetup.sh script. 
 
 ```
 cd $CMSSW_BASE/src
@@ -67,7 +77,7 @@ The Makefile currently assumes that you are in a CMSSW environment. If you set u
 
 To run: 
 ```
-./MyAnalysis
+./MyAnalysis myinputfile optional_outputfilename
 ```
-This will give a printout for each event containing the number of tops it found, and some information on each top. 
+This will give a printout for the first 10 event containing the number of tops it found, and some information on each top. 
 You can customize TopTagger.cfg to enable/disable certain top candidates, i.e. in the TTMBasicClusterAlgo block, set doTrijet/doDijet/doMonojet to true or false. 
