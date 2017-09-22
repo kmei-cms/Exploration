@@ -3,6 +3,7 @@
 #include <TH1D.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <iostream>
 
 //manditory includes to use top tagger
 #include "TopTagger/TopTagger/include/TopTagger.h"
@@ -71,10 +72,29 @@ void NtupleClass::Loop()
       // if (Cut(ientry) < 0) continue;
 
 
+      // Try to get the hadronic tops in the event
+      // genparticles seem to have a new ordering here, so make a dummy list
+      std::vector<int> mydummylist;
+      for(int d=0; d<GenParticles->size(); ++d)
+          mydummylist.push_back(d);
+/*
+      std::vector<TLorentzVector> hadtops = ttUtility::GetHadTopLVec(*GenParticles, *GenParticles_PdgId, mydummylist, *GenParticles_ParentIdx);
+      for (TLorentzVector hadtop : hadtops){
+          std::cout << hadtop.M() << ", " << hadtop.Pt() << std::endl;
+      }
+*/
       // Use helper function to create input list 
       // Create AK4 inputs object
       ttUtility::ConstAK4Inputs AK4Inputs = ttUtility::ConstAK4Inputs(*Jets, *Jets_bDiscriminatorCSV);
     
+
+      // stick all the subjets in one list for now (this is what the top tagger expects)
+      std::vector<TLorentzVector> JetsAK8_subjets_all;
+      for (std::vector<TLorentzVector> subjets : *JetsAK8_subjets)
+      {
+          for (TLorentzVector subjet : subjets)
+              JetsAK8_subjets_all.push_back(subjet);
+      }
       
       // Create AK8 inputs object
       ttUtility::ConstAK8Inputs AK8Inputs = ttUtility::ConstAK8Inputs(
@@ -82,8 +102,8 @@ void NtupleClass::Loop()
           *JetsAK8_NsubjettinessTau1,
           *JetsAK8_NsubjettinessTau2,
           *JetsAK8_NsubjettinessTau3,
-          *JetsAK8_prunedMass,
-          *JetsAK8    // These should be the subjets!
+          *JetsAK8_softDropMass,
+          JetsAK8_subjets_all    // These should be the subjets!
           );
       
       // Create jets constituents list combining AK4 and AK8 jets, these are used to construct top candiates
@@ -122,7 +142,7 @@ void NtupleClass::Loop()
               //Print properties of individual top constituent jets 
               for(const Constituent* constituent : constituents)
               {
-                  printf("\t\tConstituent properties: Constituent type: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf\n", constituent->getType(), constituent->p().Pt(), constituent->p().Eta(), constituent->p().Phi());
+                  printf("\t\tConstituent properties: Constituent type: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf,   Mass: %6.1lf\n", constituent->getType(), constituent->p().Pt(), constituent->p().Eta(), constituent->p().Phi(), constituent->p().M());
               }        
           }        
       }
