@@ -87,7 +87,7 @@ void NtupleClass::Loop()
       // Create AK4 inputs object
       ttUtility::ConstAK4Inputs AK4Inputs = ttUtility::ConstAK4Inputs(*Jets, *Jets_bDiscriminatorCSV);
     
-
+      /*
       // stick all the subjets in one list for now (this is what the top tagger expects)
       std::vector<TLorentzVector> JetsAK8_subjets_all;
       for (std::vector<TLorentzVector> subjets : *JetsAK8_subjets)
@@ -95,7 +95,8 @@ void NtupleClass::Loop()
           for (TLorentzVector subjet : subjets)
               JetsAK8_subjets_all.push_back(subjet);
       }
-      
+      */
+
       // Create AK8 inputs object
       ttUtility::ConstAK8Inputs AK8Inputs = ttUtility::ConstAK8Inputs(
           *JetsAK8,
@@ -103,7 +104,7 @@ void NtupleClass::Loop()
           *JetsAK8_NsubjettinessTau2,
           *JetsAK8_NsubjettinessTau3,
           *JetsAK8_softDropMass,
-          JetsAK8_subjets_all    // These should be the subjets!
+          *JetsAK8_subjets    // These should be the subjets!
           );
       
       // Create jets constituents list combining AK4 and AK8 jets, these are used to construct top candiates
