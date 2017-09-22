@@ -1,11 +1,11 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Sep 12 15:19:36 2017 by ROOT version 6.06/06
+// Wed Sep 13 12:42:02 2017 by ROOT version 6.06/06
 // from TChain TreeMaker2/PreSelection/
 //////////////////////////////////////////////////////////
 
-#ifndef dump1_h
-#define dump1_h
+#ifndef trig_eff_h
+#define trig_eff_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -18,7 +18,7 @@
 #include "vector"
 #include "vector"
 
-class dump1 {
+class trig_eff {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -723,61 +723,68 @@ public :
    TBranch        *b_Weight;   //!
    TBranch        *b_ZCandidates;   //!
 
-   dump1(TTree *tree=0);
-   virtual ~dump1();
+   trig_eff( const char* input_root_file = "prod-v3/merged-rpv_stop_350_t3j_uds.root"  );
+   virtual ~trig_eff();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop( int display_event=-1, float rhophi_scale = 500. );
+   virtual void     Loop( int max_events = -1, bool verb = false );
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+   char output_hist_file_name[1000] ;
 };
 
 #endif
 
-#ifdef dump1_cxx
-dump1::dump1(TTree *tree) : fChain(0) 
+#ifdef trig_eff_cxx
+trig_eff::trig_eff( const char* input_root_file ) : fChain(0) 
 {
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
-   if (tree == 0) {
-
-#ifdef SINGLE_TREE
-      // The following code should be used if you want this class to access
-      // a single tree instead of a chain
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("Memory Directory");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("Memory Directory");
-      }
-      f->GetObject("TreeMaker2/PreSelection",tree);
-
-#else // SINGLE_TREE
-
-      // The following code should be used if you want this class to access a chain
-      // of trees.
-      TChain * chain = new TChain("TreeMaker2/PreSelection","");
-      chain->Add("prod-v3/merged-rpv_stop_650_t3j_uds.root/TreeMaker2/PreSelection");
-      tree = chain;
-#endif // SINGLE_TREE
-
+   TChain * chain = new TChain("TreeMaker2/PreSelection","");
+   char filename_and_treedir[1000] ;
+   sprintf( filename_and_treedir, "%s/TreeMaker2/PreSelection", input_root_file ) ;
+   int n_added = chain->Add( filename_and_treedir );
+   if ( n_added <= 0 ) {
+      printf("\n\n *** Problems setting up TChain with %s as root file.\n\n", input_root_file ) ;
+      gSystem -> Exit( -1 ) ;
    }
+   int nentries = chain -> GetEntries() ;
+   if ( nentries <= 0 ) {
+      printf("\n\n *** No entries in TChain?  %s as root file.\n\n", input_root_file ) ;
+      gSystem -> Exit( -1 ) ;
+   } else {
+      printf("\n\n %d entries in %s\n\n", nentries, filename_and_treedir ) ;
+   }
+   TTree* tree = chain;
+
    Init(tree);
+
+   const char* bn = gSystem->BaseName( input_root_file ) ;
+   TString tsbn( bn ) ;
+   tsbn.ReplaceAll(".root","") ;
+   printf("\n\n sample name : %s\n\n", tsbn.Data() ) ;
+
+   sprintf( output_hist_file_name, "outputfiles/trig-eff-%s-plots.root", tsbn.Data() ) ;
+   printf("\n\n Output histograms file name : %s\n\n", output_hist_file_name ) ;
+
+   gSystem -> Exec( "mkdir -p outputfiles" ) ;
+
+
 }
 
-dump1::~dump1()
+trig_eff::~trig_eff()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t dump1::GetEntry(Long64_t entry)
+Int_t trig_eff::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t dump1::LoadTree(Long64_t entry)
+Long64_t trig_eff::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -790,7 +797,7 @@ Long64_t dump1::LoadTree(Long64_t entry)
    return centry;
 }
 
-void dump1::Init(TTree *tree)
+void trig_eff::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -1373,7 +1380,7 @@ void dump1::Init(TTree *tree)
    Notify();
 }
 
-Bool_t dump1::Notify()
+Bool_t trig_eff::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -1384,19 +1391,19 @@ Bool_t dump1::Notify()
    return kTRUE;
 }
 
-void dump1::Show(Long64_t entry)
+void trig_eff::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t dump1::Cut(Long64_t entry)
+Int_t trig_eff::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
-   if (entry>0) return 1;
+   if ( entry>0 ) return 1;
    return 1;
 }
-#endif // #ifdef dump1_cxx
+#endif // #ifdef trig_eff_cxx
