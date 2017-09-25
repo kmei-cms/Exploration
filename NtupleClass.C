@@ -69,20 +69,40 @@ void NtupleClass::Loop()
       nbytes += nb;
 
       myHisto->Fill(NJets);
+      
       // if (Cut(ientry) < 0) continue;
 
+      // check for number of hadronic tops
+      int hadWs = 0;
+      for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
+      {
+          int pdgid = abs( GenParticles_PdgId->at(gpi) ) ;
+          int momid = abs( GenParticles_ParentId->at(gpi) ) ;
+          int status = GenParticles_Status->at(gpi);
+          
+          if(status == 23 && momid == 24 && pdgid < 6)
+          {
+              // Should be the quarks from W decay
+              hadWs++;
+          }
+      }
 
+      // Only keep events with two hadronic top decays
+      if (hadWs != 4) continue;  
+
+      // Check whether event would pass the trigger requirement
+      
       // Try to get the hadronic tops in the event
       // genparticles seem to have a new ordering here, so make a dummy list
-      std::vector<int> mydummylist;
-      for(int d=0; d<GenParticles->size(); ++d)
-          mydummylist.push_back(d);
-/*
-      std::vector<TLorentzVector> hadtops = ttUtility::GetHadTopLVec(*GenParticles, *GenParticles_PdgId, mydummylist, *GenParticles_ParentIdx);
-      for (TLorentzVector hadtop : hadtops){
-          std::cout << hadtop.M() << ", " << hadtop.Pt() << std::endl;
-      }
-*/
+      //std::vector<int> mydummylist;
+      //for(int d=0; d<GenParticles->size(); ++d)
+      //    mydummylist.push_back(d);
+
+      //std::vector<TLorentzVector> hadtops = ttUtility::GetHadTopLVec(*GenParticles, *GenParticles_PdgId, mydummylist, *GenParticles_ParentIdx);
+      //for (TLorentzVector hadtop : hadtops){
+      //    std::cout << hadtop.M() << ", " << hadtop.Pt() << std::endl;
+      // }
+
       // Use helper function to create input list 
       // Create AK4 inputs object
       ttUtility::ConstAK4Inputs AK4Inputs = ttUtility::ConstAK4Inputs(*Jets, *Jets_bDiscriminatorCSV);
