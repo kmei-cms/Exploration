@@ -20,6 +20,17 @@ double calcDPhi(double phi1, double phi2)
     return dphi;
 }
 
+double calcDR(double eta1, double eta2, double phi1, double phi2)
+{
+    double deta = fabs( eta1 - eta2 ) ;
+    
+    double dphi = phi1 - phi2 ;
+    if ( dphi > 3.1415926 ) dphi -= 2*3.1415926 ;
+    if ( dphi <-3.1415926 ) dphi += 2*3.1415926 ;
+    
+    return sqrt( dphi*dphi + deta*deta ) ;
+}
+
 void NtupleClass::Loop()
 {
 //   In a ROOT session, you can do:
@@ -56,7 +67,7 @@ void NtupleClass::Loop()
    TH1D *h_ntops  = new TH1D("ntops","ntops", 5, 0, 5);
    TH1D *h_ntops_baseline  = new TH1D("ntops_baseline","ntops_baseline", 5, 0, 5);
    TH1D *h_dphi_2tops  = new TH1D("dphi_2tops","dphi_2tops", 40, -4, 4);
-
+   TH1D *h_top_gentop_minDR = new TH1D("h_top_gentop_minDR","h_top_gentop_minDR", 60, 0, 3);
    TopTagger tt;
    tt.setCfgFile("TopTagger.cfg");
 
@@ -70,20 +81,85 @@ void NtupleClass::Loop()
 
       myHisto->Fill(NJets);
       
-      // if (Cut(ientry) < 0) continue;
-
       // check for number of hadronic tops
       int hadWs = 0;
+      std::vector<TLorentzVector> hadtops;
+      std::vector<int> hadtops_idx;
+      std::vector<std::vector<const TLorentzVector*> > hadtopdaughters;
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
       {
           int pdgid = abs( GenParticles_PdgId->at(gpi) ) ;
           int momid = abs( GenParticles_ParentId->at(gpi) ) ;
+          int momidx = GenParticles_ParentIdx->at(gpi);
           int status = GenParticles_Status->at(gpi);
           
           if(status == 23 && momid == 24 && pdgid < 6)
           {
               // Should be the quarks from W decay
               hadWs++;
+              // find the top
+              int Wmotherid = GenParticles_ParentId->at(momidx);
+              if (abs(Wmotherid) == 6){
+                  int Wmotheridx = GenParticles_ParentIdx->at(momidx);
+                  std::vector<int>::iterator found = std::find(hadtops_idx.begin(), hadtops_idx.end(), Wmotheridx);
+                  if (found != hadtops_idx.end())
+                  {
+                      // already found before
+                      // std::cout << "Found this top before: " << *found << std::endl;
+                      int position = distance(hadtops_idx.begin(),found);
+                      // add the daughter to the list
+                      hadtopdaughters[position].push_back(&(GenParticles->at(gpi)));
+                  } else
+                  {
+                      // not yet found
+                      hadtops_idx.push_back(Wmotheridx);
+                      hadtops.push_back(GenParticles->at(Wmotheridx));
+                      std::vector<const TLorentzVector*> daughters;
+                      daughters.push_back(&(GenParticles->at(gpi)));
+                      hadtopdaughters.push_back(daughters);
+                      //std::cout << "Found a new top at idx " << Wmotheridx << std::endl;
+                  }
+              }
+          } 
+      }
+
+      // Now check the b quarks (we only want the ones associated with a hadronic W decay for now)
+      for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
+      {
+          int pdgid = abs( GenParticles_PdgId->at(gpi) ) ;
+          int momid = abs( GenParticles_ParentId->at(gpi) ) ;
+          int momidx = GenParticles_ParentIdx->at(gpi);
+          int status = GenParticles_Status->at(gpi);
+          
+          if(status == 23 && momid == 6 && pdgid == 5)
+          {
+              // found a b quark from top decay, need to add this to the list of daughters
+              std::vector<int>::iterator found = std::find(hadtops_idx.begin(), hadtops_idx.end(), momidx);
+              if (found != hadtops_idx.end())
+              {
+                  // already found
+                  int position = distance(hadtops_idx.begin(),found);
+                  hadtopdaughters[position].push_back(&(GenParticles->at(gpi)));
+                  //std::cout << "(b) Found this top before: " << *found << std::endl;
+              } 
+              //else
+              //{
+                  // not yet found
+                  //std::cout << "(b) Found a new leptonic top at idx " << momidx << std::endl;
+              //}
+          }
+      }
+
+      bool verbose = false;
+      if (verbose)
+      {
+          for (int ht=0; ht<hadtops.size(); ++ht){
+              std::cout << "Hadtop index = " << hadtops_idx[ht] << std::endl;
+              std::cout << "       daughters: ";
+              for (int htd=0; htd<hadtopdaughters[ht].size(); ++htd){
+                  std::cout << (*hadtopdaughters[ht][htd]).Pt() << " " ;
+              }
+              std::cout << std::endl;
           }
       }
 
@@ -91,32 +167,27 @@ void NtupleClass::Loop()
       if (hadWs != 4) continue;  
 
       // Check whether event would pass the trigger requirement
+      bool passTrigger = true;
+      int rec_njet_pt40(0) ;
+      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+          TLorentzVector jlv( Jets->at(rji) ) ;
+          if ( jlv.Pt() > 40 ) rec_njet_pt40++ ;
+      } 
+      if ( !( HT>450 && rec_njet_pt40>=6 ) ) 
+          passTrigger = false;
+
+
+      // --- TOP TAGGER ---
       
-      // Try to get the hadronic tops in the event
-      // genparticles seem to have a new ordering here, so make a dummy list
-      //std::vector<int> mydummylist;
-      //for(int d=0; d<GenParticles->size(); ++d)
-      //    mydummylist.push_back(d);
-
-      //std::vector<TLorentzVector> hadtops = ttUtility::GetHadTopLVec(*GenParticles, *GenParticles_PdgId, mydummylist, *GenParticles_ParentIdx);
-      //for (TLorentzVector hadtop : hadtops){
-      //    std::cout << hadtop.M() << ", " << hadtop.Pt() << std::endl;
-      // }
-
       // Use helper function to create input list 
       // Create AK4 inputs object
-      ttUtility::ConstAK4Inputs AK4Inputs = ttUtility::ConstAK4Inputs(*Jets, *Jets_bDiscriminatorCSV);
+      ttUtility::ConstAK4Inputs AK4Inputs = ttUtility::ConstAK4Inputs(
+          *Jets, 
+          *Jets_bDiscriminatorCSV,
+          *Jets_qgLikelihood, 
+          hadtops, 
+          hadtopdaughters);
     
-      /*
-      // stick all the subjets in one list for now (this is what the top tagger expects)
-      std::vector<TLorentzVector> JetsAK8_subjets_all;
-      for (std::vector<TLorentzVector> subjets : *JetsAK8_subjets)
-      {
-          for (TLorentzVector subjet : subjets)
-              JetsAK8_subjets_all.push_back(subjet);
-      }
-      */
-
       // Create AK8 inputs object
       ttUtility::ConstAK8Inputs AK8Inputs = ttUtility::ConstAK8Inputs(
           *JetsAK8,
@@ -124,8 +195,9 @@ void NtupleClass::Loop()
           *JetsAK8_NsubjettinessTau2,
           *JetsAK8_NsubjettinessTau3,
           *JetsAK8_softDropMass,
-          *JetsAK8_subjets    // These should be the subjets!
-          );
+          *JetsAK8_subjets,    // These should be the subjets!
+          hadtops,
+          hadtopdaughters);
       
       // Create jets constituents list combining AK4 and AK8 jets, these are used to construct top candiates
       // The vector of input constituents can also be constructed "by hand"
@@ -139,14 +211,15 @@ void NtupleClass::Loop()
 
       // get reconstructed top
       const std::vector<TopObject*>& tops = ttr.getTops();
-
-      // print the number of tops found in the event 
-      if(jentry < 10)
-          printf("\tN tops: %ld\n", tops.size());
       h_ntops->Fill(tops.size());
+
+      // get set of all constituents (i.e. AK4 and AK8 jets) used in one of the tops
+      std::set<Constituent const *> usedConstituents = ttr.getUsedConstituents();
 
       if (jentry < 10) 
       {
+          printf("\tN tops: %ld\n", tops.size());
+
           // print top properties
           for(const TopObject* top : tops)
           {
@@ -166,9 +239,58 @@ void NtupleClass::Loop()
                   printf("\t\tConstituent properties: Constituent type: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf,   Mass: %6.1lf\n", constituent->getType(), constituent->p().Pt(), constituent->p().Eta(), constituent->p().Phi(), constituent->p().M());
               }        
           }        
+
+          std::cout << "Properties of all used constituents" << std::endl;
+          // Print properties of individual top constituent jets 
+          for(const Constituent* constituent : usedConstituents)
+          {
+              printf("\t\tConstituent properties: Constituent type: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf,   Mass: %6.1lf\n", constituent->getType(), constituent->p().Pt(), constituent->p().Eta(), constituent->p().Phi(), constituent->p().M());
+          }        
+          
       }
 
-      if(! (HT > 450 && NJets >= 6 && (*Jets)[5].Pt() > 40)) continue;
+      // --- Gen matching ---
+      int n_matched_recotops = 0;
+      // How often does a tagged top match with genlevel?
+      for (const TopObject* top : tops)
+      {
+          TLorentzVector matched_top;
+          std::vector<const TLorentzVector*> matched_top_constituents;
+          double minDR = 99;
+          for (int i_gentop=0; i_gentop<hadtops.size(); ++i_gentop)
+          {
+              double DR_top_gentop = calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
+              if (DR_top_gentop < minDR)
+              {
+                  minDR = DR_top_gentop;
+                  matched_top = hadtops[i_gentop];
+                  matched_top_constituents = hadtopdaughters[i_gentop];
+              }
+          }
+          //std::cout << "Top Pt, Eta, Phi: " << top->p().Pt() << " " << top->p().Eta() << " " << top->p().Phi() << std::endl;
+          //std::cout << "Gen top Pt, Eta, Phi, DR: " << matched_top.Pt() << " " << matched_top.Eta() << " " << matched_top.Phi() << " " << minDR << std::endl;
+
+          h_top_gentop_minDR->Fill(minDR);
+          if(minDR < 0.4) n_matched_recotops++;
+
+          if(top->getNConstituents() == 3 )
+          {
+              // do stuff for trijet
+          }
+          else if(top->getNConstituents() == 2 )
+          {
+              // do stuff for dijet
+          }
+          else if(top->getNConstituents() == 1 )
+          {
+              // do stuff for monojet
+          }
+      }
+
+      if(n_matched_recotops>2)
+          std::cout << "Double matched a gentop!" << std::endl;
+
+      if(!passTrigger) continue;
       
       h_ntops_baseline->Fill(tops.size());
       
@@ -184,4 +306,7 @@ void NtupleClass::Loop()
    h_ntops->Write();
    h_ntops_baseline->Write();
    h_dphi_2tops->Write();
+
+   h_top_gentop_minDR->Write();
+
 }
