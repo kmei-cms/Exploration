@@ -84,12 +84,98 @@
       float eff_val_stealth_syy_350 = pass_stealth_syy_350 / total_stealth_syy_350 ;
       float eff_val_stealth_shh_350 = pass_stealth_shh_350 / total_stealth_syy_350 ;
 
-      printf(" Efficiency, rpv350 : %.3f\n", eff_val_rpv350 ) ;
-      printf(" Efficiency, rpv450 : %.3f\n", eff_val_rpv450 ) ;
-      printf(" Efficiency, rpv550 : %.3f\n", eff_val_rpv550 ) ;
-      printf(" Efficiency, rpv650 : %.3f\n", eff_val_rpv650 ) ;
-      printf(" Efficiency, stealth_syy_350 : %.3f\n", eff_val_stealth_syy_350 ) ;
-      printf(" Efficiency, stealth_shh_350 : %.3f\n", eff_val_stealth_shh_350 ) ;
+      printf("\n\n") ;
+      printf("Had Efficiency, rpv350 : %.3f\n", eff_val_rpv350 ) ;
+      printf("Had Efficiency, rpv450 : %.3f\n", eff_val_rpv450 ) ;
+      printf("Had Efficiency, rpv550 : %.3f\n", eff_val_rpv550 ) ;
+      printf("Had Efficiency, rpv650 : %.3f\n", eff_val_rpv650 ) ;
+      printf("Had Efficiency, stealth_syy_350 : %.3f\n", eff_val_stealth_syy_350 ) ;
+      printf("Had Efficiency, stealth_shh_350 : %.3f\n", eff_val_stealth_shh_350 ) ;
+      printf("\n\n") ;
+
+     //-------
+
+      TH1F* h_gen_ele_pt_rpv350          = get_hist_1d( "h_gen_ele_pt_rpv350" ) ;
+      TH1F* h_gen_ele_pt_rpv450          = get_hist_1d( "h_gen_ele_pt_rpv450" ) ;
+      TH1F* h_gen_ele_pt_rpv550          = get_hist_1d( "h_gen_ele_pt_rpv550" ) ;
+      TH1F* h_gen_ele_pt_rpv650          = get_hist_1d( "h_gen_ele_pt_rpv650" ) ;
+      TH1F* h_gen_ele_pt_stealth_syy_350          = get_hist_1d( "h_gen_ele_pt_stealth_syy_350" ) ;
+      TH1F* h_gen_ele_pt_stealth_shh_350          = get_hist_1d( "h_gen_ele_pt_stealth_shh_350" ) ;
+
+      TH1F* h_ele_pt_rpv350          = get_hist_1d( "h_ele_pt_rpv350" ) ;
+      TH1F* h_ele_pt_rpv450          = get_hist_1d( "h_ele_pt_rpv450" ) ;
+      TH1F* h_ele_pt_rpv550          = get_hist_1d( "h_ele_pt_rpv550" ) ;
+      TH1F* h_ele_pt_rpv650          = get_hist_1d( "h_ele_pt_rpv650" ) ;
+      TH1F* h_ele_pt_stealth_syy_350          = get_hist_1d( "h_ele_pt_stealth_syy_350" ) ;
+      TH1F* h_ele_pt_stealth_shh_350          = get_hist_1d( "h_ele_pt_stealth_shh_350" ) ;
+
+      TH1F* h_gen_mu_pt_rpv350          = get_hist_1d( "h_gen_mu_pt_rpv350" ) ;
+      TH1F* h_gen_mu_pt_rpv450          = get_hist_1d( "h_gen_mu_pt_rpv450" ) ;
+      TH1F* h_gen_mu_pt_rpv550          = get_hist_1d( "h_gen_mu_pt_rpv550" ) ;
+      TH1F* h_gen_mu_pt_rpv650          = get_hist_1d( "h_gen_mu_pt_rpv650" ) ;
+      TH1F* h_gen_mu_pt_stealth_syy_350          = get_hist_1d( "h_gen_mu_pt_stealth_syy_350" ) ;
+      TH1F* h_gen_mu_pt_stealth_shh_350          = get_hist_1d( "h_gen_mu_pt_stealth_shh_350" ) ;
+
+      TH1F* h_mu_pt_rpv350          = get_hist_1d( "h_mu_pt_rpv350" ) ;
+      TH1F* h_mu_pt_rpv450          = get_hist_1d( "h_mu_pt_rpv450" ) ;
+      TH1F* h_mu_pt_rpv550          = get_hist_1d( "h_mu_pt_rpv550" ) ;
+      TH1F* h_mu_pt_rpv650          = get_hist_1d( "h_mu_pt_rpv650" ) ;
+      TH1F* h_mu_pt_stealth_syy_350          = get_hist_1d( "h_mu_pt_stealth_syy_350" ) ;
+      TH1F* h_mu_pt_stealth_shh_350          = get_hist_1d( "h_mu_pt_stealth_shh_350" ) ;
+
+      int pt30_bin = h_gen_ele_pt_rpv350 -> GetXaxis() -> FindBin( 30.1 ) ;
+      int nbins = h_gen_ele_pt_rpv350 -> GetNbinsX() ;
+      printf("\n\n pt 30 hist bin : %d out of %d \n\n", pt30_bin, nbins ) ;
+
+      float total_ele_rpv350 = h_gen_ele_pt_rpv350 -> GetEntries() ;
+      float total_ele_rpv450 = h_gen_ele_pt_rpv450 -> GetEntries() ;
+      float total_ele_rpv550 = h_gen_ele_pt_rpv550 -> GetEntries() ;
+      float total_ele_rpv650 = h_gen_ele_pt_rpv650 -> GetEntries() ;
+      float total_ele_stealth_syy_350 = h_gen_ele_pt_stealth_syy_350 -> GetEntries() ;
+      float total_ele_stealth_shh_350 = h_gen_ele_pt_stealth_shh_350 -> GetEntries() ;
+
+      float pass_ele_rpv350 = h_ele_pt_rpv350 -> Integral( pt30_bin, nbins ) ;
+      float pass_ele_rpv450 = h_ele_pt_rpv450 -> Integral( pt30_bin, nbins ) ;
+      float pass_ele_rpv550 = h_ele_pt_rpv550 -> Integral( pt30_bin, nbins ) ;
+      float pass_ele_rpv650 = h_ele_pt_rpv650 -> Integral( pt30_bin, nbins ) ;
+      float pass_ele_stealth_syy_350 = h_ele_pt_stealth_syy_350 -> Integral( pt30_bin, nbins ) ;
+      float pass_ele_stealth_shh_350 = h_ele_pt_stealth_shh_350 -> Integral( pt30_bin, nbins ) ;
+
+      float total_mu_rpv350 = h_gen_mu_pt_rpv350 -> GetEntries() ;
+      float total_mu_rpv450 = h_gen_mu_pt_rpv450 -> GetEntries() ;
+      float total_mu_rpv550 = h_gen_mu_pt_rpv550 -> GetEntries() ;
+      float total_mu_rpv650 = h_gen_mu_pt_rpv650 -> GetEntries() ;
+      float total_mu_stealth_syy_350 = h_gen_mu_pt_stealth_syy_350 -> GetEntries() ;
+      float total_mu_stealth_shh_350 = h_gen_mu_pt_stealth_shh_350 -> GetEntries() ;
+
+      float pass_mu_rpv350 = h_mu_pt_rpv350 -> Integral( pt30_bin, nbins ) ;
+      float pass_mu_rpv450 = h_mu_pt_rpv450 -> Integral( pt30_bin, nbins ) ;
+      float pass_mu_rpv550 = h_mu_pt_rpv550 -> Integral( pt30_bin, nbins ) ;
+      float pass_mu_rpv650 = h_mu_pt_rpv650 -> Integral( pt30_bin, nbins ) ;
+      float pass_mu_stealth_syy_350 = h_mu_pt_stealth_syy_350 -> Integral( pt30_bin, nbins ) ;
+      float pass_mu_stealth_shh_350 = h_mu_pt_stealth_shh_350 -> Integral( pt30_bin, nbins ) ;
+
+      printf("\n") ;
+      printf(" Ele Eff, rpv350 : %.0f / %.0f = %.3f\n", pass_ele_rpv350, total_ele_rpv350, 100*pass_ele_rpv350/total_ele_rpv350 ) ;
+      printf(" Ele Eff, rpv450 : %.0f / %.0f = %.3f\n", pass_ele_rpv450, total_ele_rpv450, 100*pass_ele_rpv450/total_ele_rpv450 ) ;
+      printf(" Ele Eff, rpv550 : %.0f / %.0f = %.3f\n", pass_ele_rpv550, total_ele_rpv550, 100*pass_ele_rpv550/total_ele_rpv550 ) ;
+      printf(" Ele Eff, rpv650 : %.0f / %.0f = %.3f\n", pass_ele_rpv650, total_ele_rpv650, 100*pass_ele_rpv650/total_ele_rpv650 ) ;
+      printf(" Ele Eff, stealth_syy_350 : %.0f / %.0f = %.3f\n", pass_ele_stealth_syy_350, total_ele_stealth_syy_350, 100*pass_ele_stealth_syy_350/total_ele_stealth_syy_350 ) ;
+      printf(" Ele Eff, stealth_shh_350 : %.0f / %.0f = %.3f\n", pass_ele_stealth_shh_350, total_ele_stealth_shh_350, 100*pass_ele_stealth_shh_350/total_ele_stealth_shh_350 ) ;
+
+      printf("\n") ;
+      printf(" Mu  Eff, rpv350 : %.0f / %.0f = %.3f\n", pass_mu_rpv350, total_mu_rpv350, 100*pass_mu_rpv350/total_mu_rpv350 ) ;
+      printf(" Mu  Eff, rpv450 : %.0f / %.0f = %.3f\n", pass_mu_rpv450, total_mu_rpv450, 100*pass_mu_rpv450/total_mu_rpv450 ) ;
+      printf(" Mu  Eff, rpv550 : %.0f / %.0f = %.3f\n", pass_mu_rpv550, total_mu_rpv550, 100*pass_mu_rpv550/total_mu_rpv550 ) ;
+      printf(" Mu  Eff, rpv650 : %.0f / %.0f = %.3f\n", pass_mu_rpv650, total_mu_rpv650, 100*pass_mu_rpv650/total_mu_rpv650 ) ;
+      printf(" Mu  Eff, stealth_syy_350 : %.0f / %.0f = %.3f\n", pass_mu_stealth_syy_350, total_mu_stealth_syy_350, 100*pass_mu_stealth_syy_350/total_mu_stealth_syy_350 ) ;
+      printf(" Mu  Eff, stealth_shh_350 : %.0f / %.0f = %.3f\n", pass_mu_stealth_shh_350, total_mu_stealth_shh_350, 100*pass_mu_stealth_shh_350/total_mu_stealth_shh_350 ) ;
+
+
+
+
+
+
 
 
 

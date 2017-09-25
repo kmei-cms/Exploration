@@ -12,12 +12,10 @@ const char* mcname( int pdgid ) ;
 
 double calcDr( double eta1, double eta2, double phi1, double phi2 ) ;
 
+void add_overflows_to_last_bin( TH1F* hp ) ;
+
 void trig_eff::Loop( int max_events, bool verb )
 {
-
-   bool skip_sl_top_events(true) ;
-
-   int n_skipped(0) ;
 
    gDirectory -> Delete( "h*" ) ;
 
@@ -55,6 +53,12 @@ void trig_eff::Loop( int max_events, bool verb )
    TH1F* h_rec_ht_njet50ge6 = new TH1F( "h_rec_ht_njet50ge6", "HT, Njet50>=6", 80, 0., 4000. ) ;
 
 
+  //----------
+
+   TH1F* h_gen_ele_pt = new TH1F( "h_gen_ele_pt", "Gen Electron pt", 90, 0., 300. ) ;
+   TH1F* h_gen_mu_pt = new TH1F( "h_gen_mu_pt", "Gen Mu pt", 90, 0., 300. ) ;
+   TH1F* h_ele_pt = new TH1F( "h_ele_pt", "Electron pt", 90, 0., 300. ) ;
+   TH1F* h_mu_pt = new TH1F( "h_mu_pt", "Mu pt", 90, 0., 300. ) ;
 
 
    if (fChain == 0) return;
@@ -64,7 +68,15 @@ void trig_eff::Loop( int max_events, bool verb )
 
    Long64_t nbytes = 0, nb = 0;
 
+
+
+
    int n_missing_b(0) ;
+   int n_sl_top(0) ;
+   int n_sl_top_e_or_mu(0) ;
+   int n_sl_top_e(0) ;
+   int n_sl_top_mu(0) ;
+
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -83,7 +95,13 @@ void trig_eff::Loop( int max_events, bool verb )
       if ( verb ) printf("\n\n GenParticles: %lu\n", GenParticles->size() ) ;
 
 
-      bool skip_event(false) ;
+      bool is_sl_top(false) ;
+      bool is_sl_top_e_or_mu(false) ;
+      bool is_sl_top_e(false) ;
+      bool is_sl_top_mu(false) ;
+
+      int first_ele_gpi(-1) ;
+      int first_mu_gpi(-1) ;
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) {
 
          int spdgid = GenParticles_PdgId->at(gpi) ;
@@ -92,7 +110,17 @@ void trig_eff::Loop( int max_events, bool verb )
          int momid = abs( GenParticles_ParentId->at(gpi) ) ;
          int momidx = GenParticles_ParentIdx->at(gpi) ;
 
-         if ( skip_sl_top_events && ( ( pdgid==11 || pdgid==13 || pdgid==15 ) && momid == 24 ) ) { skip_event = true ; }
+         if ( ( pdgid==11 || pdgid==13 || pdgid==15 ) && momid == 24 && GenParticles->at(gpi).Pt() > 3.  ) { is_sl_top = true ; }
+         if ( ( pdgid==11 || pdgid==13 ) && momid == 24 && GenParticles->at(gpi).Pt() > 3.  ) { is_sl_top_e_or_mu = true ; }
+         if ( ( pdgid==11 ) && momid == 24 && GenParticles->at(gpi).Pt() > 3. ) {
+            is_sl_top_e = true ;
+            if ( first_ele_gpi < 0 ) first_ele_gpi = gpi ;
+         }
+         if ( ( pdgid==13 ) && momid == 24 ) {
+            is_sl_top_mu = true ;
+            if ( first_mu_gpi < 0 ) first_mu_gpi = gpi ;
+         }
+
 
          if ( verb ) {
             char pname[100] ;
@@ -120,81 +148,163 @@ void trig_eff::Loop( int max_events, bool verb )
 
       } // gpi
 
+      if ( is_sl_top_e  && first_ele_gpi >= 0 ) h_gen_ele_pt -> Fill( GenParticles->at(first_ele_gpi).Pt() ) ;
+      if ( is_sl_top_mu && first_mu_gpi  >= 0 ) h_gen_mu_pt  -> Fill( GenParticles->at(first_mu_gpi).Pt() ) ;
 
-      if ( skip_event ) {
-         n_skipped ++ ;
-         if ( verb ) printf("\n\n *** skipping event.\n\n") ;
-         continue ;
+ ///  if ( is_sl_top_e  && first_ele_gpi >= 0 && GenParticles->at(first_ele_gpi).Pt() < 1 ) {
+ ///     printf("\n\n Very low pt electron.\n\n") ;
+ ///     for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) {
+ ///        char pname[100] ;
+ ///        char mname[100] ;
+ ///        sprintf( pname, "%s", mcname( GenParticles_PdgId->at(gpi) ) ) ;
+ ///        sprintf( mname, "%s", mcname( GenParticles_ParentId->at(gpi) ) ) ;
+ ///        double eta = 99. ;
+ ///        if ( GenParticles->at(gpi).Pt() > 0 ) eta = GenParticles->at(gpi).Eta() ;
+ ///        double phi = GenParticles->at(gpi).Phi() ;
+ ///        double pt = GenParticles->at(gpi).Pt() ;
+ ///        printf("  %3u :  ID=%9d %10s : MomID=%9d %10s MomIdx=%3d status=%2d :  Pt = %7.1f , Eta = %6.3f, Phi = %6.3f,  px,py,pz,E = %6.1f, %6.1f, %6.1f,   %6.1f\n",
+ ///            gpi,
+ ///            GenParticles_PdgId->at(gpi), pname,
+ ///            GenParticles_ParentId->at(gpi), mname, GenParticles_ParentIdx->at(gpi),
+ ///            GenParticles_Status->at(gpi),
+ ///            GenParticles->at(gpi).Pt(),
+ ///            eta,
+ ///            phi,
+ ///            GenParticles->at(gpi).Px(),
+ ///            GenParticles->at(gpi).Py(),
+ ///            GenParticles->at(gpi).Pz(),
+ ///            GenParticles->at(gpi).E()
+ ///            ) ;
+ ///     } // gpi
+ ///  }
+
+      if ( is_sl_top ) n_sl_top ++ ;
+
+      if ( ! is_sl_top ) {
+
+        //--- Use same definition of HT as used in HLT path.
+         float pfht_pt40_eta26(0.) ;
+         for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+            TLorentzVector jlv( Jets->at(rji) ) ;
+            if ( jlv.Pt() < 40 ) continue ;
+            if ( fabs( jlv.Eta()) > 2.6 ) continue ;
+            pfht_pt40_eta26 += jlv.Pt() ;
+         }
+
+
+
+
+       //--- Approximate a hadronic trigger
+
+         int rec_njet_pt20(0) ;
+         int rec_njet_pt30(0) ;
+         int rec_njet_pt32(0) ;
+         int rec_njet_pt40(0) ;
+         int rec_njet_pt45(0) ;
+         int rec_njet_pt50(0) ;
+
+         for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+
+               TLorentzVector jlv( Jets->at(rji) ) ;
+
+               if ( jlv.Pt() > 20 ) rec_njet_pt20++ ;
+               if ( jlv.Pt() > 30 ) rec_njet_pt30++ ;
+               if ( jlv.Pt() > 32 ) rec_njet_pt32++ ;
+               if ( jlv.Pt() > 40 ) rec_njet_pt40++ ;
+               if ( jlv.Pt() > 45 ) rec_njet_pt45++ ;
+               if ( jlv.Pt() > 50 ) rec_njet_pt50++ ;
+
+         } // rji
+
+         h_rec_njet20 -> Fill( rec_njet_pt20 ) ;
+         h_rec_njet30 -> Fill( rec_njet_pt30 ) ;
+         h_rec_njet32 -> Fill( rec_njet_pt32 ) ;
+         h_rec_njet40 -> Fill( rec_njet_pt40 ) ;
+         h_rec_njet45 -> Fill( rec_njet_pt45 ) ;
+         h_rec_njet50 -> Fill( rec_njet_pt50 ) ;
+
+
+         if ( pfht_pt40_eta26 > 380 ) h_rec_njet32_ht380 -> Fill( rec_njet_pt32 ) ;
+
+         if ( pfht_pt40_eta26 > 450 ) h_rec_njet40_ht450 -> Fill( rec_njet_pt40 ) ;
+         if ( pfht_pt40_eta26 > 450 ) h_rec_njet45_ht450 -> Fill( rec_njet_pt45 ) ;
+         if ( pfht_pt40_eta26 > 450 ) h_rec_njet50_ht450 -> Fill( rec_njet_pt50 ) ;
+
+         if ( pfht_pt40_eta26 > 500 ) h_rec_njet40_ht500 -> Fill( rec_njet_pt40 ) ;
+         if ( pfht_pt40_eta26 > 500 ) h_rec_njet45_ht500 -> Fill( rec_njet_pt45 ) ;
+         if ( pfht_pt40_eta26 > 500 ) h_rec_njet50_ht500 -> Fill( rec_njet_pt50 ) ;
+
+         if ( pfht_pt40_eta26 > 550 ) h_rec_njet40_ht550 -> Fill( rec_njet_pt40 ) ;
+         if ( pfht_pt40_eta26 > 550 ) h_rec_njet45_ht550 -> Fill( rec_njet_pt45 ) ;
+         if ( pfht_pt40_eta26 > 550 ) h_rec_njet50_ht550 -> Fill( rec_njet_pt50 ) ;
+
+         if ( HT > 1100 ) h_rec_njet40_ht1100 -> Fill( rec_njet_pt40 ) ;
+         if ( HT > 1100 ) h_rec_njet32_ht1100 -> Fill( rec_njet_pt32 ) ;
+
+         h_rec_ht -> Fill( pfht_pt40_eta26 ) ;
+         if ( rec_njet_pt32 >= 6 ) h_rec_ht_njet32ge6 -> Fill( pfht_pt40_eta26 ) ;
+         if ( rec_njet_pt40 >= 6 ) h_rec_ht_njet40ge6 -> Fill( pfht_pt40_eta26 ) ;
+         if ( rec_njet_pt45 >= 6 ) h_rec_ht_njet45ge6 -> Fill( pfht_pt40_eta26 ) ;
+         if ( rec_njet_pt50 >= 6 ) h_rec_ht_njet50ge6 -> Fill( pfht_pt40_eta26 ) ;
+
+      } // not is_sl_top ?
+
+
+      if ( is_sl_top_e_or_mu ) {
+
+         n_sl_top_e_or_mu ++ ;
+
       }
 
+      if ( is_sl_top_e ) {
 
+         n_sl_top_e ++ ;
 
+         if ( Electrons->size() > 0 ) {
+            TLorentzVector tlv( Electrons->at(0) ) ;
+            h_ele_pt -> Fill( tlv.Pt() ) ;
+         } else {
+            h_ele_pt -> Fill( -1. ) ;
+         }
 
+      }
 
+      if ( is_sl_top_mu ) {
 
-    //--- Approximate a hadronic trigger
+         n_sl_top_mu ++ ;
 
-      int rec_njet_pt20(0) ;
-      int rec_njet_pt30(0) ;
-      int rec_njet_pt32(0) ;
-      int rec_njet_pt40(0) ;
-      int rec_njet_pt45(0) ;
-      int rec_njet_pt50(0) ;
+         if ( Muons->size() > 0 ) {
+            TLorentzVector tlv( Muons->at(0) ) ;
+            h_mu_pt -> Fill( tlv.Pt() ) ;
+         } else {
+            h_mu_pt -> Fill( -1. ) ;
+         }
 
-      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
-
-            TLorentzVector jlv( Jets->at(rji) ) ;
-
-            if ( jlv.Pt() > 20 ) rec_njet_pt20++ ;
-            if ( jlv.Pt() > 30 ) rec_njet_pt30++ ;
-            if ( jlv.Pt() > 32 ) rec_njet_pt32++ ;
-            if ( jlv.Pt() > 40 ) rec_njet_pt40++ ;
-            if ( jlv.Pt() > 45 ) rec_njet_pt45++ ;
-            if ( jlv.Pt() > 50 ) rec_njet_pt50++ ;
-
-      } // rji
-
-      h_rec_njet20 -> Fill( rec_njet_pt20 ) ;
-      h_rec_njet30 -> Fill( rec_njet_pt30 ) ;
-      h_rec_njet32 -> Fill( rec_njet_pt32 ) ;
-      h_rec_njet40 -> Fill( rec_njet_pt40 ) ;
-      h_rec_njet45 -> Fill( rec_njet_pt45 ) ;
-      h_rec_njet50 -> Fill( rec_njet_pt50 ) ;
-
-
-      if ( HT > 380 ) h_rec_njet32_ht380 -> Fill( rec_njet_pt32 ) ;
-
-      if ( HT > 450 ) h_rec_njet40_ht450 -> Fill( rec_njet_pt40 ) ;
-      if ( HT > 450 ) h_rec_njet45_ht450 -> Fill( rec_njet_pt45 ) ;
-      if ( HT > 450 ) h_rec_njet50_ht450 -> Fill( rec_njet_pt50 ) ;
-
-      if ( HT > 500 ) h_rec_njet40_ht500 -> Fill( rec_njet_pt40 ) ;
-      if ( HT > 500 ) h_rec_njet45_ht500 -> Fill( rec_njet_pt45 ) ;
-      if ( HT > 500 ) h_rec_njet50_ht500 -> Fill( rec_njet_pt50 ) ;
-
-      if ( HT > 550 ) h_rec_njet40_ht550 -> Fill( rec_njet_pt40 ) ;
-      if ( HT > 550 ) h_rec_njet45_ht550 -> Fill( rec_njet_pt45 ) ;
-      if ( HT > 550 ) h_rec_njet50_ht550 -> Fill( rec_njet_pt50 ) ;
-
-      if ( HT > 1100 ) h_rec_njet40_ht1100 -> Fill( rec_njet_pt40 ) ;
-      if ( HT > 1100 ) h_rec_njet32_ht1100 -> Fill( rec_njet_pt32 ) ;
-
-      h_rec_ht -> Fill( HT ) ;
-      if ( rec_njet_pt32 >= 6 ) h_rec_ht_njet32ge6 -> Fill( HT ) ;
-      if ( rec_njet_pt40 >= 6 ) h_rec_ht_njet40ge6 -> Fill( HT ) ;
-      if ( rec_njet_pt45 >= 6 ) h_rec_ht_njet45ge6 -> Fill( HT ) ;
-      if ( rec_njet_pt50 >= 6 ) h_rec_ht_njet50ge6 -> Fill( HT ) ;
-
-
+      }
 
    } // jentry
+
+   add_overflows_to_last_bin( h_ele_pt ) ;
+   add_overflows_to_last_bin( h_mu_pt ) ;
 
    printf("\n\n") ;
    gDirectory -> ls() ;
    printf("\n\n") ;
 
-   printf(" Skipped  %d / %llu  (%.3f %%)\n\n", n_skipped, nentries, 100*n_skipped/(1.*nentries) ) ;
-   printf(" analyzed %lld / %llu  (%.3f %%)\n\n", (nentries-n_skipped), nentries, 100*(nentries-n_skipped)/(1.*nentries) ) ;
+   printf(" Number and fraction of all-hadronic events : %lld / %llu  ((%.3f %%)\n\n",
+      (nentries-n_sl_top), nentries, 100*(nentries-n_sl_top) / (1.*nentries) ) ;
+
+   printf(" Number and fraction of SL top events                : %d / %llu  ((%.3f %%)\n\n",
+      n_sl_top, nentries, 100*(n_sl_top) / (1.*nentries) ) ;
+
+   printf(" Number and fraction of SL top events (e or mu only) : %d / %llu  ((%.3f %%)\n\n",
+      n_sl_top_e_or_mu, nentries, 100*(n_sl_top_e_or_mu) / (1.*nentries) ) ;
+
+   printf(" Number and fraction of SL top events (e only)       : %d / %llu  ((%.3f %%)\n\n",
+      n_sl_top_e, nentries, 100*(n_sl_top_e) / (1.*nentries) ) ;
+
+   printf(" Number and fraction of SL top events (mu only)      : %d / %llu  ((%.3f %%)\n\n",
+      n_sl_top_mu, nentries, 100*(n_sl_top_mu) / (1.*nentries) ) ;
 
    saveHist( output_hist_file_name, "h*" ) ;
 
@@ -281,4 +391,23 @@ double calcDr( double eta1, double eta2, double phi1, double phi2 ) {
    return sqrt( dphi*dphi + deta*deta ) ;
 
 } // calcDr
+
+//=====================================================================
+
+void add_overflows_to_last_bin( TH1F* hp ) {
+   if ( hp == 0x0 ) return ;
+   float last_bin = hp -> GetBinContent( hp->GetNbinsX() ) ;
+   float overflow = hp -> GetBinContent( hp->GetNbinsX()+1 ) ;
+   hp -> SetBinContent( hp->GetNbinsX(), last_bin + overflow ) ;
+}
+
+//=====================================================================
+
+
+
+
+
+
+
+
 
