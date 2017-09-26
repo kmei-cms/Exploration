@@ -1,0 +1,31 @@
+
+   set target_dir = "/uscms_data/d1/owenl/stealth-rpv/prod-subjets-topvars1"
+   set source_dir = "/store/user/soha/stealth_rpv_ntuples_subjets"
+
+   mkdir -p $target_dir
+   mkdir -p $target_dir/logs
+
+
+   set samples = ( \
+      "rpv_stop_350_t3j_uds" \
+      "rpv_stop_450_t3j_uds" \
+      "rpv_stop_550_t3j_uds" \
+      "rpv_stop_650_t3j_uds" \
+      "stealth_stop_350_singlino_SHuHd" \
+      "stealth_stop_350_singlino_SYY" \
+      "stealth_stop_650_singlino_SHuHd" \
+      "stealth_stop_650_singlino_SYY" \
+      "TT_TuneCUETP8M2T4_13TeV-powheg-pythia8" \
+   )
+
+   foreach sample ( $samples )
+      echo processing sample $sample
+      set outfile = "${target_dir}/topvars-${sample}.root"
+      set logfile = $target_dir/logs/${sample}.log
+      set command = "./AddTopVars $sample $outfile $source_dir"
+      echo command : $command
+      $command |& tee ${logfile}
+   end
+
+
+          

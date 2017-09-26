@@ -69,7 +69,7 @@ void NtupleClassAddTopVars::Loop()
       nb = fChain->GetEntry(jentry);   
       nbytes += nb;
 
-      if ( jentry % (nentries/10) == 0 ) printf("  Event %9llu / %9llu  (%2.0f%%)\n", jentry, nentries, 100*(jentry*1.)/(nentries*1.) ) ;
+      if ( jentry % (nentries/20) == 0 ) { printf("  Event %9llu / %9llu  (%2.0f%%)\n", jentry, nentries, 100*(jentry*1.)/(nentries*1.) ) ; fflush(stdout) ; }
 
 
       if ( jentry < 100 ) {
