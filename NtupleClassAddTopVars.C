@@ -72,6 +72,14 @@ void NtupleClassAddTopVars::Loop()
       if ( jentry % (nentries/10) == 0 ) printf("  Event %9llu / %9llu  (%2.0f%%)\n", jentry, nentries, 100*(jentry*1.)/(nentries*1.) ) ;
 
 
+      if ( jentry < 100 ) {
+         verbose = true ;
+      } else {
+         verbose = false ;
+      }
+
+      if ( verbose ) printf("\n\n =========== number %9llu : Run %9u , Lumi %9u , Event %9llu\n", jentry, RunNum, LumiBlockNum, EvtNum ) ;
+
 
       // Try to get the hadronic tops in the event
       // genparticles seem to have a new ordering here, so make a dummy list
@@ -121,10 +129,10 @@ void NtupleClassAddTopVars::Loop()
       const std::vector<TopObject*>& tops = ttr.getTops();
 
       // print the number of tops found in the event 
-      if(jentry < 10)
+      if( verbose )
           printf("\tN tops: %ld\n", tops.size());
 
-      if (jentry < 10) 
+      if ( verbose ) 
       {
           // print top properties
           for(const TopObject* top : tops)
@@ -154,26 +162,26 @@ void NtupleClassAddTopVars::Loop()
 
 
 
-      if ( jentry < 100 ) {
-         verbose = true ;
-      } else {
-         verbose = false ;
-      }
-
      //--- load the new top tag ntuple variables.
 
-      if ( verbose ) printf("\n\n =========== number %9llu : Run %9u , Lumi %9u , Event %9llu\n", jentry, RunNum, LumiBlockNum, EvtNum ) ;
 
       toptag_tlv.clear() ;
       toptag_nconstituents.clear() ;
       Jets_toptag_index.clear() ;
       JetsAK8_toptag_index.clear() ;
 
-      for(const TopObject* top : tops) {
+      for ( int ti=0; ti<tops.size() ; ti++ ) {
+
+         const TopObject* top = tops.at(ti) ;
 
          TLorentzVector tlv( top->p() ) ;
          toptag_tlv.emplace_back( tlv ) ;
          toptag_nconstituents.emplace_back( top->getNConstituents() ) ;
+
+         if ( verbose ) {
+            printf("  storing top tag %2d : Pt: %6.1f , Eta: %7.3f,  Phi: %7.3f,  Mass: %6.1f\n",
+                         ti, tlv.Pt(), tlv.Eta(), tlv.Phi(), tlv.M() ) ;
+         }
 
       } // top
 
