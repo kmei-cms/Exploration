@@ -29,7 +29,7 @@ LIBSTOPTAGGER += -L$(TTTDIR) -lTopTagger
 
 #OBJS       = $(patsubst %, $(ODIR)/%, $(OBJ))
 
-PROGRAMS = MyAnalysis
+PROGRAMS = MyAnalysis MyAnalysisMultiFile
 
 all: mkobj $(PROGRAMS)
 
@@ -64,6 +64,9 @@ $(ODIR)/%.o : $(TTSDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXDEPFLAGS)  -o $@ -c $<
 
 MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/NtupleClass.o
+	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
+MyAnalysisMultiFile: $(ODIR)/MyAnalysisMultiFile.o $(ODIR)/NtupleClass.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 clean:
