@@ -29,7 +29,7 @@ LIBSTOPTAGGER += -L$(TTTDIR) -lTopTagger
 
 #OBJS       = $(patsubst %, $(ODIR)/%, $(OBJ))
 
-PROGRAMS = MyAnalysis MyAnalysisMultiFile
+PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars
 
 all: mkobj $(PROGRAMS)
 
@@ -67,6 +67,9 @@ MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/NtupleClass.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 MyAnalysisMultiFile: $(ODIR)/MyAnalysisMultiFile.o $(ODIR)/NtupleClass.o
+	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
+AddTopVars: $(ODIR)/AddTopVars.o $(ODIR)/NtupleClassAddTopVars.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 clean:
