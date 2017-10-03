@@ -1,6 +1,7 @@
 #define NtupleClass_cxx
 #include "NtupleClass.h"
 #include <TH1D.h>
+#include <TH2D.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <iostream>
@@ -68,6 +69,18 @@ void NtupleClass::Loop()
    TH1D *h_ntops_baseline  = new TH1D("ntops_baseline","ntops_baseline", 5, 0, 5);
    TH1D *h_dphi_2tops  = new TH1D("dphi_2tops","dphi_2tops", 40, -4, 4);
    TH1D *h_top_gentop_minDR = new TH1D("h_top_gentop_minDR","h_top_gentop_minDR", 60, 0, 3);
+   TH1D *h_top_gentop_Dpt = new TH1D("h_top_gentop_Dpt","h_top_gentop_Dpt", 60, 0, 300);
+   TH2D *h_top_gentop_minDR_Dpt = new TH2D("h_top_gentop_minDR_Dpt", "h_top_gentop_minDR_Dpt", 60, 0, 3, 60, 0, 300);
+   TH1D *h_top_gentop_minDR_3jet_daughters = new TH1D("h_top_gentop_minDR_3jet_daughters", "h_top_gentop_minDR_3jet_daughters", 60, 0, 3); 
+   TH1D *h_top_gentop_Dpt_3jet_daughters = new TH1D("h_top_gentop_Dpt_3jet_daughters", "h_top_gentop_Dpt_3jet_daughters", 60, 0, 300); 
+   TH2D *h_top_gentop_minDR_Dpt_3jet_daughters = new TH2D("h_top_gentop_minDR_Dpt_3jet_daughters", "h_top_gentop_minDR_Dpt_3jet_daughters", 60, 0, 3, 60, 0, 300); 
+
+   TH1D *h_top_trijet_n_matched_constituents = new TH1D("h_top_trijet_n_matched_constituents", "h_top_trijet_n_matched_constituents", 4, -0.5, 3.5);
+   TH2D *h_top_gentop_minDR_Dpt_3match = new TH2D("h_top_gentop_minDR_Dpt_3match", "h_top_gentop_minDR_Dpt_3match", 60, 0, 3, 60, 0, 300);
+   TH2D *h_top_gentop_minDR_Dpt_2match = new TH2D("h_top_gentop_minDR_Dpt_2match", "h_top_gentop_minDR_Dpt_2match", 60, 0, 3, 60, 0, 300);
+   TH2D *h_top_gentop_minDR_Dpt_1match = new TH2D("h_top_gentop_minDR_Dpt_1match", "h_top_gentop_minDR_Dpt_1match", 60, 0, 3, 60, 0, 300);
+   TH2D *h_top_gentop_minDR_Dpt_0match = new TH2D("h_top_gentop_minDR_Dpt_0match", "h_top_gentop_minDR_Dpt_0match", 60, 0, 3, 60, 0, 300);
+
    TopTagger tt;
    tt.setCfgFile("TopTagger.cfg");
 
@@ -253,12 +266,13 @@ void NtupleClass::Loop()
 
       // --- Gen matching ---
       int n_matched_recotops = 0;
+      int n_matched_recotops_auto = 0;
       // How often does a tagged top match with genlevel?
       for (const TopObject* top : tops)
       {
           TLorentzVector matched_top;
           std::vector<const TLorentzVector*> matched_top_constituents;
-          double minDR = 99;
+          double minDR = 999;
           for (int i_gentop=0; i_gentop<hadtops.size(); ++i_gentop)
           {
               double DR_top_gentop = calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
@@ -269,15 +283,68 @@ void NtupleClass::Loop()
                   matched_top_constituents = hadtopdaughters[i_gentop];
               }
           }
-          //std::cout << "Top Pt, Eta, Phi: " << top->p().Pt() << " " << top->p().Eta() << " " << top->p().Phi() << std::endl;
+          // std::cout << "Top Pt, Eta, Phi: " << top->p().Pt() << " " << top->p().Eta() << " " << top->p().Phi() << std::endl;
           //std::cout << "Gen top Pt, Eta, Phi, DR: " << matched_top.Pt() << " " << matched_top.Eta() << " " << matched_top.Phi() << " " << minDR << std::endl;
 
           h_top_gentop_minDR->Fill(minDR);
-          if(minDR < 0.4) n_matched_recotops++;
+          double Dpt_top_gentop = abs(top->p().Pt() - matched_top.Pt());
+          h_top_gentop_Dpt->Fill(Dpt_top_gentop);
+          h_top_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+          
+          if(minDR <= 0.4) n_matched_recotops++;
+
+          // Compare with what comes out of the top tagger itself: 
+          const TLorentzVector* bestgentop = top->getBestGenTopMatch(0.4);
+          if(bestgentop != nullptr) n_matched_recotops_auto++;
 
           if(top->getNConstituents() == 3 )
           {
               // do stuff for trijet
+              int n_matched_constituents = 0;
+              for(const Constituent* constituent : top->getConstituents())
+              {
+                  double minDR_AK4_daughter = 999;
+                  const TLorentzVector *matched_daughter;
+
+                  for(const TLorentzVector* daughter : matched_top_constituents)
+                  {
+                      // for each AK4, check whether we find a matched daughter
+                      double DR_daughter_constituent = calcDR(daughter->Eta(), constituent->p().Eta(), daughter->Phi(), constituent->p().Phi());
+                      if(DR_daughter_constituent < minDR_AK4_daughter)
+                      {
+                          minDR_AK4_daughter = DR_daughter_constituent;
+                          matched_daughter = daughter;
+                      }
+                  }
+                  h_top_gentop_minDR_3jet_daughters->Fill(minDR_AK4_daughter);
+                  double Dpt_3jet_daughter = abs(constituent->p().Pt() - matched_daughter->Pt());
+                  h_top_gentop_Dpt_3jet_daughters->Fill( Dpt_3jet_daughter );
+                  h_top_gentop_minDR_Dpt_3jet_daughters->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+
+                  if(minDR_AK4_daughter < 0.3 && Dpt_3jet_daughter < 100)
+                  {
+                      n_matched_constituents++;
+                      //std::cout << "Found a match for this AK4 jet" << std::endl;
+                      //std::cout << "\t matched daughter pt, eta, phi: " << matched_daughter->Pt() << ", " << matched_daughter->Eta() << ", " << matched_daughter->Phi() << std::endl;
+                      //std::cout << "\t AK4 jet pt, eta, phi: " << constituent->p().Pt() << ", " << constituent->p().Eta() << ", " << constituent->p().Phi() << std::endl;
+                  }
+                  else 
+                  {
+                      //std::cout << "Did not find a match for this AK4 jet" << std::endl;
+                      //std::cout << "\t AK4 jet pt, eta, phi: " << constituent->p().Pt() << ", " << constituent->p().Eta() << ", " << constituent->p().Phi() << std::endl;
+                  }
+              }
+              std::cout << "Was able to match " << n_matched_constituents << " AK4 constituents to a genlevel top daughter" << std::endl;
+              h_top_trijet_n_matched_constituents->Fill(n_matched_constituents);
+              if(n_matched_constituents == 3)
+                  h_top_gentop_minDR_Dpt_3match->Fill(minDR, Dpt_top_gentop);
+              else if(n_matched_constituents == 2)
+                  h_top_gentop_minDR_Dpt_2match->Fill(minDR, Dpt_top_gentop);
+              else if(n_matched_constituents == 1)
+                  h_top_gentop_minDR_Dpt_1match->Fill(minDR, Dpt_top_gentop);
+              else if(n_matched_constituents == 0)
+                  h_top_gentop_minDR_Dpt_0match->Fill(minDR, Dpt_top_gentop);
+
           }
           else if(top->getNConstituents() == 2 )
           {
@@ -291,6 +358,9 @@ void NtupleClass::Loop()
 
       if(n_matched_recotops>2)
           std::cout << "Double matched a gentop!" << std::endl;
+
+      if (n_matched_recotops_auto != n_matched_recotops)
+          std::cout << "top tagger code found different number of matches" << std::endl;
 
       if(!passTrigger) continue;
       
@@ -310,5 +380,15 @@ void NtupleClass::Loop()
    h_dphi_2tops->Write();
 
    h_top_gentop_minDR->Write();
-
+   h_top_gentop_Dpt->Write();
+   h_top_gentop_minDR_Dpt->Write();
+   h_top_gentop_minDR_3jet_daughters->Write(); 
+   h_top_gentop_Dpt_3jet_daughters->Write(); 
+   h_top_gentop_minDR_Dpt_3jet_daughters->Write(); 
+   
+   h_top_trijet_n_matched_constituents->Write();
+   h_top_gentop_minDR_Dpt_3match->Write();
+   h_top_gentop_minDR_Dpt_2match->Write();
+   h_top_gentop_minDR_Dpt_1match->Write();
+   h_top_gentop_minDR_Dpt_0match->Write();
 }
