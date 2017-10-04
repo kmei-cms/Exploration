@@ -281,7 +281,7 @@ public :
    TBranch        *b_TrueNumInteractions;   //!
    TBranch        *b_Weight;   //!
 
-   NtupleClassAddTopVars(TTree *tree=0, TTree* output_tree_arg=0 );
+   NtupleClassAddTopVars(TTree *tree=0, TTree* output_tree_arg=0, bool do_skim_arg=false );
    virtual ~NtupleClassAddTopVars();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -291,13 +291,15 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    TTree* output_tree ;
+   bool    do_skim ;
 };
 
 #endif
 
 #ifdef NtupleClassAddTopVars_cxx
-NtupleClassAddTopVars::NtupleClassAddTopVars(TTree *tree, TTree* output_tree_arg ) : fChain(0) 
+NtupleClassAddTopVars::NtupleClassAddTopVars(TTree *tree, TTree* output_tree_arg, bool do_skim_arg ) : fChain(0) 
 {
+  do_skim = do_skim_arg ; 
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
