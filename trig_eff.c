@@ -52,6 +52,14 @@ void trig_eff::Loop( int max_events, bool verb )
    TH1F* h_rec_ht_njet45ge6 = new TH1F( "h_rec_ht_njet45ge6", "HT, Njet45>=6", 80, 0., 4000. ) ;
    TH1F* h_rec_ht_njet50ge6 = new TH1F( "h_rec_ht_njet50ge6", "HT, Njet50>=6", 80, 0., 4000. ) ;
 
+   TH1F* h_rec_nbtag_csv80 = new TH1F( "h_rec_nbtag_csv80", "N btag, CSV>0.80", 6, -0.5, 5.5 ) ;
+   TH1F* h_rec_nbtag_csv85 = new TH1F( "h_rec_nbtag_csv85", "N btag, CSV>0.85", 6, -0.5, 5.5 ) ;
+   TH1F* h_rec_nbtag_csv90 = new TH1F( "h_rec_nbtag_csv90", "N btag, CSV>0.90", 6, -0.5, 5.5 ) ;
+
+   TH1F* h_rec_nbtag_csv80_ht500_njet45ge6 = new TH1F( "h_rec_nbtag_csv80_ht500_njet45ge6", "N btag, CSV>0.80, HT>500, Njet45>=6", 6, -0.5, 5.5 ) ;
+   TH1F* h_rec_nbtag_csv85_ht500_njet45ge6 = new TH1F( "h_rec_nbtag_csv85_ht500_njet45ge6", "N btag, CSV>0.85, HT>500, Njet45>=6", 6, -0.5, 5.5 ) ;
+   TH1F* h_rec_nbtag_csv90_ht500_njet45ge6 = new TH1F( "h_rec_nbtag_csv90_ht500_njet45ge6", "N btag, CSV>0.90, HT>500, Njet45>=6", 6, -0.5, 5.5 ) ;
+
 
   //----------
 
@@ -59,6 +67,16 @@ void trig_eff::Loop( int max_events, bool verb )
    TH1F* h_gen_mu_pt = new TH1F( "h_gen_mu_pt", "Gen Mu pt", 90, 0., 300. ) ;
    TH1F* h_ele_pt = new TH1F( "h_ele_pt", "Electron pt", 90, 0., 300. ) ;
    TH1F* h_mu_pt = new TH1F( "h_mu_pt", "Mu pt", 90, 0., 300. ) ;
+
+   TH1F* h_gen_ele_eta24_pt = new TH1F( "h_gen_ele_eta24_pt", "Gen Electron pt, |eta|<2.4", 90, 0., 300. ) ;
+   TH1F* h_gen_mu_eta24_pt = new TH1F( "h_gen_mu_eta24_pt", "Gen Mu pt, |eta|<2.4", 90, 0., 300. ) ;
+   TH1F* h_ele_eta24_pt = new TH1F( "h_ele_eta24_pt", "Electron pt, |eta|<2.4", 90, 0., 300. ) ;
+   TH1F* h_mu_eta24_pt = new TH1F( "h_mu_eta24_pt", "Mu pt, |eta|<2.4", 90, 0., 300. ) ;
+
+   TH1F* h_gen_ele_eta = new TH1F( "h_gen_ele_eta", "Gen Electron pt", 100,-6.,6. ) ;
+   TH1F* h_gen_mu_eta = new TH1F( "h_gen_mu_eta", "Gen Mu pt", 100,-6.,6. ) ;
+   TH1F* h_ele_eta = new TH1F( "h_ele_eta", "Electron pt", 100,-6.,6. ) ;
+   TH1F* h_mu_eta = new TH1F( "h_mu_eta", "Mu pt", 100,-6.,6. ) ;
 
 
    if (fChain == 0) return;
@@ -144,12 +162,23 @@ void trig_eff::Loop( int max_events, bool verb )
                 GenParticles->at(gpi).Pz(),
                 GenParticles->at(gpi).E()
                 ) ;
+
+            printf("\n Triggers:\n") ;
+            for ( int ti=0; ti<TriggerNames->size(); ti++ ) {
+               printf("  %50s : %s\n", TriggerNames->at(ti).c_str(), (TriggerPass->at(ti)?"PASS":"fail") ) ;
+            } // ti
          } // verbose?
 
       } // gpi
 
       if ( is_sl_top_e  && first_ele_gpi >= 0 ) h_gen_ele_pt -> Fill( GenParticles->at(first_ele_gpi).Pt() ) ;
       if ( is_sl_top_mu && first_mu_gpi  >= 0 ) h_gen_mu_pt  -> Fill( GenParticles->at(first_mu_gpi).Pt() ) ;
+
+      if ( is_sl_top_e  && first_ele_gpi >= 0 && fabs( GenParticles->at(first_ele_gpi).Eta()) < 2.4 ) h_gen_ele_eta24_pt -> Fill( GenParticles->at(first_ele_gpi).Pt() ) ;
+      if ( is_sl_top_mu && first_mu_gpi  >= 0 && fabs( GenParticles->at(first_mu_gpi).Eta()) < 2.4 ) h_gen_mu_eta24_pt  -> Fill( GenParticles->at(first_mu_gpi).Pt() ) ;
+
+      if ( is_sl_top_e  && first_ele_gpi >= 0 ) h_gen_ele_eta -> Fill( GenParticles->at(first_ele_gpi).Eta() ) ;
+      if ( is_sl_top_mu && first_mu_gpi  >= 0 ) h_gen_mu_eta  -> Fill( GenParticles->at(first_mu_gpi).Eta() ) ;
 
  ///  if ( is_sl_top_e  && first_ele_gpi >= 0 && GenParticles->at(first_ele_gpi).Pt() < 1 ) {
  ///     printf("\n\n Very low pt electron.\n\n") ;
@@ -224,6 +253,20 @@ void trig_eff::Loop( int max_events, bool verb )
          h_rec_njet50 -> Fill( rec_njet_pt50 ) ;
 
 
+         int rec_nbtag_csv80(0) ;
+         int rec_nbtag_csv85(0) ;
+         int rec_nbtag_csv90(0) ;
+
+         for ( int ji=0; ji<Jets_bDiscriminatorCSV->size(); ji++ ) {
+            if ( Jets_bDiscriminatorCSV->at(ji) > 0.80 ) rec_nbtag_csv80++ ;
+            if ( Jets_bDiscriminatorCSV->at(ji) > 0.85 ) rec_nbtag_csv85++ ;
+            if ( Jets_bDiscriminatorCSV->at(ji) > 0.90 ) rec_nbtag_csv90++ ;
+         } // ji
+
+         h_rec_nbtag_csv80 -> Fill( rec_nbtag_csv80 ) ;
+         h_rec_nbtag_csv85 -> Fill( rec_nbtag_csv85 ) ;
+         h_rec_nbtag_csv90 -> Fill( rec_nbtag_csv90 ) ;
+
          if ( pfht_pt40_eta26 > 380 ) h_rec_njet32_ht380 -> Fill( rec_njet_pt32 ) ;
 
          if ( pfht_pt40_eta26 > 450 ) h_rec_njet40_ht450 -> Fill( rec_njet_pt40 ) ;
@@ -247,6 +290,12 @@ void trig_eff::Loop( int max_events, bool verb )
          if ( rec_njet_pt45 >= 6 ) h_rec_ht_njet45ge6 -> Fill( pfht_pt40_eta26 ) ;
          if ( rec_njet_pt50 >= 6 ) h_rec_ht_njet50ge6 -> Fill( pfht_pt40_eta26 ) ;
 
+         if ( rec_njet_pt45 >= 6 && pfht_pt40_eta26 > 500 ) {
+            h_rec_nbtag_csv80_ht500_njet45ge6 -> Fill( rec_nbtag_csv80 ) ;
+            h_rec_nbtag_csv85_ht500_njet45ge6 -> Fill( rec_nbtag_csv85 ) ;
+            h_rec_nbtag_csv90_ht500_njet45ge6 -> Fill( rec_nbtag_csv90 ) ;
+         }
+
       } // not is_sl_top ?
 
 
@@ -263,8 +312,12 @@ void trig_eff::Loop( int max_events, bool verb )
          if ( Electrons->size() > 0 ) {
             TLorentzVector tlv( Electrons->at(0) ) ;
             h_ele_pt -> Fill( tlv.Pt() ) ;
+            if ( fabs(tlv.Eta()) < 2.4 ) h_ele_eta24_pt -> Fill( tlv.Pt() ) ;
+            h_ele_eta -> Fill( tlv.Eta() ) ;
          } else {
             h_ele_pt -> Fill( -1. ) ;
+            h_ele_eta24_pt -> Fill( -9. ) ;
+            h_ele_eta -> Fill( -9. ) ;
          }
 
       }
@@ -276,8 +329,10 @@ void trig_eff::Loop( int max_events, bool verb )
          if ( Muons->size() > 0 ) {
             TLorentzVector tlv( Muons->at(0) ) ;
             h_mu_pt -> Fill( tlv.Pt() ) ;
+            h_mu_eta -> Fill( tlv.Eta() ) ;
          } else {
             h_mu_pt -> Fill( -1. ) ;
+            h_mu_eta -> Fill( -9. ) ;
          }
 
       }
@@ -286,6 +341,15 @@ void trig_eff::Loop( int max_events, bool verb )
 
    add_overflows_to_last_bin( h_ele_pt ) ;
    add_overflows_to_last_bin( h_mu_pt ) ;
+
+   add_overflows_to_last_bin( h_rec_nbtag_csv80 ) ;
+   add_overflows_to_last_bin( h_rec_nbtag_csv85 ) ;
+   add_overflows_to_last_bin( h_rec_nbtag_csv90 ) ;
+
+   add_overflows_to_last_bin( h_rec_nbtag_csv80_ht500_njet45ge6 ) ;
+   add_overflows_to_last_bin( h_rec_nbtag_csv85_ht500_njet45ge6 ) ;
+   add_overflows_to_last_bin( h_rec_nbtag_csv90_ht500_njet45ge6 ) ;
+
 
    printf("\n\n") ;
    gDirectory -> ls() ;
