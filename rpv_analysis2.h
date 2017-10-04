@@ -325,7 +325,7 @@ rpv_analysis2::rpv_analysis2(TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("PreSelection","");
-      chain->Add("mytest.root/PreSelection");
+      chain->Add("prod-subjets-topvars1/topvars-rpv_stop_650_t3j_uds.root/PreSelection");
       tree = chain;
 #endif // SINGLE_TREE
 
