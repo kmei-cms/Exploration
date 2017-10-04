@@ -31,6 +31,13 @@ int main(int argc, char *argv[])
        sprintf( eos_dir_name, "/store/user/soha/stealth_rpv_ntuples_subjets" ) ;
     }
 
+    bool do_skim(false) ;
+    if ( argc > 4 ) {
+       if ( strcmp( argv[4], "skim" ) == 0 ) {
+          printf("\n\n Will skim the output.\n\n") ;
+          do_skim = true ;
+       }
+    }
 
     char command[1000] ;
     sprintf( command, "eos root://cmseos.fnal.gov ls %s > eos-files.txt", eos_dir_name ) ;
@@ -74,7 +81,7 @@ int main(int argc, char *argv[])
 
     TTree* output_tree = ch -> CloneTree( 0 ) ;
     
-    NtupleClassAddTopVars t = NtupleClassAddTopVars( ch, output_tree );
+    NtupleClassAddTopVars t = NtupleClassAddTopVars( ch, output_tree, do_skim );
     t.Loop();
 
 
