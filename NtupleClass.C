@@ -4,6 +4,7 @@
 #include <TH2D.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <TEfficiency.h>
 #include <iostream>
 
 //manditory includes to use top tagger
@@ -68,18 +69,58 @@ void NtupleClass::Loop()
    TH1D *h_ntops  = new TH1D("ntops","ntops", 5, 0, 5);
    TH1D *h_ntops_baseline  = new TH1D("ntops_baseline","ntops_baseline", 5, 0, 5);
    TH1D *h_dphi_2tops  = new TH1D("dphi_2tops","dphi_2tops", 40, -4, 4);
+
+   TH2D *h_gentop_pT_daughterDR = new TH2D("h_gentop_pT_daughterDR","h_gentop_pT_daughterDR",50,0,1000,60,0,3);
+   TH1D *h_gentop_pT = new TH1D("h_gentop_pT","h_gentop_pT",50,0,1000);
+   TH1D *h_gentop_pT_type1 = new TH1D("h_gentop_pT_type1","h_gentop_pT_type1",50,0,1000);
+   TH1D *h_gentop_pT_type2 = new TH1D("h_gentop_pT_type2","h_gentop_pT_type2",50,0,1000);
+   TH1D *h_gentop_pT_type3 = new TH1D("h_gentop_pT_type3","h_gentop_pT_type3",50,0,1000);
+
    TH1D *h_top_gentop_minDR = new TH1D("h_top_gentop_minDR","h_top_gentop_minDR", 60, 0, 3);
-   TH1D *h_top_gentop_Dpt = new TH1D("h_top_gentop_Dpt","h_top_gentop_Dpt", 60, 0, 300);
-   TH2D *h_top_gentop_minDR_Dpt = new TH2D("h_top_gentop_minDR_Dpt", "h_top_gentop_minDR_Dpt", 60, 0, 3, 60, 0, 300);
+   TH1D *h_top_gentop_Dpt = new TH1D("h_top_gentop_Dpt","h_top_gentop_Dpt", 50, 0, 5);
+   TH2D *h_top_gentop_minDR_Dpt = new TH2D("h_top_gentop_minDR_Dpt", "h_top_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
    TH1D *h_top_gentop_minDR_3jet_daughters = new TH1D("h_top_gentop_minDR_3jet_daughters", "h_top_gentop_minDR_3jet_daughters", 60, 0, 3); 
-   TH1D *h_top_gentop_Dpt_3jet_daughters = new TH1D("h_top_gentop_Dpt_3jet_daughters", "h_top_gentop_Dpt_3jet_daughters", 60, 0, 300); 
-   TH2D *h_top_gentop_minDR_Dpt_3jet_daughters = new TH2D("h_top_gentop_minDR_Dpt_3jet_daughters", "h_top_gentop_minDR_Dpt_3jet_daughters", 60, 0, 3, 60, 0, 300); 
+   TH1D *h_top_gentop_Dpt_3jet_daughters = new TH1D("h_top_gentop_Dpt_3jet_daughters", "h_top_gentop_Dpt_3jet_daughters", 50, 0, 5); 
+   TH2D *h_top_gentop_minDR_Dpt_3jet_daughters = new TH2D("h_top_gentop_minDR_Dpt_3jet_daughters", "h_top_gentop_minDR_Dpt_3jet_daughters", 60, 0, 3, 50, 0, 5); 
+   TH1D *h_top_gentop_topmatch_minDR_3jet_daughters = new TH1D("h_top_gentop_topmatch_minDR_3jet_daughters", "h_top_gentop_topmatch_minDR_3jet_daughters", 60, 0, 3); 
+   TH1D *h_top_gentop_topmatch_Dpt_3jet_daughters = new TH1D("h_top_gentop_topmatch_Dpt_3jet_daughters", "h_top_gentop_topmatch_Dpt_3jet_daughters", 50, 0, 5); 
+   TH2D *h_top_gentop_topmatch_minDR_Dpt_3jet_daughters = new TH2D("h_top_gentop_topmatch_minDR_Dpt_3jet_daughters", "h_top_gentop_topmatch_minDR_Dpt_3jet_daughters", 60, 0, 3, 50, 0, 5); 
 
    TH1D *h_top_trijet_n_matched_constituents = new TH1D("h_top_trijet_n_matched_constituents", "h_top_trijet_n_matched_constituents", 4, -0.5, 3.5);
-   TH2D *h_top_gentop_minDR_Dpt_3match = new TH2D("h_top_gentop_minDR_Dpt_3match", "h_top_gentop_minDR_Dpt_3match", 60, 0, 3, 60, 0, 300);
-   TH2D *h_top_gentop_minDR_Dpt_2match = new TH2D("h_top_gentop_minDR_Dpt_2match", "h_top_gentop_minDR_Dpt_2match", 60, 0, 3, 60, 0, 300);
-   TH2D *h_top_gentop_minDR_Dpt_1match = new TH2D("h_top_gentop_minDR_Dpt_1match", "h_top_gentop_minDR_Dpt_1match", 60, 0, 3, 60, 0, 300);
-   TH2D *h_top_gentop_minDR_Dpt_0match = new TH2D("h_top_gentop_minDR_Dpt_0match", "h_top_gentop_minDR_Dpt_0match", 60, 0, 3, 60, 0, 300);
+   TH2D *h_top_gentop_minDR_Dpt_anymatch = new TH2D("h_top_gentop_minDR_Dpt_anymatch", "h_top_gentop_minDR_Dpt_anymatch", 60, 0, 3, 50, 0, 5);
+   TH2D *h_top_gentop_minDR_Dpt_3match = new TH2D("h_top_gentop_minDR_Dpt_3match", "h_top_gentop_minDR_Dpt_3match", 60, 0, 3, 50, 0, 5);
+   TH2D *h_top_gentop_minDR_Dpt_2match = new TH2D("h_top_gentop_minDR_Dpt_2match", "h_top_gentop_minDR_Dpt_2match", 60, 0, 3, 50, 0, 5);
+   TH2D *h_top_gentop_minDR_Dpt_1match = new TH2D("h_top_gentop_minDR_Dpt_1match", "h_top_gentop_minDR_Dpt_1match", 60, 0, 3, 50, 0, 5);
+   TH2D *h_top_gentop_minDR_Dpt_0match = new TH2D("h_top_gentop_minDR_Dpt_0match", "h_top_gentop_minDR_Dpt_0match", 60, 0, 3, 50, 0, 5);
+
+   TH1D *h_top_gentop_discr_anymatch = new TH1D("h_top_gentop_discr_anymatch", "h_top_gentop_discr_anymatch", 40, 0.8, 1);
+   TH1D *h_top_gentop_discr_3match = new TH1D("h_top_gentop_discr_3match", "h_top_gentop_discr_3match", 40, 0.8, 1);
+   TH1D *h_top_gentop_discr_2match = new TH1D("h_top_gentop_discr_2match", "h_top_gentop_discr_2match", 40, 0.8, 1);
+   TH1D *h_top_gentop_discr_1match = new TH1D("h_top_gentop_discr_1match", "h_top_gentop_discr_1match", 40, 0.8, 1);
+   TH1D *h_top_gentop_discr_0match = new TH1D("h_top_gentop_discr_0match", "h_top_gentop_discr_0match", 40, 0.8, 1);
+
+   TH1D *h_top_gentop_discr_anymatch_topmatch = new TH1D("h_top_gentop_discr_anymatch_topmatch", "h_top_gentop_discr_anymatch_topmatch", 40, 0.8, 1);
+   TH1D *h_top_gentop_discr_3match_topmatch = new TH1D("h_top_gentop_discr_3match_topmatch", "h_top_gentop_discr_3match_topmatch", 40, 0.8, 1);
+   TH1D *h_top_gentop_discr_2match_topmatch = new TH1D("h_top_gentop_discr_2match_topmatch", "h_top_gentop_discr_2match_topmatch", 40, 0.8, 1);
+   TH1D *h_top_gentop_discr_1match_topmatch = new TH1D("h_top_gentop_discr_1match_topmatch", "h_top_gentop_discr_1match_topmatch", 40, 0.8, 1);
+   TH1D *h_top_gentop_discr_0match_topmatch = new TH1D("h_top_gentop_discr_0match_topmatch", "h_top_gentop_discr_0match_topmatch", 40, 0.8, 1);
+
+   TH1D *h_gentop_top_minDR     = new TH1D("h_gentop_top_minDR",     "h_gentop_top_minDR", 60, 0, 3);
+   TH1D *h_gentop_top_Dpt       = new TH1D("h_gentop_top_Dpt",       "h_gentop_top_Dpt", 50, 0, 5);
+   TH2D *h_gentop_top_minDR_Dpt = new TH2D("h_gentop_top_minDR_Dpt", "h_gentop_top_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+
+   TH1D *h_top_type1_matched_nsub = new TH1D("h_top_type1_matched_nsub","h_top_type1_matched_nsub",50,0,1);
+   TH1D *h_top_type1_unmatched_nsub = new TH1D("h_top_type1_unmatched_nsub","h_top_type1_unmatched_nsub",50,0,1);
+   TH1D *h_top_type1_matched_softdrop = new TH1D("h_top_type1_matched_softdrop","h_top_type1_matched_softdrop",60,0,300);
+   TH1D *h_top_type1_unmatched_softdrop = new TH1D("h_top_type1_unmatched_softdrop","h_top_type1_unmatched_softdrop",60,0,300);
+
+   TEfficiency* toptag_eff = new TEfficiency("toptag_eff","Top tagging efficiency;gentop p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_eff_type1 = new TEfficiency("toptag_eff_type1","Top tagging efficiency;type1 gentop p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_eff_type2 = new TEfficiency("toptag_eff_type2","Top tagging efficiency;type2 gentop p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_eff_type3 = new TEfficiency("toptag_eff_type3","Top tagging efficiency;type3 gentop p_T;#epsilon",10,0,1000);
+
+   TEfficiency* event_sel = new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",7,0,7);
+   TEfficiency* event_sel_total = new TEfficiency("event_sel_total","Total event selection efficiency;Cut;#epsilon",7,0,7);
 
    TopTagger tt;
    tt.setCfgFile("TopTagger.cfg");
@@ -97,10 +138,12 @@ void NtupleClass::Loop()
       myHisto->Fill(NJets);
       
       // check for number of hadronic tops
-      int hadWs = 0;
+      int nhadWs = 0;
       std::vector<TLorentzVector> hadtops;
+      std::vector<TLorentzVector> hadWs;
       std::vector<int> hadtops_idx;
       std::vector<std::vector<const TLorentzVector*> > hadtopdaughters;
+      std::vector<int> hadtoptype;
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
       {
           int pdgid = abs( GenParticles_PdgId->at(gpi) ) ;
@@ -111,7 +154,7 @@ void NtupleClass::Loop()
           if(status == 23 && momid == 24 && pdgid < 6)
           {
               // Should be the quarks from W decay
-              hadWs++;
+              nhadWs++;
               // find the top
               int Wmotherid = GenParticles_ParentId->at(momidx);
               if (abs(Wmotherid) == 6){
@@ -129,6 +172,7 @@ void NtupleClass::Loop()
                       // not yet found
                       hadtops_idx.push_back(Wmotheridx);
                       hadtops.push_back(GenParticles->at(Wmotheridx));
+                      hadWs.push_back(GenParticles->at(momidx));
                       std::vector<const TLorentzVector*> daughters;
                       daughters.push_back(&(GenParticles->at(gpi)));
                       hadtopdaughters.push_back(daughters);
@@ -165,6 +209,38 @@ void NtupleClass::Loop()
           }
       }
 
+      // Figure out whether the gentop is more similar to a monojet, dijet or trijet reco top
+      // Monojet criterion: pT>400, DR(daughter,top)<0.8
+      for (int igentop=0; igentop<hadtops.size(); igentop++ )
+      {
+          double maxDR_gentop_daughter = 0;
+          for(int idaughter=0; idaughter<hadtopdaughters[igentop].size(); idaughter++)
+          {
+              double DR_gentop_daughter = calcDR(hadtops[igentop].Eta(), hadtopdaughters[igentop][idaughter]->Eta(), hadtops[igentop].Phi(), hadtopdaughters[igentop][idaughter]->Phi());
+              if(DR_gentop_daughter>maxDR_gentop_daughter && hadtopdaughters[igentop][idaughter]->Pt()/hadtops[igentop].Pt() > 0.1)
+                  maxDR_gentop_daughter = DR_gentop_daughter;
+          }
+          h_gentop_pT_daughterDR->Fill(hadtops[igentop].Pt(), maxDR_gentop_daughter);
+          
+          h_gentop_pT->Fill(hadtops[igentop].Pt());
+          // fully merged case
+          if (hadtops[igentop].Pt() > 450 && maxDR_gentop_daughter < 0.8)
+          {
+              hadtoptype.push_back(1);
+              h_gentop_pT_type1->Fill(hadtops[igentop].Pt());
+          }
+          else if (hadWs[igentop].Pt() > 250) // merged W case
+          {
+              hadtoptype.push_back(2);
+              h_gentop_pT_type2->Fill(hadtops[igentop].Pt());
+          }
+          else // assume everything else would be a resolved top
+          {
+              hadtoptype.push_back(3);
+              h_gentop_pT_type3->Fill(hadtops[igentop].Pt());
+          }
+      }
+
       bool verbose = false;
       if (verbose)
       {
@@ -179,18 +255,30 @@ void NtupleClass::Loop()
       }
 
       // Only keep events with two hadronic top decays
-      if (hadWs != 4) continue;  
+      if (nhadWs != 4) continue;  
 
       // Check whether event would pass the trigger requirement
       bool passTrigger = true;
-      int rec_njet_pt40(0) ;
+      int rec_njet_pt45(0) ;
+      int rec_njet_pt20(0) ;
+      int rec_njet_pt45_btag(0) ;
+      double HT_pt40 = 0.0;
       for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
           TLorentzVector jlv( Jets->at(rji) ) ;
-          if ( jlv.Pt() > 40 ) rec_njet_pt40++ ;
+          if (abs(jlv.Eta()) > 2.4) continue;
+          if ( jlv.Pt() > 20 ) 
+              rec_njet_pt20++;
+          if (jlv.Pt() > 40)
+              HT_pt40 += jlv.Pt();
+          if ( jlv.Pt() > 45 ) 
+          {
+              rec_njet_pt45++ ;
+              if ( Jets_bDiscriminatorCSV->at(rji) > 0.8484) 
+                  rec_njet_pt45_btag++;
+          }
       } 
-      if ( !( HT>450 && rec_njet_pt40>=6 ) ) 
+      if ( !( HT_pt40<050 && rec_njet_pt45>=6 ) ) 
           passTrigger = false;
-
 
       // --- TOP TAGGER ---
       
@@ -264,6 +352,41 @@ void NtupleClass::Loop()
           
       }
 
+      // Fill event selection efficiencies
+      event_sel_total->Fill(HT_pt40>500,0);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 ,1);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 ,2);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 ,3);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 ,4);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag && tops.size()>1 ,5);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag && tops.size()>1 && rec_njet_pt20>=8 ,6);
+      
+      event_sel->Fill(HT_pt40>500,0);
+      if(HT_pt40>500)
+      {
+          event_sel->Fill(rec_njet_pt45>=6,1);
+          if (rec_njet_pt45>=6)
+          {
+              event_sel->Fill(rec_njet_pt45_btag>0,2);
+              if (rec_njet_pt45_btag>0)
+              {
+                  event_sel->Fill(tops.size()>0,3);
+                  if (tops.size()>0)
+                  {
+                      event_sel->Fill(rec_njet_pt45_btag>1,4);
+                      if (rec_njet_pt45_btag>1)
+                      {
+                          event_sel->Fill(tops.size()>1,5);
+                          if (tops.size()>1)
+                          {
+                              event_sel->Fill(rec_njet_pt20>=8,6);
+                          }
+                      }
+                  }
+              }
+          }
+      }
+
       // --- Gen matching ---
       int n_matched_recotops = 0;
       int n_matched_recotops_auto = 0;
@@ -287,7 +410,7 @@ void NtupleClass::Loop()
           //std::cout << "Gen top Pt, Eta, Phi, DR: " << matched_top.Pt() << " " << matched_top.Eta() << " " << matched_top.Phi() << " " << minDR << std::endl;
 
           h_top_gentop_minDR->Fill(minDR);
-          double Dpt_top_gentop = abs(top->p().Pt() - matched_top.Pt());
+          double Dpt_top_gentop = abs(top->p().Pt() - matched_top.Pt())/top->p().Pt();
           h_top_gentop_Dpt->Fill(Dpt_top_gentop);
           h_top_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
           
@@ -317,11 +440,17 @@ void NtupleClass::Loop()
                       }
                   }
                   h_top_gentop_minDR_3jet_daughters->Fill(minDR_AK4_daughter);
-                  double Dpt_3jet_daughter = abs(constituent->p().Pt() - matched_daughter->Pt());
+                  double Dpt_3jet_daughter = abs(constituent->p().Pt() - matched_daughter->Pt())/constituent->p().Pt();
                   h_top_gentop_Dpt_3jet_daughters->Fill( Dpt_3jet_daughter );
                   h_top_gentop_minDR_Dpt_3jet_daughters->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                  if(minDR<0.4)
+                  {
+                      h_top_gentop_topmatch_minDR_3jet_daughters->Fill(minDR_AK4_daughter);
+                      h_top_gentop_topmatch_Dpt_3jet_daughters->Fill( Dpt_3jet_daughter );
+                      h_top_gentop_topmatch_minDR_Dpt_3jet_daughters->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                  }
 
-                  if(minDR_AK4_daughter < 0.3 && Dpt_3jet_daughter < 100)
+                  if(minDR_AK4_daughter < 0.3 && Dpt_3jet_daughter < 0.5)
                   {
                       n_matched_constituents++;
                       //std::cout << "Found a match for this AK4 jet" << std::endl;
@@ -334,17 +463,41 @@ void NtupleClass::Loop()
                       //std::cout << "\t AK4 jet pt, eta, phi: " << constituent->p().Pt() << ", " << constituent->p().Eta() << ", " << constituent->p().Phi() << std::endl;
                   }
               }
-              std::cout << "Was able to match " << n_matched_constituents << " AK4 constituents to a genlevel top daughter" << std::endl;
+              //std::cout << "Was able to match " << n_matched_constituents << " AK4 constituents to a genlevel top daughter" << std::endl;
               h_top_trijet_n_matched_constituents->Fill(n_matched_constituents);
-              if(n_matched_constituents == 3)
-                  h_top_gentop_minDR_Dpt_3match->Fill(minDR, Dpt_top_gentop);
-              else if(n_matched_constituents == 2)
-                  h_top_gentop_minDR_Dpt_2match->Fill(minDR, Dpt_top_gentop);
-              else if(n_matched_constituents == 1)
-                  h_top_gentop_minDR_Dpt_1match->Fill(minDR, Dpt_top_gentop);
-              else if(n_matched_constituents == 0)
-                  h_top_gentop_minDR_Dpt_0match->Fill(minDR, Dpt_top_gentop);
+              h_top_gentop_minDR_Dpt_anymatch->Fill(minDR, Dpt_top_gentop);
+              h_top_gentop_discr_anymatch->Fill(top->getDiscriminator());
+              if(minDR<0.4)
+                  h_top_gentop_discr_anymatch_topmatch->Fill(top->getDiscriminator());
 
+              if(n_matched_constituents == 3)
+              {
+                  h_top_gentop_minDR_Dpt_3match->Fill(minDR, Dpt_top_gentop);
+                  h_top_gentop_discr_3match->Fill(top->getDiscriminator());
+                  if(minDR<0.4)
+                      h_top_gentop_discr_3match_topmatch->Fill(top->getDiscriminator());
+              }
+              else if(n_matched_constituents == 2)
+              {
+                  h_top_gentop_minDR_Dpt_2match->Fill(minDR, Dpt_top_gentop);
+                  h_top_gentop_discr_2match->Fill(top->getDiscriminator());
+                  if(minDR<0.4)
+                      h_top_gentop_discr_2match_topmatch->Fill(top->getDiscriminator());
+              }
+              else if(n_matched_constituents == 1)
+              {
+                  h_top_gentop_minDR_Dpt_1match->Fill(minDR, Dpt_top_gentop);
+                  h_top_gentop_discr_1match->Fill(top->getDiscriminator());
+                  if(minDR<0.4)
+                      h_top_gentop_discr_1match_topmatch->Fill(top->getDiscriminator());
+              }
+              else if(n_matched_constituents == 0)
+              {
+                  h_top_gentop_minDR_Dpt_0match->Fill(minDR, Dpt_top_gentop);
+                  h_top_gentop_discr_0match->Fill(top->getDiscriminator());
+                  if(minDR<0.4)
+                      h_top_gentop_discr_0match_topmatch->Fill(top->getDiscriminator());
+              }
           }
           else if(top->getNConstituents() == 2 )
           {
@@ -352,7 +505,23 @@ void NtupleClass::Loop()
           }
           else if(top->getNConstituents() == 1 )
           {
+              Constituent const *thistop = top->getConstituents()[0];
               // do stuff for monojet
+              // check mindr, dpt/pt, nsubjettiness
+              //TLorentzVector matched_top;
+              //std::vector<const TLorentzVector*> matched_top_constituents;
+              //double minDR = 999;
+              // need to look at the AK4s that were removed as well. 
+              if (minDR<0.4 && Dpt_top_gentop < 0.5)
+              {
+                  h_top_type1_matched_nsub->Fill(thistop->getTau3()/thistop->getTau2());
+                  h_top_type1_matched_softdrop->Fill(thistop->getSoftDropMass());
+              } 
+              else 
+              {
+                  h_top_type1_unmatched_nsub->Fill(thistop->getTau3()/thistop->getTau2());
+                  h_top_type1_unmatched_softdrop->Fill(thistop->getSoftDropMass());
+              }
           }
       }
 
@@ -361,6 +530,50 @@ void NtupleClass::Loop()
 
       if (n_matched_recotops_auto != n_matched_recotops)
           std::cout << "top tagger code found different number of matches" << std::endl;
+
+
+      // How often is a gentop actually reconstructed as a final reco top
+      for (int i_gentop=0; i_gentop<hadtops.size(); ++i_gentop)
+      {
+          //std::cout << "Gen top Pt, Eta, Phi: " << hadtops[i_gentop].Pt() << " " << hadtops[i_gentop].Eta() << " " << hadtops[i_gentop].Phi()  << std::endl;
+
+          const TopObject* matched_top;
+          double minDR = 999;
+          for (const TopObject* top : tops)
+          {
+              double DR_top_gentop = calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
+              if (DR_top_gentop < minDR)
+              {
+                  minDR = DR_top_gentop;
+                  matched_top = top;
+              }          
+          }
+          if (minDR < 999)
+          {
+              //std::cout << "For this gentop, the closest reco top is at DR= " << minDR << " and has pT, eta, phi of: " << matched_top->p().Pt() << " " << matched_top->p().Eta() << " " << matched_top->p().Phi() << std::endl;
+              double Dpt_gentop_top = abs(hadtops[i_gentop].Pt() - matched_top->p().Pt())/hadtops[i_gentop].Pt();
+              h_gentop_top_minDR->Fill(minDR);
+              h_gentop_top_Dpt->Fill(Dpt_gentop_top);
+              h_gentop_top_minDR_Dpt->Fill(minDR,Dpt_gentop_top);
+
+              // Call it a match if dR<0.4 and dPT/PT < 0.5
+              toptag_eff->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+              if (hadtoptype[i_gentop] == 1)
+                  toptag_eff_type1->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+              else if (hadtoptype[i_gentop] == 2)
+                  toptag_eff_type2->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+              else if (hadtoptype[i_gentop] == 3)
+                  toptag_eff_type3->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+                  
+          }
+          else
+          {
+              //std::cout << "No reco top found" << std::endl;
+          }
+
+      }
+      
+
 
       if(!passTrigger) continue;
       
@@ -371,6 +584,9 @@ void NtupleClass::Loop()
           h_dphi_2tops->Fill(calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()));
       }
 
+
+
+
       
    }
 
@@ -378,6 +594,9 @@ void NtupleClass::Loop()
    h_ntops->Write();
    h_ntops_baseline->Write();
    h_dphi_2tops->Write();
+
+   h_gentop_pT_daughterDR->Write();
+
 
    h_top_gentop_minDR->Write();
    h_top_gentop_Dpt->Write();
@@ -387,8 +606,43 @@ void NtupleClass::Loop()
    h_top_gentop_minDR_Dpt_3jet_daughters->Write(); 
    
    h_top_trijet_n_matched_constituents->Write();
+   h_top_gentop_minDR_Dpt_anymatch->Write();
    h_top_gentop_minDR_Dpt_3match->Write();
    h_top_gentop_minDR_Dpt_2match->Write();
    h_top_gentop_minDR_Dpt_1match->Write();
    h_top_gentop_minDR_Dpt_0match->Write();
+
+   h_top_gentop_discr_anymatch->Write();
+   h_top_gentop_discr_3match->Write();
+   h_top_gentop_discr_2match->Write();
+   h_top_gentop_discr_1match->Write();
+   h_top_gentop_discr_0match->Write();
+
+   h_top_gentop_discr_anymatch_topmatch->Write();
+   h_top_gentop_discr_3match_topmatch->Write();
+   h_top_gentop_discr_2match_topmatch->Write();
+   h_top_gentop_discr_1match_topmatch->Write();
+   h_top_gentop_discr_0match_topmatch->Write();
+
+   h_top_type1_matched_nsub->Write();
+   h_top_type1_unmatched_nsub->Write();
+   h_top_type1_matched_softdrop->Write();
+   h_top_type1_unmatched_softdrop->Write();
+
+   h_gentop_top_minDR->Write();
+   h_gentop_top_Dpt->Write();
+   h_gentop_top_minDR_Dpt->Write();
+
+   h_gentop_pT->Write();
+   h_gentop_pT_type1->Write();
+   h_gentop_pT_type2->Write();
+   h_gentop_pT_type3->Write();
+
+   std::cout << "Top tagging efficiency: " << toptag_eff->GetEfficiency(6) << std::endl; 
+   toptag_eff->Write();
+   toptag_eff_type1->Write();
+   toptag_eff_type2->Write();
+   toptag_eff_type3->Write();
+   event_sel->Write();
+   event_sel_total->Write();
 }
