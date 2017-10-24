@@ -64,12 +64,17 @@ void NtupleClass::Loop()
 
    Long64_t nbytes = 0, nb = 0;
 
+   // -----------------------
    // make some histograms
+   // -----------------------
    TH1D *myHisto  = new TH1D("njets","njets", 20, 0, 20);
    TH1D *h_ntops  = new TH1D("ntops","ntops", 5, 0, 5);
    TH1D *h_ntops_baseline  = new TH1D("ntops_baseline","ntops_baseline", 5, 0, 5);
    TH1D *h_dphi_2tops  = new TH1D("dphi_2tops","dphi_2tops", 40, -4, 4);
 
+   // -----------------------
+   // Histograms without event selection (only presence of 2 hadronic gen tops
+   // -----------------------
    TH2D *h_gentop_pT_daughterDR = new TH2D("h_gentop_pT_daughterDR","h_gentop_pT_daughterDR",50,0,1000,60,0,3);
    TH1D *h_gentop_pT = new TH1D("h_gentop_pT","h_gentop_pT",50,0,1000);
    TH1D *h_gentop_pT_type1 = new TH1D("h_gentop_pT_type1","h_gentop_pT_type1",50,0,1000);
@@ -119,6 +124,60 @@ void NtupleClass::Loop()
    TEfficiency* toptag_eff_type2 = new TEfficiency("toptag_eff_type2","Top tagging efficiency;type2 gentop p_T;#epsilon",10,0,1000);
    TEfficiency* toptag_eff_type3 = new TEfficiency("toptag_eff_type3","Top tagging efficiency;type3 gentop p_T;#epsilon",10,0,1000);
 
+   // -----------------------
+   // Histograms after baseline event selection
+   // -----------------------
+   TH2D *h_baseline_gentop_pT_daughterDR = new TH2D("h_baseline_gentop_pT_daughterDR","h_baseline_gentop_pT_daughterDR",50,0,1000,60,0,3);
+   TH1D *h_baseline_gentop_pT = new TH1D("h_baseline_gentop_pT","h_baseline_gentop_pT",50,0,1000);
+   TH1D *h_baseline_gentop_pT_type1 = new TH1D("h_baseline_gentop_pT_type1","h_baseline_gentop_pT_type1",50,0,1000);
+   TH1D *h_baseline_gentop_pT_type2 = new TH1D("h_baseline_gentop_pT_type2","h_baseline_gentop_pT_type2",50,0,1000);
+   TH1D *h_baseline_gentop_pT_type3 = new TH1D("h_baseline_gentop_pT_type3","h_baseline_gentop_pT_type3",50,0,1000);
+
+   TH1D *h_baseline_top_gentop_minDR = new TH1D("h_baseline_top_gentop_minDR","h_baseline_top_gentop_minDR", 60, 0, 3);
+   TH1D *h_baseline_top_gentop_Dpt = new TH1D("h_baseline_top_gentop_Dpt","h_baseline_top_gentop_Dpt", 50, 0, 5);
+   TH2D *h_baseline_top_gentop_minDR_Dpt = new TH2D("h_baseline_top_gentop_minDR_Dpt", "h_baseline_top_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+   TH1D *h_baseline_top_gentop_minDR_3jet_daughters = new TH1D("h_baseline_top_gentop_minDR_3jet_daughters", "h_baseline_top_gentop_minDR_3jet_daughters", 60, 0, 3); 
+   TH1D *h_baseline_top_gentop_Dpt_3jet_daughters = new TH1D("h_baseline_top_gentop_Dpt_3jet_daughters", "h_baseline_top_gentop_Dpt_3jet_daughters", 50, 0, 5); 
+   TH2D *h_baseline_top_gentop_minDR_Dpt_3jet_daughters = new TH2D("h_baseline_top_gentop_minDR_Dpt_3jet_daughters", "h_baseline_top_gentop_minDR_Dpt_3jet_daughters", 60, 0, 3, 50, 0, 5); 
+   TH1D *h_baseline_top_gentop_topmatch_minDR_3jet_daughters = new TH1D("h_baseline_top_gentop_topmatch_minDR_3jet_daughters", "h_baseline_top_gentop_topmatch_minDR_3jet_daughters", 60, 0, 3); 
+   TH1D *h_baseline_top_gentop_topmatch_Dpt_3jet_daughters = new TH1D("h_baseline_top_gentop_topmatch_Dpt_3jet_daughters", "h_baseline_top_gentop_topmatch_Dpt_3jet_daughters", 50, 0, 5); 
+   TH2D *h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters = new TH2D("h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters", "h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters", 60, 0, 3, 50, 0, 5); 
+
+   TH1D *h_baseline_top_trijet_n_matched_constituents = new TH1D("h_baseline_top_trijet_n_matched_constituents", "h_baseline_top_trijet_n_matched_constituents", 4, -0.5, 3.5);
+   TH2D *h_baseline_top_gentop_minDR_Dpt_anymatch = new TH2D("h_baseline_top_gentop_minDR_Dpt_anymatch", "h_baseline_top_gentop_minDR_Dpt_anymatch", 60, 0, 3, 50, 0, 5);
+   TH2D *h_baseline_top_gentop_minDR_Dpt_3match = new TH2D("h_baseline_top_gentop_minDR_Dpt_3match", "h_baseline_top_gentop_minDR_Dpt_3match", 60, 0, 3, 50, 0, 5);
+   TH2D *h_baseline_top_gentop_minDR_Dpt_2match = new TH2D("h_baseline_top_gentop_minDR_Dpt_2match", "h_baseline_top_gentop_minDR_Dpt_2match", 60, 0, 3, 50, 0, 5);
+   TH2D *h_baseline_top_gentop_minDR_Dpt_1match = new TH2D("h_baseline_top_gentop_minDR_Dpt_1match", "h_baseline_top_gentop_minDR_Dpt_1match", 60, 0, 3, 50, 0, 5);
+   TH2D *h_baseline_top_gentop_minDR_Dpt_0match = new TH2D("h_baseline_top_gentop_minDR_Dpt_0match", "h_baseline_top_gentop_minDR_Dpt_0match", 60, 0, 3, 50, 0, 5);
+
+   TH1D *h_baseline_top_gentop_discr_anymatch = new TH1D("h_baseline_top_gentop_discr_anymatch", "h_baseline_top_gentop_discr_anymatch", 40, 0.8, 1);
+   TH1D *h_baseline_top_gentop_discr_3match = new TH1D("h_baseline_top_gentop_discr_3match", "h_baseline_top_gentop_discr_3match", 40, 0.8, 1);
+   TH1D *h_baseline_top_gentop_discr_2match = new TH1D("h_baseline_top_gentop_discr_2match", "h_baseline_top_gentop_discr_2match", 40, 0.8, 1);
+   TH1D *h_baseline_top_gentop_discr_1match = new TH1D("h_baseline_top_gentop_discr_1match", "h_baseline_top_gentop_discr_1match", 40, 0.8, 1);
+   TH1D *h_baseline_top_gentop_discr_0match = new TH1D("h_baseline_top_gentop_discr_0match", "h_baseline_top_gentop_discr_0match", 40, 0.8, 1);
+
+   TH1D *h_baseline_top_gentop_discr_anymatch_topmatch = new TH1D("h_baseline_top_gentop_discr_anymatch_topmatch", "h_baseline_top_gentop_discr_anymatch_topmatch", 40, 0.8, 1);
+   TH1D *h_baseline_top_gentop_discr_3match_topmatch = new TH1D("h_baseline_top_gentop_discr_3match_topmatch", "h_baseline_top_gentop_discr_3match_topmatch", 40, 0.8, 1);
+   TH1D *h_baseline_top_gentop_discr_2match_topmatch = new TH1D("h_baseline_top_gentop_discr_2match_topmatch", "h_baseline_top_gentop_discr_2match_topmatch", 40, 0.8, 1);
+   TH1D *h_baseline_top_gentop_discr_1match_topmatch = new TH1D("h_baseline_top_gentop_discr_1match_topmatch", "h_baseline_top_gentop_discr_1match_topmatch", 40, 0.8, 1);
+   TH1D *h_baseline_top_gentop_discr_0match_topmatch = new TH1D("h_baseline_top_gentop_discr_0match_topmatch", "h_baseline_top_gentop_discr_0match_topmatch", 40, 0.8, 1);
+
+   TH1D *h_baseline_gentop_top_minDR     = new TH1D("h_baseline_gentop_top_minDR",     "h_baseline_gentop_top_minDR", 60, 0, 3);
+   TH1D *h_baseline_gentop_top_Dpt       = new TH1D("h_baseline_gentop_top_Dpt",       "h_baseline_gentop_top_Dpt", 50, 0, 5);
+   TH2D *h_baseline_gentop_top_minDR_Dpt = new TH2D("h_baseline_gentop_top_minDR_Dpt", "h_baseline_gentop_top_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+
+   TH1D *h_baseline_top_type1_matched_nsub = new TH1D("h_baseline_top_type1_matched_nsub","h_baseline_top_type1_matched_nsub",50,0,1);
+   TH1D *h_baseline_top_type1_unmatched_nsub = new TH1D("h_baseline_top_type1_unmatched_nsub","h_baseline_top_type1_unmatched_nsub",50,0,1);
+   TH1D *h_baseline_top_type1_matched_softdrop = new TH1D("h_baseline_top_type1_matched_softdrop","h_baseline_top_type1_matched_softdrop",60,0,300);
+   TH1D *h_baseline_top_type1_unmatched_softdrop = new TH1D("h_baseline_top_type1_unmatched_softdrop","h_baseline_top_type1_unmatched_softdrop",60,0,300);
+
+   TEfficiency* toptag_eff_baseline = new TEfficiency("toptag_eff_baseline","Top tagging efficiency;gentop p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_eff_type1_baseline = new TEfficiency("toptag_eff_type1_baseline","Top tagging efficiency;type1 gentop p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_eff_type2_baseline = new TEfficiency("toptag_eff_type2_baseline","Top tagging efficiency;type2 gentop p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_eff_type3_baseline = new TEfficiency("toptag_eff_type3_baseline","Top tagging efficiency;type3 gentop p_T;#epsilon",10,0,1000);
+
+
+   // Cut flows
    TEfficiency* event_sel = new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",7,0,7);
    TEfficiency* event_sel_total = new TEfficiency("event_sel_total","Total event selection efficiency;Cut;#epsilon",7,0,7);
 
@@ -136,14 +195,15 @@ void NtupleClass::Loop()
       if ( jentry % (nentries/10) == 0 ) printf("  Event %9llu / %9llu  (%2.0f%%)\n", jentry, nentries, 100*(jentry*1.)/(nentries*1.) ) ;
 
       myHisto->Fill(NJets);
-      
-      // check for number of hadronic tops
+
+      // -----------------
+      // check for number of hadronic tops at gen level
+      // -----------------
       int nhadWs = 0;
       std::vector<TLorentzVector> hadtops;
       std::vector<TLorentzVector> hadWs;
       std::vector<int> hadtops_idx;
       std::vector<std::vector<const TLorentzVector*> > hadtopdaughters;
-      std::vector<int> hadtoptype;
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
       {
           int pdgid = abs( GenParticles_PdgId->at(gpi) ) ;
@@ -209,8 +269,25 @@ void NtupleClass::Loop()
           }
       }
 
+      bool verbose = false;
+      if (verbose)
+      {
+          for (int ht=0; ht<hadtops.size(); ++ht){
+              std::cout << "Hadtop index = " << hadtops_idx[ht] << std::endl;
+              std::cout << "       daughters: ";
+              for (int htd=0; htd<hadtopdaughters[ht].size(); ++htd){
+                  std::cout << (*hadtopdaughters[ht][htd]).Pt() << " " ;
+              }
+              std::cout << std::endl;
+          }
+      }
+
+      // Only keep events with two hadronic top decays
+      if (nhadWs != 4) continue;  
+
       // Figure out whether the gentop is more similar to a monojet, dijet or trijet reco top
       // Monojet criterion: pT>400, DR(daughter,top)<0.8
+      std::vector<int> hadtoptype;
       for (int igentop=0; igentop<hadtops.size(); igentop++ )
       {
           double maxDR_gentop_daughter = 0;
@@ -241,46 +318,9 @@ void NtupleClass::Loop()
           }
       }
 
-      bool verbose = false;
-      if (verbose)
-      {
-          for (int ht=0; ht<hadtops.size(); ++ht){
-              std::cout << "Hadtop index = " << hadtops_idx[ht] << std::endl;
-              std::cout << "       daughters: ";
-              for (int htd=0; htd<hadtopdaughters[ht].size(); ++htd){
-                  std::cout << (*hadtopdaughters[ht][htd]).Pt() << " " ;
-              }
-              std::cout << std::endl;
-          }
-      }
-
-      // Only keep events with two hadronic top decays
-      if (nhadWs != 4) continue;  
-
-      // Check whether event would pass the trigger requirement
-      bool passTrigger = true;
-      int rec_njet_pt45(0) ;
-      int rec_njet_pt20(0) ;
-      int rec_njet_pt45_btag(0) ;
-      double HT_pt40 = 0.0;
-      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
-          TLorentzVector jlv( Jets->at(rji) ) ;
-          if (abs(jlv.Eta()) > 2.4) continue;
-          if ( jlv.Pt() > 20 ) 
-              rec_njet_pt20++;
-          if (jlv.Pt() > 40)
-              HT_pt40 += jlv.Pt();
-          if ( jlv.Pt() > 45 ) 
-          {
-              rec_njet_pt45++ ;
-              if ( Jets_bDiscriminatorCSV->at(rji) > 0.8484) 
-                  rec_njet_pt45_btag++;
-          }
-      } 
-      if ( !( HT_pt40<050 && rec_njet_pt45>=6 ) ) 
-          passTrigger = false;
-
+      // ------------------
       // --- TOP TAGGER ---
+      // ------------------
       
       // Use helper function to create input list 
       // Create AK4 inputs object
@@ -352,6 +392,38 @@ void NtupleClass::Loop()
           
       }
 
+
+      // -------------------------------
+      // -- Basic event selection stuff
+      // -------------------------------
+
+      // Check whether event would pass the trigger requirement
+      bool passTrigger = true;
+      int rec_njet_pt45(0) ;
+      int rec_njet_pt20(0) ;
+      int rec_njet_pt45_btag(0) ;
+      double HT_pt40 = 0.0;
+      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+          TLorentzVector jlv( Jets->at(rji) ) ;
+          if (abs(jlv.Eta()) > 2.4) continue;
+          if ( jlv.Pt() > 20 ) 
+              rec_njet_pt20++;
+          if (jlv.Pt() > 40)
+              HT_pt40 += jlv.Pt();
+          if ( jlv.Pt() > 45 ) 
+          {
+              rec_njet_pt45++ ;
+              if ( Jets_bDiscriminatorCSV->at(rji) > 0.8484) 
+                  rec_njet_pt45_btag++;
+          }
+      } 
+      if ( !( HT_pt40>500 && rec_njet_pt45>=6 ) ) 
+          passTrigger = false;
+
+      bool passBaseline = HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>1 && tops.size()>1;
+
+
+
       // Fill event selection efficiencies
       event_sel_total->Fill(HT_pt40>500,0);
       event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 ,1);
@@ -387,6 +459,11 @@ void NtupleClass::Loop()
           }
       }
 
+
+      // ----------------------------------
+      // -- Study top tagger performance --
+      // ----------------------------------
+
       // --- Gen matching ---
       int n_matched_recotops = 0;
       int n_matched_recotops_auto = 0;
@@ -409,11 +486,16 @@ void NtupleClass::Loop()
           // std::cout << "Top Pt, Eta, Phi: " << top->p().Pt() << " " << top->p().Eta() << " " << top->p().Phi() << std::endl;
           //std::cout << "Gen top Pt, Eta, Phi, DR: " << matched_top.Pt() << " " << matched_top.Eta() << " " << matched_top.Phi() << " " << minDR << std::endl;
 
-          h_top_gentop_minDR->Fill(minDR);
           double Dpt_top_gentop = abs(top->p().Pt() - matched_top.Pt())/top->p().Pt();
+          h_top_gentop_minDR->Fill(minDR);
           h_top_gentop_Dpt->Fill(Dpt_top_gentop);
           h_top_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
-          
+          if(passBaseline)
+          {
+              h_baseline_top_gentop_minDR->Fill(minDR);
+              h_baseline_top_gentop_Dpt->Fill(Dpt_top_gentop);
+              h_baseline_top_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+          }
           if(minDR <= 0.4) n_matched_recotops++;
 
           // Compare with what comes out of the top tagger itself: 
@@ -439,15 +521,27 @@ void NtupleClass::Loop()
                           matched_daughter = daughter;
                       }
                   }
-                  h_top_gentop_minDR_3jet_daughters->Fill(minDR_AK4_daughter);
                   double Dpt_3jet_daughter = abs(constituent->p().Pt() - matched_daughter->Pt())/constituent->p().Pt();
+                  h_top_gentop_minDR_3jet_daughters->Fill(minDR_AK4_daughter);
                   h_top_gentop_Dpt_3jet_daughters->Fill( Dpt_3jet_daughter );
                   h_top_gentop_minDR_Dpt_3jet_daughters->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                  if(passBaseline)
+                  {
+                      h_baseline_top_gentop_minDR_3jet_daughters->Fill(minDR_AK4_daughter);
+                      h_baseline_top_gentop_Dpt_3jet_daughters->Fill( Dpt_3jet_daughter );
+                      h_baseline_top_gentop_minDR_Dpt_3jet_daughters->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );                      
+                  }
                   if(minDR<0.4)
                   {
                       h_top_gentop_topmatch_minDR_3jet_daughters->Fill(minDR_AK4_daughter);
                       h_top_gentop_topmatch_Dpt_3jet_daughters->Fill( Dpt_3jet_daughter );
                       h_top_gentop_topmatch_minDR_Dpt_3jet_daughters->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                      if(passBaseline)
+                      {
+                          h_baseline_top_gentop_topmatch_minDR_3jet_daughters->Fill(minDR_AK4_daughter);
+                          h_baseline_top_gentop_topmatch_Dpt_3jet_daughters->Fill( Dpt_3jet_daughter );
+                          h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                      }
                   }
 
                   if(minDR_AK4_daughter < 0.3 && Dpt_3jet_daughter < 0.5)
@@ -467,9 +561,18 @@ void NtupleClass::Loop()
               h_top_trijet_n_matched_constituents->Fill(n_matched_constituents);
               h_top_gentop_minDR_Dpt_anymatch->Fill(minDR, Dpt_top_gentop);
               h_top_gentop_discr_anymatch->Fill(top->getDiscriminator());
+              if(passBaseline)
+              {
+                  h_baseline_top_trijet_n_matched_constituents->Fill(n_matched_constituents);
+                  h_baseline_top_gentop_minDR_Dpt_anymatch->Fill(minDR, Dpt_top_gentop);
+                  h_baseline_top_gentop_discr_anymatch->Fill(top->getDiscriminator());
+              }
               if(minDR<0.4)
+              {
                   h_top_gentop_discr_anymatch_topmatch->Fill(top->getDiscriminator());
-
+                  if(passBaseline)
+                      h_baseline_top_gentop_discr_anymatch_topmatch->Fill(top->getDiscriminator());
+              }
               if(n_matched_constituents == 3)
               {
                   h_top_gentop_minDR_Dpt_3match->Fill(minDR, Dpt_top_gentop);
@@ -498,6 +601,38 @@ void NtupleClass::Loop()
                   if(minDR<0.4)
                       h_top_gentop_discr_0match_topmatch->Fill(top->getDiscriminator());
               }
+              if(passBaseline)
+              {
+                  if(n_matched_constituents == 3)
+                  {
+                      h_baseline_top_gentop_minDR_Dpt_3match->Fill(minDR, Dpt_top_gentop);
+                      h_baseline_top_gentop_discr_3match->Fill(top->getDiscriminator());
+                      if(minDR<0.4)
+                          h_baseline_top_gentop_discr_3match_topmatch->Fill(top->getDiscriminator());
+                  }
+                  else if(n_matched_constituents == 2)
+                  {
+                      h_baseline_top_gentop_minDR_Dpt_2match->Fill(minDR, Dpt_top_gentop);
+                      h_baseline_top_gentop_discr_2match->Fill(top->getDiscriminator());
+                      if(minDR<0.4)
+                          h_baseline_top_gentop_discr_2match_topmatch->Fill(top->getDiscriminator());
+                  }
+                  else if(n_matched_constituents == 1)
+                  {
+                      h_baseline_top_gentop_minDR_Dpt_1match->Fill(minDR, Dpt_top_gentop);
+                      h_baseline_top_gentop_discr_1match->Fill(top->getDiscriminator());
+                      if(minDR<0.4)
+                          h_baseline_top_gentop_discr_1match_topmatch->Fill(top->getDiscriminator());
+                  }
+                  else if(n_matched_constituents == 0)
+                  {
+                      h_baseline_top_gentop_minDR_Dpt_0match->Fill(minDR, Dpt_top_gentop);
+                      h_baseline_top_gentop_discr_0match->Fill(top->getDiscriminator());
+                      if(minDR<0.4)
+                          h_baseline_top_gentop_discr_0match_topmatch->Fill(top->getDiscriminator());
+                  }
+                  
+              }
           }
           else if(top->getNConstituents() == 2 )
           {
@@ -522,14 +657,27 @@ void NtupleClass::Loop()
                   h_top_type1_unmatched_nsub->Fill(thistop->getTau3()/thistop->getTau2());
                   h_top_type1_unmatched_softdrop->Fill(thistop->getSoftDropMass());
               }
+              if (passBaseline)
+              {
+                  if (minDR<0.4 && Dpt_top_gentop < 0.5)
+                  {
+                      h_baseline_top_type1_matched_nsub->Fill(thistop->getTau3()/thistop->getTau2());
+                      h_baseline_top_type1_matched_softdrop->Fill(thistop->getSoftDropMass());
+                  } 
+                  else 
+                  {
+                      h_baseline_top_type1_unmatched_nsub->Fill(thistop->getTau3()/thistop->getTau2());
+                      h_baseline_top_type1_unmatched_softdrop->Fill(thistop->getSoftDropMass());
+                  }                  
+              }
           }
       }
 
       if(n_matched_recotops>2)
           std::cout << "Double matched a gentop!" << std::endl;
 
-      if (n_matched_recotops_auto != n_matched_recotops)
-          std::cout << "top tagger code found different number of matches" << std::endl;
+      //if (n_matched_recotops_auto != n_matched_recotops)
+      //    std::cout << "top tagger code found different number of matches" << std::endl;
 
 
       // How often is a gentop actually reconstructed as a final reco top
@@ -564,7 +712,22 @@ void NtupleClass::Loop()
                   toptag_eff_type2->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
               else if (hadtoptype[i_gentop] == 3)
                   toptag_eff_type3->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+
+              if(passBaseline)
+              {
+                  h_baseline_gentop_top_minDR->Fill(minDR);
+                  h_baseline_gentop_top_Dpt->Fill(Dpt_gentop_top);
+                  h_baseline_gentop_top_minDR_Dpt->Fill(minDR,Dpt_gentop_top);
                   
+                  // Call it a match if dR<0.4 and dPT/PT < 0.5
+                  toptag_eff_baseline->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+                  if (hadtoptype[i_gentop] == 1)
+                      toptag_eff_type1_baseline->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+                  else if (hadtoptype[i_gentop] == 2)
+                      toptag_eff_type2_baseline->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+                  else if (hadtoptype[i_gentop] == 3)
+                      toptag_eff_type3_baseline->Fill( (minDR < 0.4 && Dpt_gentop_top < 0.5) , hadtops[i_gentop].Pt());
+              }
           }
           else
           {
@@ -575,7 +738,7 @@ void NtupleClass::Loop()
       
 
 
-      if(!passTrigger) continue;
+      if(!passBaseline) continue;
       
       h_ntops_baseline->Fill(tops.size());
       
@@ -596,7 +759,6 @@ void NtupleClass::Loop()
    h_dphi_2tops->Write();
 
    h_gentop_pT_daughterDR->Write();
-
 
    h_top_gentop_minDR->Write();
    h_top_gentop_Dpt->Write();
@@ -638,11 +800,61 @@ void NtupleClass::Loop()
    h_gentop_pT_type2->Write();
    h_gentop_pT_type3->Write();
 
+
+   h_baseline_gentop_pT_daughterDR->Write();
+
+   h_baseline_top_gentop_minDR->Write();
+   h_baseline_top_gentop_Dpt->Write();
+   h_baseline_top_gentop_minDR_Dpt->Write();
+   h_baseline_top_gentop_minDR_3jet_daughters->Write(); 
+   h_baseline_top_gentop_Dpt_3jet_daughters->Write(); 
+   h_baseline_top_gentop_minDR_Dpt_3jet_daughters->Write(); 
+   
+   h_baseline_top_trijet_n_matched_constituents->Write();
+   h_baseline_top_gentop_minDR_Dpt_anymatch->Write();
+   h_baseline_top_gentop_minDR_Dpt_3match->Write();
+   h_baseline_top_gentop_minDR_Dpt_2match->Write();
+   h_baseline_top_gentop_minDR_Dpt_1match->Write();
+   h_baseline_top_gentop_minDR_Dpt_0match->Write();
+
+   h_baseline_top_gentop_discr_anymatch->Write();
+   h_baseline_top_gentop_discr_3match->Write();
+   h_baseline_top_gentop_discr_2match->Write();
+   h_baseline_top_gentop_discr_1match->Write();
+   h_baseline_top_gentop_discr_0match->Write();
+
+   h_baseline_top_gentop_discr_anymatch_topmatch->Write();
+   h_baseline_top_gentop_discr_3match_topmatch->Write();
+   h_baseline_top_gentop_discr_2match_topmatch->Write();
+   h_baseline_top_gentop_discr_1match_topmatch->Write();
+   h_baseline_top_gentop_discr_0match_topmatch->Write();
+
+   h_baseline_top_type1_matched_nsub->Write();
+   h_baseline_top_type1_unmatched_nsub->Write();
+   h_baseline_top_type1_matched_softdrop->Write();
+   h_baseline_top_type1_unmatched_softdrop->Write();
+
+   h_baseline_gentop_top_minDR->Write();
+   h_baseline_gentop_top_Dpt->Write();
+   h_baseline_gentop_top_minDR_Dpt->Write();
+  
+   h_baseline_gentop_pT->Write();
+   h_baseline_gentop_pT_type1->Write();
+   h_baseline_gentop_pT_type2->Write();
+   h_baseline_gentop_pT_type3->Write();
+
+
    std::cout << "Top tagging efficiency: " << toptag_eff->GetEfficiency(6) << std::endl; 
    toptag_eff->Write();
    toptag_eff_type1->Write();
    toptag_eff_type2->Write();
    toptag_eff_type3->Write();
+
+   toptag_eff_baseline->Write();
+   toptag_eff_type1_baseline->Write();
+   toptag_eff_type2_baseline->Write();
+   toptag_eff_type3_baseline->Write();
+
    event_sel->Write();
    event_sel_total->Write();
 }
