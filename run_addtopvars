@@ -1,6 +1,6 @@
 
-   set target_dir = "/uscms_data/d1/owenl/stealth-rpv/prod-subjets-topvars1"
-   set source_dir = "/store/user/soha/stealth_rpv_ntuples_subjets"
+   set target_dir = "/uscms_data/d1/owenl/stealth-rpv/prod-subjets-topvars2"
+   set source_dir = "/store/user/soha/stealth_rpv_ntuples_triginfo"
 
    mkdir -p $target_dir
    mkdir -p $target_dir/logs

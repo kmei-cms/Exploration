@@ -757,7 +757,8 @@ rpv_analysis1::rpv_analysis1(TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("TreeMaker2/PreSelection","");
-      chain->Add("prod-v3/merged-rpv_stop_350_t3j_uds.root/TreeMaker2/PreSelection");
+      //chain->Add("prod-v3/merged-rpv_stop_350_t3j_uds.root/TreeMaker2/PreSelection");
+      chain->Add("prod-subjets/merged-rpv_stop_350_t3j_uds.root/TreeMaker2/PreSelection");
       tree = chain;
 #endif // SINGLE_TREE
 

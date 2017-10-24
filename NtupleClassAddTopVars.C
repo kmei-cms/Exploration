@@ -49,6 +49,10 @@ void NtupleClassAddTopVars::Loop()
 
 
 
+   TH1F* h_njets_pt45_eta24 = new TH1F( "h_njets_pt45", "Njets, pt>45, |eta|<2.4", 11, -0.5, 10.5 ) ;
+   TH1F* h_pfht_pt40_eta24 = new TH1F( "h_pfht_pt40_eta24", "PF HT, jet pt>40, |eta|<2.4", 100, 0., 4000. ) ;
+   TH1F* h_nbtag_csv50 = new TH1F( "h_nbtag_csv50", "Nbtag, CSV>0.50", 6, -0.5, 5.5 ) ;
+
 
 
 
@@ -56,6 +60,8 @@ void NtupleClassAddTopVars::Loop()
    Long64_t nentries = fChain->GetEntries();
 
    Long64_t nbytes = 0, nb = 0;
+
+   Long64_t nsave(0) ;
 
 
    TopTagger tt;
@@ -79,6 +85,36 @@ void NtupleClassAddTopVars::Loop()
       }
 
       if ( verbose ) printf("\n\n =========== number %9llu : Run %9u , Lumi %9u , Event %9llu\n", jentry, RunNum, LumiBlockNum, EvtNum ) ;
+
+
+
+      int rec_njet_pt45(0) ;
+      float pfht_pt40_eta24(0.) ;
+      int nbtag_csv50(0) ;
+
+      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+
+            TLorentzVector jlv( Jets->at(rji) ) ;
+
+            if ( jlv.Pt() > 45 && fabs(jlv.Eta())<2.4 ) rec_njet_pt45++ ;
+            if ( jlv.Pt() > 40 && fabs(jlv.Eta())<2.4 ) pfht_pt40_eta24 += jlv.Pt() ;
+            if ( Jets_bDiscriminatorCSV->at(rji) > 0.50 ) nbtag_csv50++ ;
+
+      } // rji
+
+      h_njets_pt45_eta24 -> Fill( rec_njet_pt45 ) ;
+      h_pfht_pt40_eta24 -> Fill( pfht_pt40_eta24 ) ;
+      h_nbtag_csv50 -> Fill( nbtag_csv50 ) ;
+
+
+      if ( do_skim ) {
+         if ( rec_njet_pt45 < 5 ) continue ;
+         if ( pfht_pt40_eta24 < 450 ) continue ;
+         if ( nbtag_csv50 < 1 ) continue ;
+      }
+
+      nsave++ ;
+
 
 
       // Try to get the hadronic tops in the event
@@ -262,6 +298,12 @@ void NtupleClassAddTopVars::Loop()
       
       
    } // jentry
+
+   if ( do_skim ) {
+
+      printf("\n\n  Saved %lld / %lld (%.6f) in skimmed output.\n\n", nsave, nentries, (1.*nsave)/(1.*nentries) ) ;
+
+   }
 
    output_tree -> AutoSave() ;
 
