@@ -68,8 +68,15 @@ void NtupleClass::Loop()
    // make some histograms
    // -----------------------
    TH1D *myHisto  = new TH1D("njets","njets", 20, 0, 20);
-   TH1D *h_ntops  = new TH1D("ntops","ntops", 5, 0, 5);
-   TH1D *h_ntops_baseline  = new TH1D("ntops_baseline","ntops_baseline", 5, 0, 5);
+   TH1D *h_ntops  = new TH1D("h_ntops","h_ntops", 5, 0, 5);
+   TH1D *h_ntops_3jet  = new TH1D("h_ntops_3jet","h_ntops_3jet", 5, 0, 5);
+   TH1D *h_ntops_2jet  = new TH1D("h_ntops_2jet","h_ntops_2jet", 5, 0, 5);
+   TH1D *h_ntops_1jet  = new TH1D("h_ntops_1jet","h_ntops_1jet", 5, 0, 5);
+   TH1D *h_baseline_ntops  = new TH1D("h_baseline_ntops","h_baseline_ntops", 5, 0, 5);
+   TH1D *h_baseline_ntops_3jet  = new TH1D("h_baseline_ntops_3jet","h_baseline_ntops_3jet", 5, 0, 5);
+   TH1D *h_baseline_ntops_2jet  = new TH1D("h_baseline_ntops_2jet","h_baseline_ntops_2jet", 5, 0, 5);
+   TH1D *h_baseline_ntops_1jet  = new TH1D("h_baseline_ntops_1jet","h_baseline_ntops_1jet", 5, 0, 5);
+
    TH1D *h_dphi_2tops  = new TH1D("dphi_2tops","dphi_2tops", 40, -4, 4);
 
    // -----------------------
@@ -84,6 +91,17 @@ void NtupleClass::Loop()
    TH1D *h_top_gentop_minDR = new TH1D("h_top_gentop_minDR","h_top_gentop_minDR", 60, 0, 3);
    TH1D *h_top_gentop_Dpt = new TH1D("h_top_gentop_Dpt","h_top_gentop_Dpt", 50, 0, 5);
    TH2D *h_top_gentop_minDR_Dpt = new TH2D("h_top_gentop_minDR_Dpt", "h_top_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+
+   TH1D *h_top_3jet_gentop_minDR = new TH1D("h_top_3jet_gentop_minDR","h_top_3jet_gentop_minDR", 60, 0, 3);
+   TH1D *h_top_3jet_gentop_Dpt = new TH1D("h_top_3jet_gentop_Dpt","h_top_3jet_gentop_Dpt", 50, 0, 5);
+   TH2D *h_top_3jet_gentop_minDR_Dpt = new TH2D("h_top_3jet_gentop_minDR_Dpt", "h_top_3jet_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+   TH1D *h_top_2jet_gentop_minDR = new TH1D("h_top_2jet_gentop_minDR","h_top_2jet_gentop_minDR", 60, 0, 3);
+   TH1D *h_top_2jet_gentop_Dpt = new TH1D("h_top_2jet_gentop_Dpt","h_top_2jet_gentop_Dpt", 50, 0, 5);
+   TH2D *h_top_2jet_gentop_minDR_Dpt = new TH2D("h_top_2jet_gentop_minDR_Dpt", "h_top_2jet_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+   TH1D *h_top_1jet_gentop_minDR = new TH1D("h_top_1jet_gentop_minDR","h_top_1jet_gentop_minDR", 60, 0, 3);
+   TH1D *h_top_1jet_gentop_Dpt = new TH1D("h_top_1jet_gentop_Dpt","h_top_1jet_gentop_Dpt", 50, 0, 5);
+   TH2D *h_top_1jet_gentop_minDR_Dpt = new TH2D("h_top_1jet_gentop_minDR_Dpt", "h_top_1jet_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+
    TH1D *h_top_gentop_minDR_3jet_daughters = new TH1D("h_top_gentop_minDR_3jet_daughters", "h_top_gentop_minDR_3jet_daughters", 60, 0, 3); 
    TH1D *h_top_gentop_Dpt_3jet_daughters = new TH1D("h_top_gentop_Dpt_3jet_daughters", "h_top_gentop_Dpt_3jet_daughters", 50, 0, 5); 
    TH2D *h_top_gentop_minDR_Dpt_3jet_daughters = new TH2D("h_top_gentop_minDR_Dpt_3jet_daughters", "h_top_gentop_minDR_Dpt_3jet_daughters", 60, 0, 3, 50, 0, 5); 
@@ -136,6 +154,17 @@ void NtupleClass::Loop()
    TH1D *h_baseline_top_gentop_minDR = new TH1D("h_baseline_top_gentop_minDR","h_baseline_top_gentop_minDR", 60, 0, 3);
    TH1D *h_baseline_top_gentop_Dpt = new TH1D("h_baseline_top_gentop_Dpt","h_baseline_top_gentop_Dpt", 50, 0, 5);
    TH2D *h_baseline_top_gentop_minDR_Dpt = new TH2D("h_baseline_top_gentop_minDR_Dpt", "h_baseline_top_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+
+   TH1D *h_baseline_top_3jet_gentop_minDR = new TH1D("h_baseline_top_3jet_gentop_minDR","h_baseline_top_3jet_gentop_minDR", 60, 0, 3);
+   TH1D *h_baseline_top_3jet_gentop_Dpt = new TH1D("h_baseline_top_3jet_gentop_Dpt","h_baseline_top_3jet_gentop_Dpt", 50, 0, 5);
+   TH2D *h_baseline_top_3jet_gentop_minDR_Dpt = new TH2D("h_baseline_top_3jet_gentop_minDR_Dpt", "h_baseline_top_3jet_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+   TH1D *h_baseline_top_2jet_gentop_minDR = new TH1D("h_baseline_top_2jet_gentop_minDR","h_baseline_top_2jet_gentop_minDR", 60, 0, 3);
+   TH1D *h_baseline_top_2jet_gentop_Dpt = new TH1D("h_baseline_top_2jet_gentop_Dpt","h_baseline_top_2jet_gentop_Dpt", 50, 0, 5);
+   TH2D *h_baseline_top_2jet_gentop_minDR_Dpt = new TH2D("h_baseline_top_2jet_gentop_minDR_Dpt", "h_baseline_top_2jet_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+   TH1D *h_baseline_top_1jet_gentop_minDR = new TH1D("h_baseline_top_1jet_gentop_minDR","h_baseline_top_1jet_gentop_minDR", 60, 0, 3);
+   TH1D *h_baseline_top_1jet_gentop_Dpt = new TH1D("h_baseline_top_1jet_gentop_Dpt","h_baseline_top_1jet_gentop_Dpt", 50, 0, 5);
+   TH2D *h_baseline_top_1jet_gentop_minDR_Dpt = new TH2D("h_baseline_top_1jet_gentop_minDR_Dpt", "h_baseline_top_1jet_gentop_minDR_Dpt", 60, 0, 3, 50, 0, 5);
+
    TH1D *h_baseline_top_gentop_minDR_3jet_daughters = new TH1D("h_baseline_top_gentop_minDR_3jet_daughters", "h_baseline_top_gentop_minDR_3jet_daughters", 60, 0, 3); 
    TH1D *h_baseline_top_gentop_Dpt_3jet_daughters = new TH1D("h_baseline_top_gentop_Dpt_3jet_daughters", "h_baseline_top_gentop_Dpt_3jet_daughters", 50, 0, 5); 
    TH2D *h_baseline_top_gentop_minDR_Dpt_3jet_daughters = new TH2D("h_baseline_top_gentop_minDR_Dpt_3jet_daughters", "h_baseline_top_gentop_minDR_Dpt_3jet_daughters", 60, 0, 3, 50, 0, 5); 
@@ -422,6 +451,37 @@ void NtupleClass::Loop()
 
       bool passBaseline = HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>1 && tops.size()>1;
 
+      if(passBaseline)
+      {
+          for (int igentop=0; igentop<hadtops.size(); igentop++ )
+          {
+              double maxDR_gentop_daughter = 0;
+              for(int idaughter=0; idaughter<hadtopdaughters[igentop].size(); idaughter++)
+              {
+                  double DR_gentop_daughter = calcDR(hadtops[igentop].Eta(), hadtopdaughters[igentop][idaughter]->Eta(), hadtops[igentop].Phi(), hadtopdaughters[igentop][idaughter]->Phi());
+                  if(DR_gentop_daughter>maxDR_gentop_daughter && hadtopdaughters[igentop][idaughter]->Pt()/hadtops[igentop].Pt() > 0.1)
+                      maxDR_gentop_daughter = DR_gentop_daughter;
+              }
+              h_baseline_gentop_pT_daughterDR->Fill(hadtops[igentop].Pt(), maxDR_gentop_daughter);
+              
+              h_baseline_gentop_pT->Fill(hadtops[igentop].Pt());
+              // fully merged case
+              if (hadtops[igentop].Pt() > 450 && maxDR_gentop_daughter < 0.8)
+              {
+                  h_baseline_gentop_pT_type1->Fill(hadtops[igentop].Pt());
+              }
+              else if (hadWs[igentop].Pt() > 250) // merged W case
+              {
+                  h_baseline_gentop_pT_type2->Fill(hadtops[igentop].Pt());
+              }
+              else // assume everything else would be a resolved top
+              {
+                  h_baseline_gentop_pT_type3->Fill(hadtops[igentop].Pt());
+              }
+          }
+
+      }
+
 
 
       // Fill event selection efficiencies
@@ -467,6 +527,9 @@ void NtupleClass::Loop()
       // --- Gen matching ---
       int n_matched_recotops = 0;
       int n_matched_recotops_auto = 0;
+      int ntops_3jet=0;
+      int ntops_2jet=0;
+      int ntops_1jet=0;
       // How often does a tagged top match with genlevel?
       for (const TopObject* top : tops)
       {
@@ -504,7 +567,12 @@ void NtupleClass::Loop()
 
           if(top->getNConstituents() == 3 )
           {
+              ntops_3jet++;
               // do stuff for trijet
+              h_top_3jet_gentop_minDR->Fill(minDR);
+              h_top_3jet_gentop_Dpt->Fill(Dpt_top_gentop);
+              h_top_3jet_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+
               int n_matched_constituents = 0;
               for(const Constituent* constituent : top->getConstituents())
               {
@@ -563,6 +631,10 @@ void NtupleClass::Loop()
               h_top_gentop_discr_anymatch->Fill(top->getDiscriminator());
               if(passBaseline)
               {
+                  h_baseline_top_3jet_gentop_minDR->Fill(minDR);
+                  h_baseline_top_3jet_gentop_Dpt->Fill(Dpt_top_gentop);
+                  h_baseline_top_3jet_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+
                   h_baseline_top_trijet_n_matched_constituents->Fill(n_matched_constituents);
                   h_baseline_top_gentop_minDR_Dpt_anymatch->Fill(minDR, Dpt_top_gentop);
                   h_baseline_top_gentop_discr_anymatch->Fill(top->getDiscriminator());
@@ -636,10 +708,31 @@ void NtupleClass::Loop()
           }
           else if(top->getNConstituents() == 2 )
           {
+              ntops_2jet++;
               // do stuff for dijet
+              h_top_2jet_gentop_minDR->Fill(minDR);
+              h_top_2jet_gentop_Dpt->Fill(Dpt_top_gentop);
+              h_top_2jet_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+              if(passBaseline)
+              {
+                  h_baseline_top_2jet_gentop_minDR->Fill(minDR);
+                  h_baseline_top_2jet_gentop_Dpt->Fill(Dpt_top_gentop);
+                  h_baseline_top_2jet_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+              }
           }
           else if(top->getNConstituents() == 1 )
           {
+              ntops_1jet++;
+              h_top_1jet_gentop_minDR->Fill(minDR);
+              h_top_1jet_gentop_Dpt->Fill(Dpt_top_gentop);
+              h_top_1jet_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+              if(passBaseline)
+              {
+                  h_baseline_top_1jet_gentop_minDR->Fill(minDR);
+                  h_baseline_top_1jet_gentop_Dpt->Fill(Dpt_top_gentop);
+                  h_baseline_top_1jet_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+              }
+
               Constituent const *thistop = top->getConstituents()[0];
               // do stuff for monojet
               // check mindr, dpt/pt, nsubjettiness
@@ -672,7 +765,9 @@ void NtupleClass::Loop()
               }
           }
       }
-
+      h_ntops_3jet->Fill(ntops_3jet);
+      h_ntops_2jet->Fill(ntops_2jet);
+      h_ntops_1jet->Fill(ntops_1jet);
       if(n_matched_recotops>2)
           std::cout << "Double matched a gentop!" << std::endl;
 
@@ -740,7 +835,10 @@ void NtupleClass::Loop()
 
       if(!passBaseline) continue;
       
-      h_ntops_baseline->Fill(tops.size());
+      h_baseline_ntops->Fill(tops.size());
+      h_baseline_ntops_3jet->Fill(ntops_3jet);
+      h_baseline_ntops_2jet->Fill(ntops_2jet);
+      h_baseline_ntops_1jet->Fill(ntops_1jet);
       
       if (tops.size() == 2)
       {
@@ -755,7 +853,13 @@ void NtupleClass::Loop()
 
    myHisto->Write();
    h_ntops->Write();
-   h_ntops_baseline->Write();
+   h_ntops_3jet->Write();
+   h_ntops_2jet->Write();
+   h_ntops_1jet->Write();
+   h_baseline_ntops->Write();
+   h_baseline_ntops_3jet->Write();
+   h_baseline_ntops_2jet->Write();
+   h_baseline_ntops_1jet->Write();
    h_dphi_2tops->Write();
 
    h_gentop_pT_daughterDR->Write();
@@ -763,6 +867,17 @@ void NtupleClass::Loop()
    h_top_gentop_minDR->Write();
    h_top_gentop_Dpt->Write();
    h_top_gentop_minDR_Dpt->Write();
+
+   h_top_3jet_gentop_minDR->Write();
+   h_top_3jet_gentop_Dpt->Write();
+   h_top_3jet_gentop_minDR_Dpt->Write();
+   h_top_2jet_gentop_minDR->Write();
+   h_top_2jet_gentop_Dpt->Write();
+   h_top_2jet_gentop_minDR_Dpt->Write();
+   h_top_1jet_gentop_minDR->Write();
+   h_top_1jet_gentop_Dpt->Write();
+   h_top_1jet_gentop_minDR_Dpt->Write();
+
    h_top_gentop_minDR_3jet_daughters->Write(); 
    h_top_gentop_Dpt_3jet_daughters->Write(); 
    h_top_gentop_minDR_Dpt_3jet_daughters->Write(); 
@@ -806,6 +921,18 @@ void NtupleClass::Loop()
    h_baseline_top_gentop_minDR->Write();
    h_baseline_top_gentop_Dpt->Write();
    h_baseline_top_gentop_minDR_Dpt->Write();
+
+   h_baseline_top_3jet_gentop_minDR->Write();
+   h_baseline_top_3jet_gentop_Dpt->Write();
+   h_baseline_top_3jet_gentop_minDR_Dpt->Write();
+   h_baseline_top_2jet_gentop_minDR->Write();
+   h_baseline_top_2jet_gentop_Dpt->Write();
+   h_baseline_top_2jet_gentop_minDR_Dpt->Write();
+   h_baseline_top_1jet_gentop_minDR->Write();
+   h_baseline_top_1jet_gentop_Dpt->Write();
+   h_baseline_top_1jet_gentop_minDR_Dpt->Write();
+
+
    h_baseline_top_gentop_minDR_3jet_daughters->Write(); 
    h_baseline_top_gentop_Dpt_3jet_daughters->Write(); 
    h_baseline_top_gentop_minDR_Dpt_3jet_daughters->Write(); 
