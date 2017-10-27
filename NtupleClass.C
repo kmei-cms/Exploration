@@ -7,7 +7,7 @@
 #include <TEfficiency.h>
 #include <iostream>
 
-//manditory includes to use top tagger
+//mandatory includes to use top tagger
 #include "TopTagger/TopTagger/include/TopTagger.h"
 #include "TopTagger/TopTagger/include/TopTaggerResults.h"
 #include "TopTagger/TopTagger/include/TopTaggerUtilities.h"
@@ -205,6 +205,11 @@ void NtupleClass::Loop()
    TEfficiency* toptag_eff_type2_baseline = new TEfficiency("toptag_eff_type2_baseline","Top tagging efficiency;type2 gentop p_T;#epsilon",10,0,1000);
    TEfficiency* toptag_eff_type3_baseline = new TEfficiency("toptag_eff_type3_baseline","Top tagging efficiency;type3 gentop p_T;#epsilon",10,0,1000);
 
+   TEfficiency* toptag_fakerate_baseline = new TEfficiency("toptag_fakerate_baseline","Top tagging fake rate;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_fakerate = new TEfficiency("toptag_fakerate","Top tagging fake rate;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_chitagrate = new TEfficiency("toptag_chitagrate","Tagged top fraction that matches a neutralino;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_chitagrate_baseline = new TEfficiency("toptag_chitagrate_baseline","Tagged top fraction that matches a neutralino;reco top p_T;#epsilon",10,0,1000);
+
 
    // Cut flows
    TEfficiency* event_sel = new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",7,0,7);
@@ -233,13 +238,17 @@ void NtupleClass::Loop()
       std::vector<TLorentzVector> hadWs;
       std::vector<int> hadtops_idx;
       std::vector<std::vector<const TLorentzVector*> > hadtopdaughters;
+      std::vector<TLorentzVector> neutralinos;
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
       {
           int pdgid = abs( GenParticles_PdgId->at(gpi) ) ;
           int momid = abs( GenParticles_ParentId->at(gpi) ) ;
           int momidx = GenParticles_ParentIdx->at(gpi);
           int status = GenParticles_Status->at(gpi);
-          
+          if(pdgid == 1000022 && status==22)
+          {
+              neutralinos.push_back(GenParticles->at(gpi));
+          }
           if(status == 23 && momid == 24 && pdgid < 6)
           {
               // Should be the quarks from W decay
@@ -270,6 +279,8 @@ void NtupleClass::Loop()
               }
           } 
       }
+      if(neutralinos.size() > 2)
+          std::cout << "Found " << neutralinos.size() << " neutralinos!" << std::endl;
 
       // Now check the b quarks (we only want the ones associated with a hadronic W decay for now)
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
@@ -553,14 +564,36 @@ void NtupleClass::Loop()
           h_top_gentop_minDR->Fill(minDR);
           h_top_gentop_Dpt->Fill(Dpt_top_gentop);
           h_top_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+          
+          double minDR_top_neutralino = 999;
+          double Dpt_top_neutralino = -1;
+          for (int i_chi=0; i_chi<neutralinos.size(); ++i_chi)
+          {
+              double DR_top_neutralino = calcDR(top->p().Eta(), neutralinos[i_chi].Eta(), top->p().Phi(), neutralinos[i_chi].Phi());
+              if(DR_top_neutralino < minDR_top_neutralino)
+              {
+                  minDR_top_neutralino = DR_top_neutralino;
+                  Dpt_top_neutralino = abs(top->p().Pt() - neutralinos[i_chi].Pt())/top->p().Pt();
+              }
+          }
+          if ((minDR_top_neutralino < 0.4 && Dpt_top_neutralino < 0.5 && minDR < 0.4 && Dpt_top_gentop < 0.5))
+          {
+              std::cout << "Matched to a neutralino and to a top quark..." << std::endl;
+              std::cout << "DR and Dpt for neutralino: " << minDR_top_neutralino << ", " << Dpt_top_neutralino << std::endl;
+              std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
+          }
+          toptag_chitagrate->Fill( (minDR_top_neutralino<0.4 && Dpt_top_neutralino<0.5), top->p().Pt());
+          toptag_fakerate->Fill( (minDR_top_neutralino>0.4 || Dpt_top_neutralino > 0.5) && (minDR > 0.4 || Dpt_top_gentop > 0.5) , top->p().Pt());
           if(passBaseline)
           {
               h_baseline_top_gentop_minDR->Fill(minDR);
               h_baseline_top_gentop_Dpt->Fill(Dpt_top_gentop);
               h_baseline_top_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
+              toptag_fakerate_baseline->Fill( (minDR_top_neutralino>0.4 || Dpt_top_neutralino>0.5) && (minDR > 0.4 || Dpt_top_gentop > 0.5) , top->p().Pt());
+              toptag_chitagrate_baseline->Fill( (minDR_top_neutralino<0.4 && Dpt_top_neutralino<0.5), top->p().Pt());
           }
           if(minDR <= 0.4) n_matched_recotops++;
-
+          
           // Compare with what comes out of the top tagger itself: 
           const TLorentzVector* bestgentop = top->getBestGenTopMatch(0.4);
           if(bestgentop != nullptr) n_matched_recotops_auto++;
@@ -981,6 +1014,11 @@ void NtupleClass::Loop()
    toptag_eff_type1_baseline->Write();
    toptag_eff_type2_baseline->Write();
    toptag_eff_type3_baseline->Write();
+
+   toptag_fakerate->Write();
+   toptag_fakerate_baseline->Write();
+   toptag_chitagrate->Write();
+   toptag_chitagrate_baseline->Write();
 
    event_sel->Write();
    event_sel_total->Write();
