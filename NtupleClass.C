@@ -207,8 +207,20 @@ void NtupleClass::Loop()
 
    TEfficiency* toptag_fakerate_baseline = new TEfficiency("toptag_fakerate_baseline","Top tagging fake rate;reco top p_T;#epsilon",10,0,1000);
    TEfficiency* toptag_fakerate = new TEfficiency("toptag_fakerate","Top tagging fake rate;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_fakerate_excl_baseline = new TEfficiency("toptag_fakerate_excl_baseline","Top tagging fake rate;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_fakerate_excl = new TEfficiency("toptag_fakerate_excl","Top tagging fake rate;reco top p_T;#epsilon",10,0,1000);
    TEfficiency* toptag_chitagrate = new TEfficiency("toptag_chitagrate","Tagged top fraction that matches a neutralino;reco top p_T;#epsilon",10,0,1000);
    TEfficiency* toptag_chitagrate_baseline = new TEfficiency("toptag_chitagrate_baseline","Tagged top fraction that matches a neutralino;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_chitagrate_excl = new TEfficiency("toptag_chitagrate_excl","Tagged top fraction that matches a neutralino and no tops;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_chitagrate_excl_baseline = new TEfficiency("toptag_chitagrate_excl_baseline","Tagged top fraction that matches a neutralino and no tops;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_singletrate = new TEfficiency("toptag_singletrate","Tagged top fraction that matches a singlet or singlino;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_singletrate_baseline = new TEfficiency("toptag_singletrate_baseline","Tagged top fraction that matches a singlet or singlino;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_singletrate_excl = new TEfficiency("toptag_singletrate_excl","Tagged top fraction that matches a singlet or singlino and no tops;reco top p_T;#epsilon",10,0,1000);
+   TEfficiency* toptag_singletrate_excl_baseline = new TEfficiency("toptag_singletrate_excl_baseline","Tagged top fraction that matches a singlet or singlino and no tops;reco top p_T;#epsilon",10,0,1000);
+
+   TEfficiency* toptag_fully_matched = new TEfficiency("toptag_fully_matched","Both tops matched;top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5);
+   TEfficiency* toptag_partially_matched = new TEfficiency("toptag_partially_matched","One top matched;top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5);
+   TEfficiency* toptag_unmatched = new TEfficiency("toptag_unmatched","Both tops not matched;top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5);
 
 
    // Cut flows
@@ -239,15 +251,25 @@ void NtupleClass::Loop()
       std::vector<int> hadtops_idx;
       std::vector<std::vector<const TLorentzVector*> > hadtopdaughters;
       std::vector<TLorentzVector> neutralinos;
+      std::vector<TLorentzVector> singlets;
+      std::vector<TLorentzVector> singlinos;
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
       {
           int pdgid = abs( GenParticles_PdgId->at(gpi) ) ;
           int momid = abs( GenParticles_ParentId->at(gpi) ) ;
           int momidx = GenParticles_ParentIdx->at(gpi);
           int status = GenParticles_Status->at(gpi);
-          if(pdgid == 1000022 && status==22)
+          if(pdgid == 1000022 && (status==22 || status == 52))
           {
               neutralinos.push_back(GenParticles->at(gpi));
+          }
+          if(pdgid == 5000001 && (status == 22 || status == 52))
+          {
+              singlinos.push_back(GenParticles->at(gpi));
+          }
+          if(pdgid == 5000002 && (status == 22 || status == 52))
+          {
+              singlets.push_back(GenParticles->at(gpi));
           }
           if(status == 23 && momid == 24 && pdgid < 6)
           {
@@ -279,8 +301,12 @@ void NtupleClass::Loop()
               }
           } 
       }
-      if(neutralinos.size() > 2)
+      if(neutralinos.size() != 2 && neutralinos.size() != 0)
           std::cout << "Found " << neutralinos.size() << " neutralinos!" << std::endl;
+      if(singlinos.size() != 2 && singlinos.size() != 0)
+          std::cout << "Found " << singlinos.size() << " singlinos!" << std::endl;
+      if(singlets.size() != 2 && singlets.size() != 0)
+          std::cout << "Found " << singlets.size() << " singlets!" << std::endl;
 
       // Now check the b quarks (we only want the ones associated with a hadronic W decay for now)
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
@@ -542,9 +568,15 @@ void NtupleClass::Loop()
       int ntops_2jet=0;
       int ntops_1jet=0;
       // How often does a tagged top match with genlevel?
+      std::vector<bool> top_matches;
       for (const TopObject* top : tops)
       {
-          TLorentzVector matched_top;
+          bool matched_top = false;
+          bool matched_neutralino = false;
+          bool matched_singlet = false;
+          bool matched_singlino = false;
+
+          TLorentzVector matched_top_LV;
           std::vector<const TLorentzVector*> matched_top_constituents;
           double minDR = 999;
           for (int i_gentop=0; i_gentop<hadtops.size(); ++i_gentop)
@@ -553,18 +585,20 @@ void NtupleClass::Loop()
               if (DR_top_gentop < minDR)
               {
                   minDR = DR_top_gentop;
-                  matched_top = hadtops[i_gentop];
+                  matched_top_LV = hadtops[i_gentop];
                   matched_top_constituents = hadtopdaughters[i_gentop];
               }
           }
           // std::cout << "Top Pt, Eta, Phi: " << top->p().Pt() << " " << top->p().Eta() << " " << top->p().Phi() << std::endl;
           //std::cout << "Gen top Pt, Eta, Phi, DR: " << matched_top.Pt() << " " << matched_top.Eta() << " " << matched_top.Phi() << " " << minDR << std::endl;
 
-          double Dpt_top_gentop = abs(top->p().Pt() - matched_top.Pt())/top->p().Pt();
+          double Dpt_top_gentop = abs(top->p().Pt() - matched_top_LV.Pt())/top->p().Pt();
           h_top_gentop_minDR->Fill(minDR);
           h_top_gentop_Dpt->Fill(Dpt_top_gentop);
           h_top_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
-          
+          matched_top = minDR<0.4 && Dpt_top_gentop < 0.5;
+          top_matches.push_back(matched_top);
+
           double minDR_top_neutralino = 999;
           double Dpt_top_neutralino = -1;
           for (int i_chi=0; i_chi<neutralinos.size(); ++i_chi)
@@ -576,23 +610,71 @@ void NtupleClass::Loop()
                   Dpt_top_neutralino = abs(top->p().Pt() - neutralinos[i_chi].Pt())/top->p().Pt();
               }
           }
-          if ((minDR_top_neutralino < 0.4 && Dpt_top_neutralino < 0.5 && minDR < 0.4 && Dpt_top_gentop < 0.5))
+          matched_neutralino = minDR_top_neutralino < 0.4 && Dpt_top_neutralino < 0.5;
+          if (matched_neutralino && matched_top)
           {
               std::cout << "Matched to a neutralino and to a top quark..." << std::endl;
               std::cout << "DR and Dpt for neutralino: " << minDR_top_neutralino << ", " << Dpt_top_neutralino << std::endl;
               std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
           }
-          toptag_chitagrate->Fill( (minDR_top_neutralino<0.4 && Dpt_top_neutralino<0.5), top->p().Pt());
-          toptag_fakerate->Fill( (minDR_top_neutralino>0.4 || Dpt_top_neutralino > 0.5) && (minDR > 0.4 || Dpt_top_gentop > 0.5) , top->p().Pt());
+          toptag_chitagrate->Fill( matched_neutralino, top->p().Pt());
+          toptag_chitagrate_excl->Fill( matched_neutralino && (!matched_top), top->p().Pt());
+
+          double minDR_top_singlet = 999;
+          double Dpt_top_singlet = -1;
+          for (int i_chi=0; i_chi<singlets.size(); ++i_chi)
+          {
+              double DR_top_singlet = calcDR(top->p().Eta(), singlets[i_chi].Eta(), top->p().Phi(), singlets[i_chi].Phi());
+              if(DR_top_singlet < minDR_top_singlet)
+              {
+                  minDR_top_singlet = DR_top_singlet;
+                  Dpt_top_singlet = abs(top->p().Pt() - singlets[i_chi].Pt())/top->p().Pt();
+              }
+          }
+          matched_singlet = minDR_top_singlet < 0.4 && Dpt_top_singlet < 0.5;
+          if (matched_singlet && matched_top)
+          {
+              std::cout << "Matched to a singlet and to a top quark..." << std::endl;
+              std::cout << "DR and Dpt for singlet: " << minDR_top_singlet << ", " << Dpt_top_singlet << std::endl;
+              std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
+          }
+          double minDR_top_singlino = 999;
+          double Dpt_top_singlino = -1;
+          for (int i_chi=0; i_chi<singlinos.size(); ++i_chi)
+          {
+              double DR_top_singlino = calcDR(top->p().Eta(), singlinos[i_chi].Eta(), top->p().Phi(), singlinos[i_chi].Phi());
+              if(DR_top_singlino < minDR_top_singlino)
+              {
+                  minDR_top_singlino = DR_top_singlino;
+                  Dpt_top_singlino = abs(top->p().Pt() - singlinos[i_chi].Pt())/top->p().Pt();
+              }
+          }
+          matched_singlino = minDR_top_singlino < 0.4 && Dpt_top_singlino < 0.5;
+          if (matched_singlino && matched_top)
+          {
+              std::cout << "Matched to a singlino and to a top quark..." << std::endl;
+              std::cout << "DR and Dpt for singlino: " << minDR_top_singlino << ", " << Dpt_top_singlino << std::endl;
+              std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
+          }
+          toptag_singletrate->Fill( matched_singlet || matched_singlino, top->p().Pt());
+          toptag_singletrate_excl->Fill( (matched_singlet || matched_singlino) && (!matched_top), top->p().Pt());
+
+          // Fake rate defined as not matching a top, neutralino, singlet, or singlino
+          toptag_fakerate->Fill( !matched_top, top->p().Pt());
+          toptag_fakerate_excl->Fill( !( matched_top || matched_neutralino || matched_singlet || matched_singlino ), top->p().Pt());
           if(passBaseline)
           {
               h_baseline_top_gentop_minDR->Fill(minDR);
               h_baseline_top_gentop_Dpt->Fill(Dpt_top_gentop);
               h_baseline_top_gentop_minDR_Dpt->Fill(minDR, Dpt_top_gentop);
-              toptag_fakerate_baseline->Fill( (minDR_top_neutralino>0.4 || Dpt_top_neutralino>0.5) && (minDR > 0.4 || Dpt_top_gentop > 0.5) , top->p().Pt());
-              toptag_chitagrate_baseline->Fill( (minDR_top_neutralino<0.4 && Dpt_top_neutralino<0.5), top->p().Pt());
+              toptag_fakerate_baseline->Fill( !matched_top , top->p().Pt());
+              toptag_fakerate_excl_baseline->Fill( !( matched_top || matched_neutralino || matched_singlet || matched_singlino ) , top->p().Pt());
+              toptag_chitagrate_baseline->Fill( matched_neutralino, top->p().Pt());
+              toptag_chitagrate_excl_baseline->Fill( matched_neutralino && (!matched_top), top->p().Pt());
+              toptag_singletrate_baseline->Fill(matched_singlet || matched_singlino, top->p().Pt());
+              toptag_singletrate_excl_baseline->Fill( (matched_singlet || matched_singlino) && (!matched_top), top->p().Pt());
           }
-          if(minDR <= 0.4) n_matched_recotops++;
+          if(matched_top) n_matched_recotops++;
           
           // Compare with what comes out of the top tagger itself: 
           const TLorentzVector* bestgentop = top->getBestGenTopMatch(0.4);
@@ -873,11 +955,71 @@ void NtupleClass::Loop()
       h_baseline_ntops_2jet->Fill(ntops_2jet);
       h_baseline_ntops_1jet->Fill(ntops_1jet);
       
-      if (tops.size() == 2)
-      {
-          h_dphi_2tops->Fill(calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()));
-      }
+      h_dphi_2tops->Fill(calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()));
 
+
+      // fully matched or not
+      bool fully_matched = false;
+      bool partially_matched = false;
+      bool unmatched = false;
+      if (n_matched_recotops >= 2)
+          fully_matched = true;
+      else if(n_matched_recotops == 1)
+          partially_matched = true;
+      else if(n_matched_recotops == 0)
+          unmatched = true;
+
+      toptag_fully_matched->Fill(fully_matched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
+      toptag_partially_matched->Fill(partially_matched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
+      toptag_unmatched->Fill(unmatched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
+
+      // Check fake rates per category
+      if(tops[0]->getNConstituents() == 1)
+      {
+          if(tops[1]->getNConstituents() == 1)
+          {
+              // stuff
+              
+          } 
+          else if(tops[1]->getNConstituents() == 2)
+          {
+              // stuff
+          }
+          else if(tops[1]->getNConstituents() == 3)
+          {
+              // stuff
+          }
+      }
+      else if(tops[0]->getNConstituents() == 2)
+      {
+          if(tops[1]->getNConstituents() == 1)
+          {
+              // stuff
+          } 
+          else if(tops[1]->getNConstituents() == 2)
+          {
+              // stuff
+          }
+          else if(tops[1]->getNConstituents() == 3)
+          {
+              // stuff
+          }
+      }
+      else if(tops[0]->getNConstituents() == 3)
+      {
+          if(tops[1]->getNConstituents() == 1)
+          {
+              // stuff
+          } 
+          else if(tops[1]->getNConstituents() == 2)
+          {
+              // stuff
+          }
+          else if(tops[1]->getNConstituents() == 3)
+          {
+              // stuff
+          }
+      }
 
 
 
@@ -1017,8 +1159,20 @@ void NtupleClass::Loop()
 
    toptag_fakerate->Write();
    toptag_fakerate_baseline->Write();
+   toptag_fakerate_excl->Write();
+   toptag_fakerate_excl_baseline->Write();
    toptag_chitagrate->Write();
    toptag_chitagrate_baseline->Write();
+   toptag_chitagrate_excl->Write();
+   toptag_chitagrate_excl_baseline->Write();
+   toptag_singletrate->Write();
+   toptag_singletrate_baseline->Write();
+   toptag_singletrate_excl->Write();
+   toptag_singletrate_excl_baseline->Write();
+
+   toptag_fully_matched->Write();
+   toptag_partially_matched->Write();
+   toptag_unmatched->Write();
 
    event_sel->Write();
    event_sel_total->Write();
