@@ -10,14 +10,14 @@
 
  //--------------------
 
-   void draw_rpv1( const char* file1 = "plots-350.root",
-                   const char* file2 = "plots-650.root",
+   void draw_rpv1( const char* file1 = "outputfiles/rpv-analysis2-rpv_350.root",
+                   const char* file2 = "outputfiles/rpv-analysis2-rpv_650.root",
                    const char* tag1 = "350",
                    const char* tag2 = "650" ) {
 
       gDirectory -> Delete( "h*" ) ;
 
-      gSystem -> Exec( "mkdir -p outputfiles" ) ;
+      gSystem -> Exec( "mkdir -p outputfiles-rpv" ) ;
 
       gStyle -> SetPadBottomMargin( 0.15 ) ;
       gStyle -> SetPadLeftMargin( 0.15 ) ;
@@ -61,7 +61,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/pt-top.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/pt-top.pdf" ) ;
 
 
     //------------
@@ -80,7 +80,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/pt-stop.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/pt-stop.pdf" ) ;
 
 
     //------------
@@ -99,7 +99,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/pt-chi.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/pt-chi.pdf" ) ;
 
 
 
@@ -119,7 +119,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/pt-w.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/pt-w.pdf" ) ;
 
 
 
@@ -139,7 +139,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/pt-b.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/pt-b.pdf" ) ;
 
 
 
@@ -160,7 +160,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/pt-w-dh.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/pt-w-dh.pdf" ) ;
 
 
 
@@ -180,7 +180,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/pt-w-ds.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/pt-w-ds.pdf" ) ;
 
 
 
@@ -198,13 +198,19 @@
       legend -> AddEntry( hp1, tag1 ) ;
       legend -> AddEntry( hp2, tag2 ) ;
 
+      hp1->SetNormFactor(1.) ;
+      hp2->SetNormFactor(1.) ;
+
+      gPad->SetGridy(1) ;
       hp1->Draw() ;
       hp2->Draw("same") ;
       legend -> Draw() ;
+      can1->Update() ; can1->Draw() ;
 
-      can1 -> SaveAs( "outputfiles/n-taggable-tops.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/n-taggable-tops.pdf" ) ;
 
 
+      gPad->SetGridy(0) ;
 
     //------------
 
@@ -222,7 +228,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/n-extra-jets.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/n-extra-jets.pdf" ) ;
 
 
 
@@ -244,7 +250,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/extra-jet-pt.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/extra-jet-pt.pdf" ) ;
 
 
 
@@ -267,7 +273,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/extra-jet-lead-rank.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/extra-jet-lead-rank.pdf" ) ;
 
 
 
@@ -289,7 +295,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      can1 -> SaveAs( "outputfiles/twostop-pt.pdf" ) ;
+      can1 -> SaveAs( "outputfiles-rpv/twostop-pt.pdf" ) ;
 
 
 
@@ -323,7 +329,7 @@
       legend -> Draw() ;
 
 
-      sprintf( fname, "outputfiles/top-pt-taggable-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/top-pt-taggable-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -346,7 +352,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/top-pt-taggable-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/top-pt-taggable-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -373,7 +379,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twotop-cosdphi-taggable-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/twotop-cosdphi-taggable-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -400,7 +406,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twotop-cosdphi-taggable-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/twotop-cosdphi-taggable-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -426,7 +432,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twotop-rec-cosdphi-taggable-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/twotop-rec-cosdphi-taggable-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -453,7 +459,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twotop-rec-cosdphi-taggable-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/twotop-rec-cosdphi-taggable-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -479,7 +485,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twostop-cosdphi-taggable-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/twostop-cosdphi-taggable-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -505,7 +511,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twostop-cosdphi-taggable-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/twostop-cosdphi-taggable-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -532,7 +538,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twostop-costhetasum-taggable-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/twostop-costhetasum-taggable-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -559,7 +565,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twostop-costhetasum-taggable-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/twostop-costhetasum-taggable-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -587,7 +593,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twotop-costhetasum-taggable-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/twotop-costhetasum-taggable-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -614,7 +620,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twotop-costhetasum-taggable-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/twotop-costhetasum-taggable-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -642,7 +648,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twotop-rec-costhetasum-taggable-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/twotop-rec-costhetasum-taggable-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -669,7 +675,7 @@
       hp2->Draw("same axis") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/twotop-rec-costhetasum-taggable-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/twotop-rec-costhetasum-taggable-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -695,7 +701,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/njet40-ht450-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/njet40-ht450-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -721,7 +727,7 @@
       hp2->Draw("same") ;
       legend -> Draw() ;
 
-      sprintf( fname, "outputfiles/njet40-ht450-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/njet40-ht450-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -745,7 +751,7 @@
       gPad -> SetGridx(1) ;
       gPad -> SetGridy(1) ;
 
-      sprintf( fname, "outputfiles/top-dau-drmax-vs-top-pt-%s.pdf", tag1 ) ;
+      sprintf( fname, "outputfiles-rpv/top-dau-drmax-vs-top-pt-%s.pdf", tag1 ) ;
       can1 -> SaveAs( fname ) ;
 
 
@@ -755,7 +761,7 @@
       gPad -> SetGridx(1) ;
       gPad -> SetGridy(1) ;
 
-      sprintf( fname, "outputfiles/top-dau-drmax-vs-top-pt-%s.pdf", tag2 ) ;
+      sprintf( fname, "outputfiles-rpv/top-dau-drmax-vs-top-pt-%s.pdf", tag2 ) ;
       can1 -> SaveAs( fname ) ;
 
 
