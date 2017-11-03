@@ -297,7 +297,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop( int max_events = -1, bool verb = false );
+   virtual void     Loop( int max_events = -1, bool verb = false, const char* hist_file = "plots.root" );
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -325,7 +325,7 @@ rpv_analysis2::rpv_analysis2(TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("PreSelection","");
-      chain->Add("mytest.root/PreSelection");
+      chain->Add("prod-subjets-topvars1/topvars-rpv_stop_650_t3j_uds.root/PreSelection");
       tree = chain;
 #endif // SINGLE_TREE
 

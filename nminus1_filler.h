@@ -1,25 +1,26 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Oct  3 10:02:59 2017 by ROOT version 6.06/06
+// Fri Oct 13 12:38:41 2017 by ROOT version 6.06/06
 // from TChain PreSelection/
 //////////////////////////////////////////////////////////
 
-#ifndef trig_eff_h
-#define trig_eff_h
+#ifndef nminus1_filler_h
+#define nminus1_filler_h
 
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
 #include "TLorentzVector.h"
+#include "TSystem.h"
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
-#include "vector"
-#include "vector"
-#include "vector"
 
-class trig_eff {
+class nminus1_filler {
 public :
+
+   friend class cut_var ;
+
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
@@ -289,70 +290,61 @@ public :
    TBranch        *b_Jets_toptag_index;   //!
    TBranch        *b_JetsAK8_toptag_index;   //!
 
-   trig_eff( const char* input_root_file = "prod-subjets-topvars2/topvars-rpv_stop_350_t3j_uds.root"  );
-   virtual ~trig_eff();
+   nminus1_filler( const char* sample_string = "QCD_HT500to700", const char* ntuple_dir = "prod-subjets-topvars3", double arg_ds_weight=1. );
+   virtual ~nminus1_filler();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop( int max_events = -1, bool verb = false );
+   virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   char output_hist_file_name[1000] ;
+   char    hist_file_name[1000] ;
+   double ds_weight ;
 };
 
 #endif
 
-#ifdef trig_eff_cxx
-trig_eff::trig_eff( const char* input_root_file ) : fChain(0) 
+#ifdef nminus1_filler_cxx
+nminus1_filler::nminus1_filler( const char* sample_string, const char* ntuple_dir, double arg_ds_weight ) : fChain(0) 
 {
-   //////////TChain * chain = new TChain("TreeMaker2/PreSelection","");
-   TChain * chain = new TChain("PreSelection","");
-   char filename_and_treedir[1000] ;
-   /////////sprintf( filename_and_treedir, "%s/TreeMaker2/PreSelection", input_root_file ) ;
-   sprintf( filename_and_treedir, "%s/PreSelection", input_root_file ) ;
-   int n_added = chain->Add( filename_and_treedir );
-   if ( n_added <= 0 ) {
-      printf("\n\n *** Problems setting up TChain with %s as root file.\n\n", input_root_file ) ;
-      gSystem -> Exit( -1 ) ;
-   }
-   int nentries = chain -> GetEntries() ;
-   if ( nentries <= 0 ) {
-      printf("\n\n *** No entries in TChain?  %s as root file.\n\n", input_root_file ) ;
-      gSystem -> Exit( -1 ) ;
-   } else {
-      printf("\n\n %d entries in %s\n\n", nentries, filename_and_treedir ) ;
-   }
-   TTree* tree = chain;
 
-   Init(tree);
+   ds_weight = arg_ds_weight ;
 
-   const char* bn = gSystem->BaseName( input_root_file ) ;
-   TString tsbn( bn ) ;
-   tsbn.ReplaceAll(".root","") ;
-   printf("\n\n sample name : %s\n\n", tsbn.Data() ) ;
+   TChain* chain = new TChain( "PreSelection", "" ) ;
+   char fpat[1000] ;
+   sprintf( fpat, "%s/*%s*.root", ntuple_dir, sample_string ) ;
+   printf("\n\n Loading files that match %s\n", fpat ) ;
+   int n_added = chain -> Add( fpat ) ;
+   if ( n_added <= 0 ) { printf("\n\n *** No files match %s\n\n", fpat ) ; gSystem->Exit(-1) ; }
+   printf("  Added %d files to chain.\n", n_added ) ;
+   int n_entries = chain -> GetEntries() ;
+   if ( n_entries <= 0 ) { printf("\n\n *** No entries in ntuple chain.\n\n" ) ; gSystem->Exit(-1) ; }
+   printf("  Number of entries: %d\n\n", n_entries ) ;
 
-   sprintf( output_hist_file_name, "outputfiles/trig-eff-%s-plots.root", tsbn.Data() ) ;
-   printf("\n\n Output histograms file name : %s\n\n", output_hist_file_name ) ;
+   TTree* tree = chain ;
+   Init(tree) ;
 
    gSystem -> Exec( "mkdir -p outputfiles" ) ;
+
+   sprintf( hist_file_name, "outputfiles/nm1-hists-%s.root", sample_string ) ;
 
 
 }
 
-trig_eff::~trig_eff()
+nminus1_filler::~nminus1_filler()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t trig_eff::GetEntry(Long64_t entry)
+Int_t nminus1_filler::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t trig_eff::LoadTree(Long64_t entry)
+Long64_t nminus1_filler::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -365,7 +357,7 @@ Long64_t trig_eff::LoadTree(Long64_t entry)
    return centry;
 }
 
-void trig_eff::Init(TTree *tree)
+void nminus1_filler::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -582,7 +574,7 @@ void trig_eff::Init(TTree *tree)
    Notify();
 }
 
-Bool_t trig_eff::Notify()
+Bool_t nminus1_filler::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -593,19 +585,19 @@ Bool_t trig_eff::Notify()
    return kTRUE;
 }
 
-void trig_eff::Show(Long64_t entry)
+void nminus1_filler::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t trig_eff::Cut(Long64_t entry)
+Int_t nminus1_filler::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
-   if ( entry>0 ) return 1;
+   if ( entry > 0 ) return 1 ;
    return 1;
 }
-#endif // #ifdef trig_eff_cxx
+#endif // #ifdef nminus1_filler_cxx
