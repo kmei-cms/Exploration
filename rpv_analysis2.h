@@ -297,7 +297,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop( int max_events = -1, bool verb = false );
+   virtual void     Loop( int max_events = -1, bool verb = false, const char* hist_file = "plots.root" );
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
