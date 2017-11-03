@@ -29,7 +29,9 @@ LIBSTOPTAGGER += -L$(TTTDIR) -lTopTagger
 
 #OBJS       = $(patsubst %, $(ODIR)/%, $(OBJ))
 
-PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch
+
+PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple
+
 
 all: mkobj $(PROGRAMS)
 
@@ -74,6 +76,11 @@ AddTopVars: $(ODIR)/AddTopVars.o $(ODIR)/NtupleClassAddTopVars.o
 
 AddTopVarsBatch: $(ODIR)/AddTopVarsBatch.o $(ODIR)/NtupleClassAddTopVars.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
+
+MicroNtuple: $(ODIR)/MicroNtuple.o $(ODIR)/NtupleClassMicroNtuple.o
+	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
 
 clean:
 	rm -f $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.d $(PROGRAMS) core 

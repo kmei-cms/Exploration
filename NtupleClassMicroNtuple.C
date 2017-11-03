@@ -1,5 +1,5 @@
-#define NtupleClassAddTopVars_cxx
-#include "NtupleClassAddTopVars.h"
+#define NtupleClassMicroNtuple_cxx
+#include "NtupleClassMicroNtuple.h"
 #include <TH1D.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -26,7 +26,7 @@ double calcDR( TLorentzVector& lv1, TLorentzVector& lv2 ) {
    return sqrt( dphi*dphi + deta*deta ) ;
 }
 
-void NtupleClassAddTopVars::Loop()
+void NtupleClassMicroNtuple::Loop()
 {
    if (fChain == 0) return;
 
@@ -36,16 +36,52 @@ void NtupleClassAddTopVars::Loop()
   //--- Additional variables for top tagger output to be added to ntuple
 
    std::vector<TLorentzVector> toptag_tlv ;
-   output_tree -> Branch( "toptag_tlv", &toptag_tlv ) ;
+   ///output_tree -> Branch( "toptag_tlv", &toptag_tlv ) ;
 
    std::vector<int> toptag_nconstituents ;
-   output_tree -> Branch( "toptag_nconstituents", &toptag_nconstituents ) ;
+   ///output_tree -> Branch( "toptag_nconstituents", &toptag_nconstituents ) ;
 
    std::vector<int> Jets_toptag_index ;
-   output_tree -> Branch( "Jets_toptag_index", &Jets_toptag_index ) ;
+   ///output_tree -> Branch( "Jets_toptag_index", &Jets_toptag_index ) ;
 
    std::vector<int> JetsAK8_toptag_index ;
-   output_tree -> Branch( "JetsAK8_toptag_index", &JetsAK8_toptag_index ) ;
+   ///output_tree -> Branch( "JetsAK8_toptag_index", &JetsAK8_toptag_index ) ;
+
+
+   int njets_pt45_eta24 ;
+   output_tree -> Branch( "njets_pt45_eta24", &njets_pt45_eta24, "njets_pt45_eta24/I" ) ;
+
+   float pfht_pt40_eta24 ;
+   output_tree -> Branch( "pfht_pt40_eta24", &pfht_pt40_eta24, "pfht_pt40_eta24/F" ) ;
+
+   int nbtag_csv85_pt30_eta24 ;
+   output_tree -> Branch( "nbtag_csv85_pt30_eta24", &nbtag_csv85_pt30_eta24, "nbtag_csv85_pt30_eta24/I" ) ;
+
+   int ntop1b ;
+   output_tree -> Branch( "ntop1b", &ntop1b, "ntop1b/I" ) ;
+
+   int ntop1bpt200 ;
+   output_tree -> Branch( "ntop1bpt200", &ntop1bpt200, "ntop1bpt200/I" ) ;
+
+   int ntop1bnot3prong ;
+   output_tree -> Branch( "ntop1bnot3prong", &ntop1bnot3prong, "ntop1bnot3prong/I" ) ;
+
+   int ntop1bnot3prongpt200 ;
+   output_tree -> Branch( "ntop1bnot3prongpt200", &ntop1bnot3prongpt200, "ntop1bnot3prongpt200/I" ) ;
+
+   int njetsextra_pt30_eta24 ;
+   output_tree -> Branch( "njetsextra_pt30_eta24", &njetsextra_pt30_eta24, "njetsextra_pt30_eta24/I" ) ;
+
+   float pfht7p_pt30_eta24 ;
+   output_tree -> Branch( "pfht7p_pt30_eta24", &pfht7p_pt30_eta24, "pfht7p_pt30_eta24/F" ) ;
+
+   float pfhtextra_pt30_eta24 ;
+   output_tree -> Branch( "pfhtextra_pt30_eta24", &pfhtextra_pt30_eta24, "pfhtextra_pt30_eta24/F" ) ;
+
+   int nleptons ;
+   output_tree -> Branch( "nleptons", &nleptons, "nleptons/I" ) ;
+
+
 
 
 
@@ -90,15 +126,52 @@ void NtupleClassAddTopVars::Loop()
 
 
       int rec_njet_pt45(0) ;
-      float pfht_pt40_eta24(0.) ;
       int nbtag_csv50(0) ;
+
+      njets_pt45_eta24 = 0 ;
+      pfht_pt40_eta24 = 0 ;
+      nbtag_csv85_pt30_eta24 = 0 ;
+      ntop1b = 0 ;
+      ntop1bpt200 = 0 ;
+      ntop1bnot3prong = 0 ;
+      ntop1bnot3prongpt200 = 0 ;
+      njetsextra_pt30_eta24 = 0 ;
+      pfht7p_pt30_eta24 = 0 ;
+      pfhtextra_pt30_eta24 = 0 ;
+      nleptons = 0 ;
+
+      nleptons += Muons->size() ;
+      nleptons += Electrons->size() ;
+
+      int ngood_pt30_eta24(0) ;
+      for ( unsigned int rji=0; rji<Jets->size(); rji++ ) {
+         TLorentzVector tlv = Jets->at(rji) ;
+         if ( tlv.Pt() > 45 && fabs(tlv.Eta()) < 2.4 ) {
+            njets_pt45_eta24 += 1 ;
+         }
+         if ( tlv.Pt() > 40 && fabs(tlv.Eta()) < 2.4 ) {
+            pfht_pt40_eta24 += tlv.Pt() ;
+         }
+         if ( tlv.Pt() > 30 && fabs(tlv.Eta()) < 2.4 ) {
+            ngood_pt30_eta24 ++ ;
+            if ( ngood_pt30_eta24 >= 7 ) {
+               pfht7p_pt30_eta24 += tlv.Pt() ;
+            }
+            if ( Jets_bDiscriminatorCSV->at(rji) > 0.85 ) {
+               nbtag_csv85_pt30_eta24 += 1 ;
+            }
+         }
+      } // rji
+
+
+     //----
 
       for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
 
             TLorentzVector jlv( Jets->at(rji) ) ;
 
             if ( jlv.Pt() > 45 && fabs(jlv.Eta())<2.4 ) rec_njet_pt45++ ;
-            if ( jlv.Pt() > 40 && fabs(jlv.Eta())<2.4 ) pfht_pt40_eta24 += jlv.Pt() ;
+            //////////////////if ( jlv.Pt() > 40 && fabs(jlv.Eta())<2.4 ) pfht_pt40_eta24 += jlv.Pt() ;  // bug in v1
             if ( Jets_bDiscriminatorCSV->at(rji) > 0.50 ) nbtag_csv50++ ;
 
       } // rji
@@ -224,7 +297,7 @@ void NtupleClassAddTopVars::Loop()
 
       } // top
 
-      if ( do_skim && n_toptag_not3prong == 0 ) continue ;
+      ///////////////////// if ( do_skim && n_toptag_not3prong == 0 ) continue ;
 
 
 
@@ -297,7 +370,64 @@ void NtupleClassAddTopVars::Loop()
       } // ji
 
 
+      std::vector<int> toptag_nb ;
+      for ( unsigned int tti=0; tti < toptag_tlv.size(); tti++ ) {
+         int nb(0) ;
+         std::vector<int> bjets_in_this_top_tag ;
+         for ( unsigned int rji=0; rji < Jets->size(); rji++ ) {
+            if ( Jets_toptag_index.at(rji) == tti ) {
+               if ( Jets_bDiscriminatorCSV->at(rji) > 0.85 ) {
+                  nb ++ ;
+                  bjets_in_this_top_tag.push_back(rji) ;
+               }
+            }
+         } // rji
+         for ( unsigned int fji=0; fji < JetsAK8->size(); fji++ ) {
+            if ( JetsAK8_toptag_index.at(fji) == tti ) {
+               for ( unsigned int rji=0; rji < Jets->size(); rji++ ) {
+                  if ( calcDR( JetsAK8->at(fji), Jets->at(rji) ) < 0.8 ) {
+                     bool already_in_this_top_tag(false) ;
+                     for ( unsigned int bji=0; bji<bjets_in_this_top_tag.size(); bji++ ) {
+                        if ( rji == bjets_in_this_top_tag[bji] ) already_in_this_top_tag = true ;
+                     } // bji
+                     if ( Jets_bDiscriminatorCSV->at(rji) > 0.85 && !already_in_this_top_tag ) {
+                        nb ++ ;
+                     }
+                  } // dr match
+               } // rji
+            }
+         } // fji
+         toptag_nb.emplace_back( nb ) ;
+         if ( nb == 1 ) {
+            ntop1b += 1 ;
+            if ( toptag_tlv.at(tti).Pt() > 200 ) ntop1bpt200 += 1 ;
+            if ( toptag_nconstituents.at(tti) != 3 ) ntop1bnot3prong += 1 ;
+            if ( toptag_tlv.at(tti).Pt() > 200 && toptag_nconstituents.at(tti) != 3 ) ntop1bnot3prongpt200 += 1 ;
+         }
+      } // tti
 
+      for ( unsigned int rji=0; rji < Jets->size(); rji++ ) {
+         bool in_a_good_tag(false) ;
+         if ( Jets_toptag_index.at(rji) >= 0 ) {
+            if ( toptag_nb[ Jets_toptag_index.at(rji) ] == 1 ) {
+               in_a_good_tag = true ;
+            }
+         }
+         for ( unsigned int fji=0; fji<JetsAK8->size(); fji++ ) {
+            if ( JetsAK8_toptag_index.at(fji) >= 0 ) {
+               if ( toptag_nb[ JetsAK8_toptag_index.at(fji)] == 1 ) {
+                  double dr = calcDR( Jets->at(rji), JetsAK8->at(fji) ) ;
+                  if ( dr < 0.8 ) in_a_good_tag = true ;
+               }
+            }
+         } // fji
+         if ( !in_a_good_tag ) {
+            if ( Jets->at(rji).Pt() > 30 && fabs(Jets->at(rji).Eta())<2.4 ) {
+               njetsextra_pt30_eta24 += 1 ;
+               pfhtextra_pt30_eta24 += Jets->at(rji).Pt() ;
+            }
+         } // is extra (not in a good tag)?
+      } // rji
 
       nsave++ ;
 
