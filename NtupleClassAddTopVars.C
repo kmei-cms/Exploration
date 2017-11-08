@@ -52,6 +52,7 @@ void NtupleClassAddTopVars::Loop()
    TH1F* h_njets_pt45_eta24 = new TH1F( "h_njets_pt45", "Njets, pt>45, |eta|<2.4", 11, -0.5, 10.5 ) ;
    TH1F* h_pfht_pt40_eta24 = new TH1F( "h_pfht_pt40_eta24", "PF HT, jet pt>40, |eta|<2.4", 100, 0., 4000. ) ;
    TH1F* h_nbtag_csv50 = new TH1F( "h_nbtag_csv50", "Nbtag, CSV>0.50", 6, -0.5, 5.5 ) ;
+   TH1F* h_nbtag_csv85 = new TH1F( "h_nbtag_csv85", "Nbtag, CSV>0.85", 6, -0.5, 5.5 ) ;
 
 
 
@@ -92,6 +93,7 @@ void NtupleClassAddTopVars::Loop()
       int rec_njet_pt45(0) ;
       float pfht_pt40_eta24(0.) ;
       int nbtag_csv50(0) ;
+      int nbtag_csv85(0) ;
 
       for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
 
@@ -100,18 +102,20 @@ void NtupleClassAddTopVars::Loop()
             if ( jlv.Pt() > 45 && fabs(jlv.Eta())<2.4 ) rec_njet_pt45++ ;
             if ( jlv.Pt() > 40 && fabs(jlv.Eta())<2.4 ) pfht_pt40_eta24 += jlv.Pt() ;
             if ( Jets_bDiscriminatorCSV->at(rji) > 0.50 ) nbtag_csv50++ ;
+            if ( Jets_bDiscriminatorCSV->at(rji) > 0.85 ) nbtag_csv85++ ;
 
       } // rji
 
       h_njets_pt45_eta24 -> Fill( rec_njet_pt45 ) ;
       h_pfht_pt40_eta24 -> Fill( pfht_pt40_eta24 ) ;
       h_nbtag_csv50 -> Fill( nbtag_csv50 ) ;
+      h_nbtag_csv85 -> Fill( nbtag_csv85 ) ;
 
 
       if ( do_skim ) {
-         if ( rec_njet_pt45 < 5 ) continue ;
-         if ( pfht_pt40_eta24 < 450 ) continue ;
-         if ( nbtag_csv50 < 1 ) continue ;
+         if ( rec_njet_pt45 < 6 ) continue ;
+         if ( pfht_pt40_eta24 < 500 ) continue ;
+         if ( nbtag_csv85 < 1 ) continue ;
       }
 
 
