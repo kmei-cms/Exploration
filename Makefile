@@ -41,6 +41,9 @@ mkobj:
 $(ODIR)/%.o : $(SDIR)/%.C
 	$(CXX) $(CXXFLAGS) $(CXXDEPFLAGS)  -o $@ -c $<
 
+$(ODIR)/%.o : $(SDIR)/%.c
+	$(CXX) $(CXXFLAGS) $(CXXDEPFLAGS)  -o $@ -c $<
+
 $(ODIR)/%.o : $(SDIR)/%.cc
 	$(CXX) $(CXXFLAGS) $(CXXDEPFLAGS)  -o $@ -c $<
 
@@ -78,7 +81,7 @@ AddTopVarsBatch: $(ODIR)/AddTopVarsBatch.o $(ODIR)/NtupleClassAddTopVars.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 
-MicroNtuple: $(ODIR)/MicroNtuple.o $(ODIR)/NtupleClassMicroNtuple.o
+MicroNtuple: $(ODIR)/MicroNtuple.o $(ODIR)/NtupleClassMicroNtuple.o $(ODIR)/EventShapeVariables.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 

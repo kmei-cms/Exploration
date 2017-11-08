@@ -5,6 +5,8 @@
 #include <TCanvas.h>
 #include <iostream>
 
+#include "EventShapeVariables.h"
+
 //manditory includes to use top tagger
 #include "TopTagger/TopTagger/include/TopTagger.h"
 #include "TopTagger/TopTagger/include/TopTaggerResults.h"
@@ -83,6 +85,76 @@ void NtupleClassMicroNtuple::Loop()
 
 
 
+   float lambda1 ;
+   output_tree -> Branch( "lambda1", &lambda1, "lambda1/F" ) ;
+
+   float lambda2 ;
+   output_tree -> Branch( "lambda2", &lambda2, "lambda2/F" ) ;
+
+   float lambda3 ;
+   output_tree -> Branch( "lambda3", &lambda3, "lambda3/F" ) ;
+
+
+
+   float lambda1nonorm ;
+   output_tree -> Branch( "lambda1nonorm", &lambda1nonorm, "lambda1nonorm/F" ) ;
+
+   float lambda2nonorm ;
+   output_tree -> Branch( "lambda2nonorm", &lambda2nonorm, "lambda2nonorm/F" ) ;
+
+   float lambda3nonorm ;
+   output_tree -> Branch( "lambda3nonorm", &lambda3nonorm, "lambda3nonorm/F" ) ;
+
+
+   int ntop1b_1prong ;
+   output_tree -> Branch( "ntop1b_1prong", &ntop1b_1prong, "ntop1b_1prong/I" ) ;
+
+   int ntop1b_2prong ;
+   output_tree -> Branch( "ntop1b_2prong", &ntop1b_2prong, "ntop1b_2prong/I" ) ;
+
+   int ntop1b_3prong ;
+   output_tree -> Branch( "ntop1b_3prong", &ntop1b_3prong, "ntop1b_3prong/I" ) ;
+
+
+
+   float jpt1 ;
+   output_tree -> Branch( "jpt1", &jpt1, "jpt1/F" ) ;
+
+   float jpt2 ;
+   output_tree -> Branch( "jpt2", &jpt2, "jpt2/F" ) ;
+
+   float jpt3 ;
+   output_tree -> Branch( "jpt3", &jpt3, "jpt3/F" ) ;
+
+   float jpt4 ;
+   output_tree -> Branch( "jpt4", &jpt4, "jpt4/F" ) ;
+
+   float jpt5 ;
+   output_tree -> Branch( "jpt5", &jpt5, "jpt5/F" ) ;
+
+   float jpt6 ;
+   output_tree -> Branch( "jpt6", &jpt6, "jpt6/F" ) ;
+
+   float jpt7 ;
+   output_tree -> Branch( "jpt7", &jpt7, "jpt7/F" ) ;
+
+   float jpt8 ;
+   output_tree -> Branch( "jpt8", &jpt8, "jpt8/F" ) ;
+
+   float jpt9 ;
+   output_tree -> Branch( "jpt9", &jpt9, "jpt9/F" ) ;
+
+   float jpt10 ;
+   output_tree -> Branch( "jpt10", &jpt10, "jpt10/F" ) ;
+
+   float jpt11 ;
+   output_tree -> Branch( "jpt11", &jpt11, "jpt11/F" ) ;
+
+   float jpt12 ;
+   output_tree -> Branch( "jpt12", &jpt12, "jpt12/F" ) ;
+
+
+
 
 
    TH1F* h_njets_pt45_eta24 = new TH1F( "h_njets_pt45", "Njets, pt>45, |eta|<2.4", 11, -0.5, 10.5 ) ;
@@ -127,6 +199,7 @@ void NtupleClassMicroNtuple::Loop()
 
       int rec_njet_pt45(0) ;
       int nbtag_csv50(0) ;
+      int nbtag_csv85(0) ;
 
       njets_pt45_eta24 = 0 ;
       pfht_pt40_eta24 = 0 ;
@@ -139,6 +212,34 @@ void NtupleClassMicroNtuple::Loop()
       pfht7p_pt30_eta24 = 0 ;
       pfhtextra_pt30_eta24 = 0 ;
       nleptons = 0 ;
+
+      lambda1 = 0. ;
+      lambda2 = 0. ;
+      lambda3 = 0. ;
+
+      lambda1nonorm = 0. ;
+      lambda2nonorm = 0. ;
+      lambda3nonorm = 0. ;
+
+      ntop1b_1prong = 0 ;
+      ntop1b_2prong = 0 ;
+      ntop1b_3prong = 0 ;
+
+      jpt1 = 0. ;
+      jpt2 = 0. ;
+      jpt3 = 0. ;
+      jpt4 = 0. ;
+      jpt5 = 0. ;
+      jpt6 = 0. ;
+      jpt7 = 0. ;
+      jpt8 = 0. ;
+      jpt9 = 0. ;
+      jpt10 = 0. ;
+      jpt11 = 0. ;
+      jpt12 = 0. ;
+
+
+
 
       nleptons += Muons->size() ;
       nleptons += Electrons->size() ;
@@ -160,6 +261,18 @@ void NtupleClassMicroNtuple::Loop()
             if ( Jets_bDiscriminatorCSV->at(rji) > 0.85 ) {
                nbtag_csv85_pt30_eta24 += 1 ;
             }
+            if ( ngood_pt30_eta24 == 1 )  jpt1  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 2 )  jpt2  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 3 )  jpt3  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 4 )  jpt4  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 5 )  jpt5  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 6 )  jpt6  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 7 )  jpt7  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 8 )  jpt8  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 9 )  jpt9  = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 10 ) jpt10 = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 11 ) jpt11 = tlv.Pt() ;
+            if ( ngood_pt30_eta24 == 12 ) jpt12 = tlv.Pt() ;
          }
       } // rji
 
@@ -173,6 +286,7 @@ void NtupleClassMicroNtuple::Loop()
             if ( jlv.Pt() > 45 && fabs(jlv.Eta())<2.4 ) rec_njet_pt45++ ;
             //////////////////if ( jlv.Pt() > 40 && fabs(jlv.Eta())<2.4 ) pfht_pt40_eta24 += jlv.Pt() ;  // bug in v1
             if ( Jets_bDiscriminatorCSV->at(rji) > 0.50 ) nbtag_csv50++ ;
+            if ( Jets_bDiscriminatorCSV->at(rji) > 0.85 ) nbtag_csv85++ ;
 
       } // rji
 
@@ -182,9 +296,9 @@ void NtupleClassMicroNtuple::Loop()
 
 
       if ( do_skim ) {
-         if ( rec_njet_pt45 < 5 ) continue ;
-         if ( pfht_pt40_eta24 < 450 ) continue ;
-         if ( nbtag_csv50 < 1 ) continue ;
+         if ( rec_njet_pt45 < 6 ) continue ;
+         if ( pfht_pt40_eta24 < 500 ) continue ;
+         if ( nbtag_csv85 < 2 ) continue ;
       }
 
 
@@ -400,6 +514,9 @@ void NtupleClassMicroNtuple::Loop()
          toptag_nb.emplace_back( nb ) ;
          if ( nb == 1 ) {
             ntop1b += 1 ;
+            if ( toptag_nconstituents.at(tti) == 1 ) ntop1b_1prong += 1 ;
+            if ( toptag_nconstituents.at(tti) == 2 ) ntop1b_2prong += 1 ;
+            if ( toptag_nconstituents.at(tti) == 3 ) ntop1b_3prong += 1 ;
             if ( toptag_tlv.at(tti).Pt() > 200 ) ntop1bpt200 += 1 ;
             if ( toptag_nconstituents.at(tti) != 3 ) ntop1bnot3prong += 1 ;
             if ( toptag_tlv.at(tti).Pt() > 200 && toptag_nconstituents.at(tti) != 3 ) ntop1bnot3prongpt200 += 1 ;
@@ -428,6 +545,93 @@ void NtupleClassMicroNtuple::Loop()
             }
          } // is extra (not in a good tag)?
       } // rji
+
+
+
+
+
+
+
+
+      //--- Find boost to CM frame.
+
+      TLorentzVector rlv_all_jets ;
+
+      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+
+         TLorentzVector jlv( Jets->at(rji) ) ;
+
+         rlv_all_jets += jlv ;
+
+      } // rji
+
+
+
+
+
+
+      double reco_jets_beta = rlv_all_jets.Pz() / rlv_all_jets.E() ;
+
+      TVector3 rec_boost_beta_vec( 0., 0., -1.*reco_jets_beta ) ;
+
+
+
+     //--- Fill vector of jet momenta in CM frame.
+
+      std::vector<math::RThetaPhiVector> cm_jets ;
+
+      for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
+
+         TLorentzVector jlvcm( Jets->at(rji) ) ;
+         jlvcm.Boost( rec_boost_beta_vec ) ;
+
+         math::RThetaPhiVector cmvec( jlvcm.P(), jlvcm.Theta(), jlvcm.Phi() ) ;
+         cm_jets.push_back( cmvec ) ;
+
+      } // rji
+
+
+
+
+     //--- Compute event shape variables and eigenvalues of jet momentum tensor.
+
+      EventShapeVariables esv( cm_jets ) ;
+      double sphericity = esv.sphericity() ;
+      double aplanarity = esv.aplanarity() ;
+      double es_c = esv.C() ;
+      double es_d = esv.D() ;
+
+      TVectorD eigen_vals_norm = esv.getEigenValues() ;
+      TVectorD eigen_vals_nonorm = esv.getEigenValuesNoNorm() ;
+
+      lambda1 = eigen_vals_norm[0] ;
+      lambda2 = eigen_vals_norm[1] ;
+      lambda3 = eigen_vals_norm[2] ;
+
+      lambda1nonorm = eigen_vals_nonorm[0] ;
+      lambda2nonorm = eigen_vals_nonorm[1] ;
+      lambda3nonorm = eigen_vals_nonorm[2] ;
+
+      if ( verbose ) {
+
+         printf("\n\n =========== number %9llu : Run %9u , Lumi %9u , Event %9llu\n", jentry, RunNum, LumiBlockNum, EvtNum ) ;
+
+         printf("   Number of extra jets : %2.0f\n", njetsextra_pt30_eta24 ) ;
+         printf("   Sphericity : %6.3f\n", sphericity ) ;
+         printf("   Aplanarity : %6.3f\n", aplanarity ) ;
+         printf("   C          : %6.3f\n", es_c ) ;
+         printf("   D          : %6.3f\n", es_d ) ;
+
+         printf("   Normalized   eigen values       :  %9.3f , %9.3f, %9.3f\n", eigen_vals_norm[0], eigen_vals_norm[1], eigen_vals_norm[2] ) ;
+         printf("   Unnormalized eigen values (sqrt):  %9.1f , %9.1f, %9.1f\n", sqrt(eigen_vals_nonorm[0]), sqrt(eigen_vals_nonorm[1]), sqrt(eigen_vals_nonorm[2]) ) ;
+         printf("   Unnormalized eigen values       :  %9.1f , %9.1f, %9.1f\n", eigen_vals_nonorm[0], eigen_vals_nonorm[1], eigen_vals_nonorm[2] ) ;
+
+      }
+
+
+
+
+
 
       nsave++ ;
 
