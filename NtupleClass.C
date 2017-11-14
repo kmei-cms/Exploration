@@ -33,7 +33,7 @@ double calcDR(double eta1, double eta2, double phi1, double phi2)
     return sqrt( dphi*dphi + deta*deta ) ;
 }
 
-void NtupleClass::Loop()
+void NtupleClass::Loop(std::string runtype)
 {
 //   In a ROOT session, you can do:
 //      root> .L NtupleClass.C
@@ -68,6 +68,8 @@ void NtupleClass::Loop()
    // make some histograms
    // -----------------------
    TH1D *myHisto  = new TH1D("njets","njets", 20, 0, 20);
+   TH1D *h_met  = new TH1D("h_met","h_met", 20, 0, 200);
+   TH1D *h_ht  = new TH1D("h_ht","h_ht", 60, 0, 3000);
    TH1D *h_ntops  = new TH1D("h_ntops","h_ntops", 5, 0, 5);
    TH1D *h_ntops_3jet  = new TH1D("h_ntops_3jet","h_ntops_3jet", 5, 0, 5);
    TH1D *h_ntops_2jet  = new TH1D("h_ntops_2jet","h_ntops_2jet", 5, 0, 5);
@@ -110,6 +112,7 @@ void NtupleClass::Loop()
    TH2D *h_top_gentop_topmatch_minDR_Dpt_3jet_daughters = new TH2D("h_top_gentop_topmatch_minDR_Dpt_3jet_daughters", "h_top_gentop_topmatch_minDR_Dpt_3jet_daughters", 60, 0, 3, 50, 0, 5); 
 
    TH1D *h_top_trijet_n_matched_constituents = new TH1D("h_top_trijet_n_matched_constituents", "h_top_trijet_n_matched_constituents", 4, -0.5, 3.5);
+   TH1D *h_top_trijet_match_n_matched_constituents = new TH1D("h_top_trijet_match_n_matched_constituents", "h_top_trijet_match_n_matched_constituents", 4, -0.5, 3.5);
    TH2D *h_top_gentop_minDR_Dpt_anymatch = new TH2D("h_top_gentop_minDR_Dpt_anymatch", "h_top_gentop_minDR_Dpt_anymatch", 60, 0, 3, 50, 0, 5);
    TH2D *h_top_gentop_minDR_Dpt_3match = new TH2D("h_top_gentop_minDR_Dpt_3match", "h_top_gentop_minDR_Dpt_3match", 60, 0, 3, 50, 0, 5);
    TH2D *h_top_gentop_minDR_Dpt_2match = new TH2D("h_top_gentop_minDR_Dpt_2match", "h_top_gentop_minDR_Dpt_2match", 60, 0, 3, 50, 0, 5);
@@ -173,6 +176,7 @@ void NtupleClass::Loop()
    TH2D *h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters = new TH2D("h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters", "h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters", 60, 0, 3, 50, 0, 5); 
 
    TH1D *h_baseline_top_trijet_n_matched_constituents = new TH1D("h_baseline_top_trijet_n_matched_constituents", "h_baseline_top_trijet_n_matched_constituents", 4, -0.5, 3.5);
+   TH1D *h_baseline_top_trijet_match_n_matched_constituents = new TH1D("h_baseline_top_trijet_match_n_matched_constituents", "h_baseline_top_trijet_match_n_matched_constituents", 4, -0.5, 3.5);
    TH2D *h_baseline_top_gentop_minDR_Dpt_anymatch = new TH2D("h_baseline_top_gentop_minDR_Dpt_anymatch", "h_baseline_top_gentop_minDR_Dpt_anymatch", 60, 0, 3, 50, 0, 5);
    TH2D *h_baseline_top_gentop_minDR_Dpt_3match = new TH2D("h_baseline_top_gentop_minDR_Dpt_3match", "h_baseline_top_gentop_minDR_Dpt_3match", 60, 0, 3, 50, 0, 5);
    TH2D *h_baseline_top_gentop_minDR_Dpt_2match = new TH2D("h_baseline_top_gentop_minDR_Dpt_2match", "h_baseline_top_gentop_minDR_Dpt_2match", 60, 0, 3, 50, 0, 5);
@@ -222,10 +226,12 @@ void NtupleClass::Loop()
    TEfficiency* toptag_partially_matched = new TEfficiency("toptag_partially_matched","One top matched;top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5);
    TEfficiency* toptag_unmatched = new TEfficiency("toptag_unmatched","Both tops not matched;top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5);
 
+   TH2D* toptag_breakdown = new TH2D("toptag_breakdown","Number of events/category;top[0] category;top[1] category;#Events",3,0.5,3.5,3,0.5,3.5);
+
 
    // Cut flows
-   TEfficiency* event_sel = new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",7,0,7);
-   TEfficiency* event_sel_total = new TEfficiency("event_sel_total","Total event selection efficiency;Cut;#epsilon",7,0,7);
+   TEfficiency* event_sel = new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",8,0,8);
+   TEfficiency* event_sel_total = new TEfficiency("event_sel_total","Total event selection efficiency;Cut;#epsilon",8,0,8);
 
    TopTagger tt;
    tt.setCfgFile("TopTagger.cfg");
@@ -239,8 +245,6 @@ void NtupleClass::Loop()
       nbytes += nb;
 
       if ( jentry % (nentries/10) == 0 ) printf("  Event %9llu / %9llu  (%2.0f%%)\n", jentry, nentries, 100*(jentry*1.)/(nentries*1.) ) ;
-
-      myHisto->Fill(NJets);
 
       // -----------------
       // check for number of hadronic tops at gen level
@@ -349,7 +353,7 @@ void NtupleClass::Loop()
       }
 
       // Only keep events with two hadronic top decays
-      if (nhadWs != 4) continue;  
+      if (runtype.find("qcd") == std::string::npos && nhadWs != 4) continue;  
 
       // Figure out whether the gentop is more similar to a monojet, dijet or trijet reco top
       // Monojet criterion: pT>400, DR(daughter,top)<0.8
@@ -522,40 +526,45 @@ void NtupleClass::Loop()
 
 
       // Fill event selection efficiencies
-      event_sel_total->Fill(HT_pt40>500,0);
-      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 ,1);
-      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 ,2);
-      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 ,3);
-      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 ,4);
-      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 && tops.size()>1 ,5);
-      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 && tops.size()>1 && rec_njet_pt20>=8 ,6);
+      event_sel_total->Fill(true,0);
+      event_sel_total->Fill(HT_pt40>500,1);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 ,2);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 ,3);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 ,4);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 ,5);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 && tops.size()>1 ,6);
+      event_sel_total->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 && tops.size()>1 && rec_njet_pt20>=8 ,7);
       
-      event_sel->Fill(HT_pt40>500,0);
+      event_sel->Fill(true,0);
+      event_sel->Fill(HT_pt40>500,1);
       if(HT_pt40>500)
       {
-          event_sel->Fill(rec_njet_pt45>=6,1);
+          event_sel->Fill(rec_njet_pt45>=6,2);
           if (rec_njet_pt45>=6)
           {
-              event_sel->Fill(rec_njet_pt45_btag>0,2);
+              event_sel->Fill(rec_njet_pt45_btag>0,3);
               if (rec_njet_pt45_btag>0)
               {
-                  event_sel->Fill(tops.size()>0,3);
+                  event_sel->Fill(tops.size()>0,4);
                   if (tops.size()>0)
                   {
-                      event_sel->Fill(rec_njet_pt45_btag>1,4);
+                      event_sel->Fill(rec_njet_pt45_btag>1,5);
                       if (rec_njet_pt45_btag>1)
                       {
-                          event_sel->Fill(tops.size()>1,5);
+                          event_sel->Fill(tops.size()>1,6);
                           if (tops.size()>1)
                           {
-                              event_sel->Fill(rec_njet_pt20>=8,6);
+                              event_sel->Fill(rec_njet_pt20>=8,7);
                           }
                       }
                   }
               }
           }
       }
-
+ 
+      myHisto->Fill(NJets);
+      h_met->Fill(MET);
+      h_ht->Fill(HT);
 
       // ----------------------------------
       // -- Study top tagger performance --
@@ -563,6 +572,7 @@ void NtupleClass::Loop()
 
       // --- Gen matching ---
       int n_matched_recotops = 0;
+      int n_matched_other = 0;
       int n_matched_recotops_auto = 0;
       int ntops_3jet=0;
       int ntops_2jet=0;
@@ -675,7 +685,8 @@ void NtupleClass::Loop()
               toptag_singletrate_excl_baseline->Fill( (matched_singlet || matched_singlino) && (!matched_top), top->p().Pt());
           }
           if(matched_top) n_matched_recotops++;
-          
+          if((matched_neutralino || matched_singlet || matched_singlino) && (!matched_top))
+              n_matched_other++;
           // Compare with what comes out of the top tagger itself: 
           const TLorentzVector* bestgentop = top->getBestGenTopMatch(0.4);
           if(bestgentop != nullptr) n_matched_recotops_auto++;
@@ -742,6 +753,8 @@ void NtupleClass::Loop()
               }
               //std::cout << "Was able to match " << n_matched_constituents << " AK4 constituents to a genlevel top daughter" << std::endl;
               h_top_trijet_n_matched_constituents->Fill(n_matched_constituents);
+              if(matched_top)
+                  h_top_trijet_match_n_matched_constituents->Fill(n_matched_constituents);
               h_top_gentop_minDR_Dpt_anymatch->Fill(minDR, Dpt_top_gentop);
               h_top_gentop_discr_anymatch->Fill(top->getDiscriminator());
               if(passBaseline)
@@ -753,8 +766,10 @@ void NtupleClass::Loop()
                   h_baseline_top_trijet_n_matched_constituents->Fill(n_matched_constituents);
                   h_baseline_top_gentop_minDR_Dpt_anymatch->Fill(minDR, Dpt_top_gentop);
                   h_baseline_top_gentop_discr_anymatch->Fill(top->getDiscriminator());
+                  if(matched_top)
+                      h_baseline_top_trijet_match_n_matched_constituents->Fill(n_matched_constituents);
               }
-              if(minDR<0.4)
+              if(matched_top)
               {
                   h_top_gentop_discr_anymatch_topmatch->Fill(top->getDiscriminator());
                   if(passBaseline)
@@ -957,76 +972,29 @@ void NtupleClass::Loop()
       
       h_dphi_2tops->Fill(calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()));
 
-
-      // fully matched or not
-      bool fully_matched = false;
-      bool partially_matched = false;
-      bool unmatched = false;
-      if (n_matched_recotops >= 2)
-          fully_matched = true;
-      else if(n_matched_recotops == 1)
-          partially_matched = true;
-      else if(n_matched_recotops == 0)
-          unmatched = true;
-
-      toptag_fully_matched->Fill(fully_matched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
-      toptag_partially_matched->Fill(partially_matched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
-      toptag_unmatched->Fill(unmatched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
-
-      // Check fake rates per category
-      if(tops[0]->getNConstituents() == 1)
+      if(n_matched_other == 0)
       {
-          if(tops[1]->getNConstituents() == 1)
-          {
-              // stuff
-              
-          } 
-          else if(tops[1]->getNConstituents() == 2)
-          {
-              // stuff
-          }
-          else if(tops[1]->getNConstituents() == 3)
-          {
-              // stuff
-          }
+          // fully matched or not
+          bool fully_matched = false;
+          bool partially_matched = false;
+          bool unmatched = false;
+          if (n_matched_recotops >= 2)
+              fully_matched = true;
+          else if(n_matched_recotops == 1)
+              partially_matched = true;
+          else if(n_matched_recotops == 0)
+              unmatched = true;
+          
+          toptag_fully_matched->Fill(fully_matched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
+          toptag_partially_matched->Fill(partially_matched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
+          toptag_unmatched->Fill(unmatched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
       }
-      else if(tops[0]->getNConstituents() == 2)
-      {
-          if(tops[1]->getNConstituents() == 1)
-          {
-              // stuff
-          } 
-          else if(tops[1]->getNConstituents() == 2)
-          {
-              // stuff
-          }
-          else if(tops[1]->getNConstituents() == 3)
-          {
-              // stuff
-          }
-      }
-      else if(tops[0]->getNConstituents() == 3)
-      {
-          if(tops[1]->getNConstituents() == 1)
-          {
-              // stuff
-          } 
-          else if(tops[1]->getNConstituents() == 2)
-          {
-              // stuff
-          }
-          else if(tops[1]->getNConstituents() == 3)
-          {
-              // stuff
-          }
-      }
-
-
-
-      
+      toptag_breakdown->Fill(tops[0]->getNConstituents(), tops[1]->getNConstituents());
    }
 
    myHisto->Write();
+   h_met->Write();
+   h_ht->Write();
    h_ntops->Write();
    h_ntops_3jet->Write();
    h_ntops_2jet->Write();
@@ -1036,6 +1004,7 @@ void NtupleClass::Loop()
    h_baseline_ntops_2jet->Write();
    h_baseline_ntops_1jet->Write();
    h_dphi_2tops->Write();
+   toptag_breakdown->Write();
 
    h_gentop_pT_daughterDR->Write();
 
@@ -1058,6 +1027,7 @@ void NtupleClass::Loop()
    h_top_gentop_minDR_Dpt_3jet_daughters->Write(); 
    
    h_top_trijet_n_matched_constituents->Write();
+   h_top_trijet_match_n_matched_constituents->Write();
    h_top_gentop_minDR_Dpt_anymatch->Write();
    h_top_gentop_minDR_Dpt_3match->Write();
    h_top_gentop_minDR_Dpt_2match->Write();
@@ -1113,6 +1083,7 @@ void NtupleClass::Loop()
    h_baseline_top_gentop_minDR_Dpt_3jet_daughters->Write(); 
    
    h_baseline_top_trijet_n_matched_constituents->Write();
+   h_baseline_top_trijet_match_n_matched_constituents->Write();
    h_baseline_top_gentop_minDR_Dpt_anymatch->Write();
    h_baseline_top_gentop_minDR_Dpt_3match->Write();
    h_baseline_top_gentop_minDR_Dpt_2match->Write();
