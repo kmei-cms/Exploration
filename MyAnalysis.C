@@ -28,9 +28,12 @@ int main(int argc, char *argv[])
 
     TFile* myfile = TFile::Open(outfile.c_str(), "RECREATE");
 
+    std::string type = "";
+    if(infile.find("qcd") != std::string::npos)
+        type = "qcd";
     
     NtupleClass t = NtupleClass(mytree);
-    t.Loop();
+    t.Loop(type);
 
 
     myfile->Close();
