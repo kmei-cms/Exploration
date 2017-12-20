@@ -2,7 +2,7 @@
 Collection of scripts, macros, tools to help us explore our signal models and design the analysis.
 
 
-## How to use the Top Tagger in a simple code
+## How to use the SUS-16-050 Top Tagger in a simple code
 
 First, set up a CMSSW area so that you have access to ROOT etc. 
 ```
@@ -81,3 +81,48 @@ To run:
 ```
 This will give a printout for the first 10 event containing the number of tops it found, and some information on each top. 
 You can customize TopTagger.cfg to enable/disable certain top candidates, i.e. in the TTMBasicClusterAlgo block, set doTrijet/doDijet/doMonojet to true or false. 
+
+
+
+
+## Using the tensor-flow based top tagger
+
+To have easy access to TensorFlow, we need to work in a CMSSW93 release:
+```
+cmsrel CMSSW_9_3_3
+cd CMSSW_9_3_3/src/
+cmsenv
+```
+
+Then, check out the latest tagged version of the top tagger repository. 
+
+```
+git clone git@github.com:susy2015/TopTagger.git -b IntermediateRecipeV0
+cd TopTagger
+```
+
+Then configure and compile the tagger:
+```
+cd TopTagger/test
+./configure 
+make -j4
+```
+
+Now also check out our repository if not done already:
+```
+cd $CMSSW_BASE/src
+git clone git@github.com:StealthStop/Exploration.git
+cd Exploration
+# best option:
+source ../TopTagger/TopTagger/test/taggerSetup.sh
+# or update the taggerSetup.csh in the Exploration repo to point to the TopTagger repo in the CMSSW93 area
+source taggerSetup.csh
+```
+
+Last step is to get the cfg file for the top tagger, and the TF output model file for the resolved part.
+```
+$CMSSW_BASE/src/TopTagger/Tools/getTaggerCfg.sh  -t Tensorflow_Example_v1.0.1
+```
+
+No changes to the analysis code should be needed. 
+
