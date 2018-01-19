@@ -228,6 +228,90 @@ void NtupleClass::Loop(std::string runtype)
 
    TH2D* toptag_breakdown = new TH2D("toptag_breakdown","Number of events/category;top[0] category;top[1] category;#Events",3,0.5,3.5,3,0.5,3.5);
 
+   // Histograms of tagger inputs
+   TH1D* h_cand_m = new TH1D("h_cand_m", "h_cand_m", 50, 50, 300);
+   TH1D* h_cand_p = new TH1D("h_cand_p", "h_cand_p", 50, 0, 2000);
+   TH1D* h_j12_m = new TH1D("h_j12_m", "h_j12_m", 50, 0, 250);
+   TH1D* h_j23_m = new TH1D("h_j23_m", "h_j23_m", 50, 0, 200);
+   TH1D* h_j13_m = new TH1D("h_j13_m", "h_j13_m", 50, 0, 200);
+   TH1D* h_dTheta12 = new TH1D("h_dTheta12", "h_dTheta12", 60, 1, 4);
+   TH1D* h_dTheta23 = new TH1D("h_dTheta23", "h_dTheta23", 60, 0, 3);
+   TH1D* h_dTheta13 = new TH1D("h_dTheta13", "h_dTheta13", 60, 1, 4);
+   TH1D* h_j1_m = new TH1D("h_j1_m", "h_j1_m", 50, 0, 100);
+   TH1D* h_j1_p = new TH1D("h_j1_p", "h_j1_p", 50, 0, 250);
+   TH1D* h_j1_QGL = new TH1D("h_j1_QGL", "h_j1_QGL", 50, 0, 1);
+   TH1D* h_j1_CSV = new TH1D("h_j1_CSV", "h_j1_CSV", 50, 0, 1);
+   TH1D* h_j2_m = new TH1D("h_j2_m", "h_j2_m", 50, 0, 100);
+   TH1D* h_j2_p = new TH1D("h_j2_p", "h_j2_p", 50, 0, 250);
+   TH1D* h_j2_QGL = new TH1D("h_j2_QGL", "h_j2_QGL", 50, 0, 1);
+   TH1D* h_j2_CSV = new TH1D("h_j2_CSV", "h_j2_CSV", 50, 0, 1);
+   TH1D* h_j3_m = new TH1D("h_j3_m", "h_j3_m", 50, 0, 100);
+   TH1D* h_j3_p = new TH1D("h_j3_p", "h_j3_p", 50, 0, 250);
+   TH1D* h_j3_QGL = new TH1D("h_j3_QGL", "h_j3_QGL", 50, 0, 1);
+   TH1D* h_j3_CSV = new TH1D("h_j3_CSV", "h_j3_CSV", 50, 0, 1);
+
+   TH1D* h_cand_m_topmatch = new TH1D("h_cand_m_topmatch", "h_cand_m_topmatch", 50, 50, 300);
+   TH1D* h_cand_p_topmatch = new TH1D("h_cand_p_topmatch", "h_cand_p_topmatch", 50, 0, 2000);
+   TH1D* h_j12_m_topmatch = new TH1D("h_j12_m_topmatch", "h_j12_m_topmatch", 50, 0, 250);
+   TH1D* h_j23_m_topmatch = new TH1D("h_j23_m_topmatch", "h_j23_m_topmatch", 50, 0, 200);
+   TH1D* h_j13_m_topmatch = new TH1D("h_j13_m_topmatch", "h_j13_m_topmatch", 50, 0, 200);
+   TH1D* h_dTheta12_topmatch = new TH1D("h_dTheta12_topmatch", "h_dTheta12_topmatch", 60, 1, 4);
+   TH1D* h_dTheta23_topmatch = new TH1D("h_dTheta23_topmatch", "h_dTheta23_topmatch", 60, 0, 3);
+   TH1D* h_dTheta13_topmatch = new TH1D("h_dTheta13_topmatch", "h_dTheta13_topmatch", 60, 1, 4);
+   TH1D* h_j1_m_topmatch = new TH1D("h_j1_m_topmatch", "h_j1_m_topmatch", 50, 0, 100);
+   TH1D* h_j1_p_topmatch = new TH1D("h_j1_p_topmatch", "h_j1_p_topmatch", 50, 0, 250);
+   TH1D* h_j1_QGL_topmatch = new TH1D("h_j1_QGL_topmatch", "h_j1_QGL_topmatch", 50, 0, 1);
+   TH1D* h_j1_CSV_topmatch = new TH1D("h_j1_CSV_topmatch", "h_j1_CSV_topmatch", 50, 0, 1);
+   TH1D* h_j2_m_topmatch = new TH1D("h_j2_m_topmatch", "h_j2_m_topmatch", 50, 0, 100);
+   TH1D* h_j2_p_topmatch = new TH1D("h_j2_p_topmatch", "h_j2_p_topmatch", 50, 0, 250);
+   TH1D* h_j2_QGL_topmatch = new TH1D("h_j2_QGL_topmatch", "h_j2_QGL_topmatch", 50, 0, 1);
+   TH1D* h_j2_CSV_topmatch = new TH1D("h_j2_CSV_topmatch", "h_j2_CSV_topmatch", 50, 0, 1);
+   TH1D* h_j3_m_topmatch = new TH1D("h_j3_m_topmatch", "h_j3_m_topmatch", 50, 0, 100);
+   TH1D* h_j3_p_topmatch = new TH1D("h_j3_p_topmatch", "h_j3_p_topmatch", 50, 0, 250);
+   TH1D* h_j3_QGL_topmatch = new TH1D("h_j3_QGL_topmatch", "h_j3_QGL_topmatch", 50, 0, 1);
+   TH1D* h_j3_CSV_topmatch = new TH1D("h_j3_CSV_topmatch", "h_j3_CSV_topmatch", 50, 0, 1);
+
+   TH1D* h_cand_m_susymatch = new TH1D("h_cand_m_susymatch", "h_cand_m_susymatch", 50, 50, 300);
+   TH1D* h_cand_p_susymatch = new TH1D("h_cand_p_susymatch", "h_cand_p_susymatch", 50, 0, 2000);
+   TH1D* h_j12_m_susymatch = new TH1D("h_j12_m_susymatch", "h_j12_m_susymatch", 50, 0, 250);
+   TH1D* h_j23_m_susymatch = new TH1D("h_j23_m_susymatch", "h_j23_m_susymatch", 50, 0, 200);
+   TH1D* h_j13_m_susymatch = new TH1D("h_j13_m_susymatch", "h_j13_m_susymatch", 50, 0, 200);
+   TH1D* h_dTheta12_susymatch = new TH1D("h_dTheta12_susymatch", "h_dTheta12_susymatch", 60, 1, 4);
+   TH1D* h_dTheta23_susymatch = new TH1D("h_dTheta23_susymatch", "h_dTheta23_susymatch", 60, 0, 3);
+   TH1D* h_dTheta13_susymatch = new TH1D("h_dTheta13_susymatch", "h_dTheta13_susymatch", 60, 1, 4);
+   TH1D* h_j1_m_susymatch = new TH1D("h_j1_m_susymatch", "h_j1_m_susymatch", 50, 0, 100);
+   TH1D* h_j1_p_susymatch = new TH1D("h_j1_p_susymatch", "h_j1_p_susymatch", 50, 0, 250);
+   TH1D* h_j1_QGL_susymatch = new TH1D("h_j1_QGL_susymatch", "h_j1_QGL_susymatch", 50, 0, 1);
+   TH1D* h_j1_CSV_susymatch = new TH1D("h_j1_CSV_susymatch", "h_j1_CSV_susymatch", 50, 0, 1);
+   TH1D* h_j2_m_susymatch = new TH1D("h_j2_m_susymatch", "h_j2_m_susymatch", 50, 0, 100);
+   TH1D* h_j2_p_susymatch = new TH1D("h_j2_p_susymatch", "h_j2_p_susymatch", 50, 0, 250);
+   TH1D* h_j2_QGL_susymatch = new TH1D("h_j2_QGL_susymatch", "h_j2_QGL_susymatch", 50, 0, 1);
+   TH1D* h_j2_CSV_susymatch = new TH1D("h_j2_CSV_susymatch", "h_j2_CSV_susymatch", 50, 0, 1);
+   TH1D* h_j3_m_susymatch = new TH1D("h_j3_m_susymatch", "h_j3_m_susymatch", 50, 0, 100);
+   TH1D* h_j3_p_susymatch = new TH1D("h_j3_p_susymatch", "h_j3_p_susymatch", 50, 0, 250);
+   TH1D* h_j3_QGL_susymatch = new TH1D("h_j3_QGL_susymatch", "h_j3_QGL_susymatch", 50, 0, 1);
+   TH1D* h_j3_CSV_susymatch = new TH1D("h_j3_CSV_susymatch", "h_j3_CSV_susymatch", 50, 0, 1);
+
+   TH1D* h_cand_m_nomatch = new TH1D("h_cand_m_nomatch", "h_cand_m_nomatch", 50, 50, 300);
+   TH1D* h_cand_p_nomatch = new TH1D("h_cand_p_nomatch", "h_cand_p_nomatch", 50, 0, 2000);
+   TH1D* h_j12_m_nomatch = new TH1D("h_j12_m_nomatch", "h_j12_m_nomatch", 50, 0, 250);
+   TH1D* h_j23_m_nomatch = new TH1D("h_j23_m_nomatch", "h_j23_m_nomatch", 50, 0, 200);
+   TH1D* h_j13_m_nomatch = new TH1D("h_j13_m_nomatch", "h_j13_m_nomatch", 50, 0, 200);
+   TH1D* h_dTheta12_nomatch = new TH1D("h_dTheta12_nomatch", "h_dTheta12_nomatch", 60, 1, 4);
+   TH1D* h_dTheta23_nomatch = new TH1D("h_dTheta23_nomatch", "h_dTheta23_nomatch", 60, 0, 3);
+   TH1D* h_dTheta13_nomatch = new TH1D("h_dTheta13_nomatch", "h_dTheta13_nomatch", 60, 1, 4);
+   TH1D* h_j1_m_nomatch = new TH1D("h_j1_m_nomatch", "h_j1_m_nomatch", 50, 0, 100);
+   TH1D* h_j1_p_nomatch = new TH1D("h_j1_p_nomatch", "h_j1_p_nomatch", 50, 0, 250);
+   TH1D* h_j1_QGL_nomatch = new TH1D("h_j1_QGL_nomatch", "h_j1_QGL_nomatch", 50, 0, 1);
+   TH1D* h_j1_CSV_nomatch = new TH1D("h_j1_CSV_nomatch", "h_j1_CSV_nomatch", 50, 0, 1);
+   TH1D* h_j2_m_nomatch = new TH1D("h_j2_m_nomatch", "h_j2_m_nomatch", 50, 0, 100);
+   TH1D* h_j2_p_nomatch = new TH1D("h_j2_p_nomatch", "h_j2_p_nomatch", 50, 0, 250);
+   TH1D* h_j2_QGL_nomatch = new TH1D("h_j2_QGL_nomatch", "h_j2_QGL_nomatch", 50, 0, 1);
+   TH1D* h_j2_CSV_nomatch = new TH1D("h_j2_CSV_nomatch", "h_j2_CSV_nomatch", 50, 0, 1);
+   TH1D* h_j3_m_nomatch = new TH1D("h_j3_m_nomatch", "h_j3_m_nomatch", 50, 0, 100);
+   TH1D* h_j3_p_nomatch = new TH1D("h_j3_p_nomatch", "h_j3_p_nomatch", 50, 0, 2500);
+   TH1D* h_j3_QGL_nomatch = new TH1D("h_j3_QGL_nomatch", "h_j3_QGL_nomatch", 50, 0, 1);
+   TH1D* h_j3_CSV_nomatch = new TH1D("h_j3_CSV_nomatch", "h_j3_CSV_nomatch", 50, 0, 1);
 
    // Cut flows
    TEfficiency* event_sel = new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",8,0,8);
@@ -570,6 +654,180 @@ void NtupleClass::Loop(std::string runtype)
       // -- Study top tagger performance --
       // ----------------------------------
 
+      ttUtility::TrijetInputCalculator TIC = ttUtility::TrijetInputCalculator();
+      std::vector<std::string> myvars;
+      myvars.push_back("cand_m");
+      myvars.push_back("cand_p");
+      myvars.push_back("j12_m");
+      myvars.push_back("j13_m");
+      myvars.push_back("j23_m");
+      myvars.push_back("dTheta12");
+      myvars.push_back("dTheta23");
+      myvars.push_back("dTheta13");
+      myvars.push_back("j1_m");
+      myvars.push_back("j1_p");
+      myvars.push_back("j1_QGL");
+      myvars.push_back("j1_CSV");
+      myvars.push_back("j2_m");
+      myvars.push_back("j2_p");
+      myvars.push_back("j2_QGL");
+      myvars.push_back("j2_CSV");
+      myvars.push_back("j3_m");
+      myvars.push_back("j3_p");
+      myvars.push_back("j3_QGL");
+      myvars.push_back("j3_CSV");
+      std::vector<float> mydata;
+      mydata.resize(myvars.size());
+      TIC.mapVars(myvars, mydata.data());
+
+      // --- Check input variables for resolved tagger ---
+      for(const TopObject top : ttr.getTopCandidates())
+      {
+          TIC.calculateVars(top);
+          h_cand_m->Fill(mydata[0]);
+          h_cand_p->Fill(mydata[1]);
+          h_j12_m->Fill(mydata[2]);
+          h_j23_m->Fill(mydata[3]);
+          h_j13_m->Fill(mydata[4]);
+          h_dTheta12->Fill(mydata[5]);
+          h_dTheta23->Fill(mydata[6]);
+          h_dTheta13->Fill(mydata[7]);
+          h_j1_m->Fill(mydata[8]);
+          h_j1_p->Fill(mydata[9]);
+          h_j1_QGL->Fill(mydata[10]);
+          h_j1_CSV->Fill(mydata[11]);
+          h_j2_m->Fill(mydata[12]);
+          h_j2_p->Fill(mydata[13]);
+          h_j2_QGL->Fill(mydata[14]);
+          h_j2_CSV->Fill(mydata[15]);
+          h_j3_m->Fill(mydata[16]);
+          h_j3_p->Fill(mydata[17]);
+          h_j3_QGL->Fill(mydata[18]);
+          h_j3_CSV->Fill(mydata[19]);
+
+          // Also divide this into categories
+          bool matches_top = false;
+          bool matches_susy = false;
+
+          for (TLorentzVector hadtop : hadtops)
+          {
+              double DR_top_gentop = calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
+              double Dpt_top_gentop = abs(top.p().Pt() - hadtop.Pt())/top.p().Pt();
+
+              if(DR_top_gentop<0.4 && Dpt_top_gentop < 0.5)
+              {
+                  matches_top = true;
+                  break;
+              }
+          }
+          for (TLorentzVector hadtop : neutralinos)
+          {
+              double DR_top_gentop = calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
+              double Dpt_top_gentop = abs(top.p().Pt() - hadtop.Pt())/top.p().Pt();
+
+              if(DR_top_gentop<0.4 && Dpt_top_gentop < 0.5)
+              {
+                  matches_susy = true;
+                  break;
+              }
+          }
+          for (TLorentzVector hadtop : singlets)
+          {
+              double DR_top_gentop = calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
+              double Dpt_top_gentop = abs(top.p().Pt() - hadtop.Pt())/top.p().Pt();
+
+              if(DR_top_gentop<0.4 && Dpt_top_gentop < 0.5)
+              {
+                  matches_susy = true;
+                  break;
+              }
+          }
+          for (TLorentzVector hadtop : singlinos)
+          {
+              double DR_top_gentop = calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
+              double Dpt_top_gentop = abs(top.p().Pt() - hadtop.Pt())/top.p().Pt();
+
+              if(DR_top_gentop<0.4 && Dpt_top_gentop < 0.5)
+              {
+                  matches_susy = true;
+                  break;
+              }
+          }
+
+          if(matches_top)
+          {
+              h_cand_m_topmatch->Fill(mydata[0]);
+              h_cand_p_topmatch->Fill(mydata[1]);
+              h_j12_m_topmatch->Fill(mydata[2]);
+              h_j23_m_topmatch->Fill(mydata[3]);
+              h_j13_m_topmatch->Fill(mydata[4]);
+              h_dTheta12_topmatch->Fill(mydata[5]);
+              h_dTheta23_topmatch->Fill(mydata[6]);
+              h_dTheta13_topmatch->Fill(mydata[7]);
+              h_j1_m_topmatch->Fill(mydata[8]);
+              h_j1_p_topmatch->Fill(mydata[9]);
+              h_j1_QGL_topmatch->Fill(mydata[10]);
+              h_j1_CSV_topmatch->Fill(mydata[11]);
+              h_j2_m_topmatch->Fill(mydata[12]);
+              h_j2_p_topmatch->Fill(mydata[13]);
+              h_j2_QGL_topmatch->Fill(mydata[14]);
+              h_j2_CSV_topmatch->Fill(mydata[15]);
+              h_j3_m_topmatch->Fill(mydata[16]);
+              h_j3_p_topmatch->Fill(mydata[17]);
+              h_j3_QGL_topmatch->Fill(mydata[18]);
+              h_j3_CSV_topmatch->Fill(mydata[19]);
+          }
+          else if(matches_susy)
+          {
+              h_cand_m_susymatch->Fill(mydata[0]);
+              h_cand_p_susymatch->Fill(mydata[1]);
+              h_j12_m_susymatch->Fill(mydata[2]);
+              h_j23_m_susymatch->Fill(mydata[3]);
+              h_j13_m_susymatch->Fill(mydata[4]);
+              h_dTheta12_susymatch->Fill(mydata[5]);
+              h_dTheta23_susymatch->Fill(mydata[6]);
+              h_dTheta13_susymatch->Fill(mydata[7]);
+              h_j1_m_susymatch->Fill(mydata[8]);
+              h_j1_p_susymatch->Fill(mydata[9]);
+              h_j1_QGL_susymatch->Fill(mydata[10]);
+              h_j1_CSV_susymatch->Fill(mydata[11]);
+              h_j2_m_susymatch->Fill(mydata[12]);
+              h_j2_p_susymatch->Fill(mydata[13]);
+              h_j2_QGL_susymatch->Fill(mydata[14]);
+              h_j2_CSV_susymatch->Fill(mydata[15]);
+              h_j3_m_susymatch->Fill(mydata[16]);
+              h_j3_p_susymatch->Fill(mydata[17]);
+              h_j3_QGL_susymatch->Fill(mydata[18]);
+              h_j3_CSV_susymatch->Fill(mydata[19]);
+          }
+          else 
+          {
+              h_cand_m_nomatch->Fill(mydata[0]);
+              h_cand_p_nomatch->Fill(mydata[1]);
+              h_j12_m_nomatch->Fill(mydata[2]);
+              h_j23_m_nomatch->Fill(mydata[3]);
+              h_j13_m_nomatch->Fill(mydata[4]);
+              h_dTheta12_nomatch->Fill(mydata[5]);
+              h_dTheta23_nomatch->Fill(mydata[6]);
+              h_dTheta13_nomatch->Fill(mydata[7]);
+              h_j1_m_nomatch->Fill(mydata[8]);
+              h_j1_p_nomatch->Fill(mydata[9]);
+              h_j1_QGL_nomatch->Fill(mydata[10]);
+              h_j1_CSV_nomatch->Fill(mydata[11]);
+              h_j2_m_nomatch->Fill(mydata[12]);
+              h_j2_p_nomatch->Fill(mydata[13]);
+              h_j2_QGL_nomatch->Fill(mydata[14]);
+              h_j2_CSV_nomatch->Fill(mydata[15]);
+              h_j3_m_nomatch->Fill(mydata[16]);
+              h_j3_p_nomatch->Fill(mydata[17]);
+              h_j3_QGL_nomatch->Fill(mydata[18]);
+              h_j3_CSV_nomatch->Fill(mydata[19]);
+          }
+
+      }
+
+
+
       // --- Gen matching ---
       int n_matched_recotops = 0;
       int n_matched_other = 0;
@@ -621,7 +879,7 @@ void NtupleClass::Loop(std::string runtype)
               }
           }
           matched_neutralino = minDR_top_neutralino < 0.4 && Dpt_top_neutralino < 0.5;
-          if (matched_neutralino && matched_top)
+          if (verbose && matched_neutralino && matched_top)
           {
               std::cout << "Matched to a neutralino and to a top quark..." << std::endl;
               std::cout << "DR and Dpt for neutralino: " << minDR_top_neutralino << ", " << Dpt_top_neutralino << std::endl;
@@ -642,7 +900,7 @@ void NtupleClass::Loop(std::string runtype)
               }
           }
           matched_singlet = minDR_top_singlet < 0.4 && Dpt_top_singlet < 0.5;
-          if (matched_singlet && matched_top)
+          if (verbose && matched_singlet && matched_top)
           {
               std::cout << "Matched to a singlet and to a top quark..." << std::endl;
               std::cout << "DR and Dpt for singlet: " << minDR_top_singlet << ", " << Dpt_top_singlet << std::endl;
@@ -660,7 +918,7 @@ void NtupleClass::Loop(std::string runtype)
               }
           }
           matched_singlino = minDR_top_singlino < 0.4 && Dpt_top_singlino < 0.5;
-          if (matched_singlino && matched_top)
+          if (verbose && matched_singlino && matched_top)
           {
               std::cout << "Matched to a singlino and to a top quark..." << std::endl;
               std::cout << "DR and Dpt for singlino: " << minDR_top_singlino << ", " << Dpt_top_singlino << std::endl;
@@ -1117,7 +1375,93 @@ void NtupleClass::Loop(std::string runtype)
    h_baseline_gentop_pT_type3->Write();
 
 
-   std::cout << "Top tagging efficiency: " << toptag_eff->GetEfficiency(6) << std::endl; 
+   h_cand_m->Write();
+   h_cand_p->Write();
+   h_j12_m->Write();
+   h_j23_m->Write();
+   h_j13_m->Write();
+   h_dTheta12->Write();
+   h_dTheta23->Write();
+   h_dTheta13->Write();
+   h_j1_m->Write();
+   h_j1_p->Write();
+   h_j1_QGL->Write();
+   h_j1_CSV->Write();
+   h_j2_m->Write();
+   h_j2_p->Write();
+   h_j2_QGL->Write();
+   h_j2_CSV->Write();
+   h_j3_m->Write();
+   h_j3_p->Write();
+   h_j3_QGL->Write();
+   h_j3_CSV->Write();
+
+   h_cand_m_topmatch->Write();
+   h_cand_p_topmatch->Write();
+   h_j12_m_topmatch->Write();
+   h_j23_m_topmatch->Write();
+   h_j13_m_topmatch->Write();
+   h_dTheta12_topmatch->Write();
+   h_dTheta23_topmatch->Write();
+   h_dTheta13_topmatch->Write();
+   h_j1_m_topmatch->Write();
+   h_j1_p_topmatch->Write();
+   h_j1_QGL_topmatch->Write();
+   h_j1_CSV_topmatch->Write();
+   h_j2_m_topmatch->Write();
+   h_j2_p_topmatch->Write();
+   h_j2_QGL_topmatch->Write();
+   h_j2_CSV_topmatch->Write();
+   h_j3_m_topmatch->Write();
+   h_j3_p_topmatch->Write();
+   h_j3_QGL_topmatch->Write();
+   h_j3_CSV_topmatch->Write();
+
+   h_cand_m_susymatch->Write();
+   h_cand_p_susymatch->Write();
+   h_j12_m_susymatch->Write();
+   h_j23_m_susymatch->Write();
+   h_j13_m_susymatch->Write();
+   h_dTheta12_susymatch->Write();
+   h_dTheta23_susymatch->Write();
+   h_dTheta13_susymatch->Write();
+   h_j1_m_susymatch->Write();
+   h_j1_p_susymatch->Write();
+   h_j1_QGL_susymatch->Write();
+   h_j1_CSV_susymatch->Write();
+   h_j2_m_susymatch->Write();
+   h_j2_p_susymatch->Write();
+   h_j2_QGL_susymatch->Write();
+   h_j2_CSV_susymatch->Write();
+   h_j3_m_susymatch->Write();
+   h_j3_p_susymatch->Write();
+   h_j3_QGL_susymatch->Write();
+   h_j3_CSV_susymatch->Write();
+
+   h_cand_m_nomatch->Write();
+   h_cand_p_nomatch->Write();
+   h_j12_m_nomatch->Write();
+   h_j23_m_nomatch->Write();
+   h_j13_m_nomatch->Write();
+   h_dTheta12_nomatch->Write();
+   h_dTheta23_nomatch->Write();
+   h_dTheta13_nomatch->Write();
+   h_j1_m_nomatch->Write();
+   h_j1_p_nomatch->Write();
+   h_j1_QGL_nomatch->Write();
+   h_j1_CSV_nomatch->Write();
+   h_j2_m_nomatch->Write();
+   h_j2_p_nomatch->Write();
+   h_j2_QGL_nomatch->Write();
+   h_j2_CSV_nomatch->Write();
+   h_j3_m_nomatch->Write();
+   h_j3_p_nomatch->Write();
+   h_j3_QGL_nomatch->Write();
+   h_j3_CSV_nomatch->Write();
+
+
+
+   //std::cout << "Top tagging efficiency: " << toptag_eff->GetEfficiency(6) << std::endl; 
    toptag_eff->Write();
    toptag_eff_type1->Write();
    toptag_eff_type2->Write();
