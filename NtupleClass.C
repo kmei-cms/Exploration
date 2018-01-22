@@ -1,5 +1,7 @@
 #define NtupleClass_cxx
 #include "NtupleClass.h"
+
+#include "Utility.h"
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TStyle.h>
@@ -13,25 +15,6 @@
 #include "TopTagger/TopTagger/include/TopTaggerUtilities.h"
 #include "TopTagger/CfgParser/include/TTException.h"
 
-
-double calcDPhi(double phi1, double phi2)
-{
-    double dphi = phi1 - phi2 ;
-    if ( dphi >  3.14159265 ) dphi -= 2*3.14159265 ;
-    if ( dphi < -3.14159265 ) dphi += 2*3.14159265 ;
-    return dphi;
-}
-
-double calcDR(double eta1, double eta2, double phi1, double phi2)
-{
-    double deta = fabs( eta1 - eta2 ) ;
-    
-    double dphi = phi1 - phi2 ;
-    if ( dphi > 3.1415926 ) dphi -= 2*3.1415926 ;
-    if ( dphi <-3.1415926 ) dphi += 2*3.1415926 ;
-    
-    return sqrt( dphi*dphi + deta*deta ) ;
-}
 
 void NtupleClass::Loop(std::string runtype)
 {
@@ -447,7 +430,7 @@ void NtupleClass::Loop(std::string runtype)
           double maxDR_gentop_daughter = 0;
           for(int idaughter=0; idaughter<hadtopdaughters[igentop].size(); idaughter++)
           {
-              double DR_gentop_daughter = calcDR(hadtops[igentop].Eta(), hadtopdaughters[igentop][idaughter]->Eta(), hadtops[igentop].Phi(), hadtopdaughters[igentop][idaughter]->Phi());
+              double DR_gentop_daughter = utility::calcDR(hadtops[igentop].Eta(), hadtopdaughters[igentop][idaughter]->Eta(), hadtops[igentop].Phi(), hadtopdaughters[igentop][idaughter]->Phi());
               if(DR_gentop_daughter>maxDR_gentop_daughter && hadtopdaughters[igentop][idaughter]->Pt()/hadtops[igentop].Pt() > 0.1)
                   maxDR_gentop_daughter = DR_gentop_daughter;
           }
@@ -583,7 +566,7 @@ void NtupleClass::Loop(std::string runtype)
               double maxDR_gentop_daughter = 0;
               for(int idaughter=0; idaughter<hadtopdaughters[igentop].size(); idaughter++)
               {
-                  double DR_gentop_daughter = calcDR(hadtops[igentop].Eta(), hadtopdaughters[igentop][idaughter]->Eta(), hadtops[igentop].Phi(), hadtopdaughters[igentop][idaughter]->Phi());
+                  double DR_gentop_daughter = utility::calcDR(hadtops[igentop].Eta(), hadtopdaughters[igentop][idaughter]->Eta(), hadtops[igentop].Phi(), hadtopdaughters[igentop][idaughter]->Phi());
                   if(DR_gentop_daughter>maxDR_gentop_daughter && hadtopdaughters[igentop][idaughter]->Pt()/hadtops[igentop].Pt() > 0.1)
                       maxDR_gentop_daughter = DR_gentop_daughter;
               }
@@ -711,7 +694,7 @@ void NtupleClass::Loop(std::string runtype)
 
           for (TLorentzVector hadtop : hadtops)
           {
-              double DR_top_gentop = calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
+              double DR_top_gentop = utility::calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
               double Dpt_top_gentop = abs(top.p().Pt() - hadtop.Pt())/top.p().Pt();
 
               if(DR_top_gentop<0.4 && Dpt_top_gentop < 0.5)
@@ -722,7 +705,7 @@ void NtupleClass::Loop(std::string runtype)
           }
           for (TLorentzVector hadtop : neutralinos)
           {
-              double DR_top_gentop = calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
+              double DR_top_gentop = utility::calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
               double Dpt_top_gentop = abs(top.p().Pt() - hadtop.Pt())/top.p().Pt();
 
               if(DR_top_gentop<0.4 && Dpt_top_gentop < 0.5)
@@ -733,7 +716,7 @@ void NtupleClass::Loop(std::string runtype)
           }
           for (TLorentzVector hadtop : singlets)
           {
-              double DR_top_gentop = calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
+              double DR_top_gentop = utility::calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
               double Dpt_top_gentop = abs(top.p().Pt() - hadtop.Pt())/top.p().Pt();
 
               if(DR_top_gentop<0.4 && Dpt_top_gentop < 0.5)
@@ -744,7 +727,7 @@ void NtupleClass::Loop(std::string runtype)
           }
           for (TLorentzVector hadtop : singlinos)
           {
-              double DR_top_gentop = calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
+              double DR_top_gentop = utility::calcDR(top.p().Eta(), hadtop.Eta(), top.p().Phi(), hadtop.Phi());
               double Dpt_top_gentop = abs(top.p().Pt() - hadtop.Pt())/top.p().Pt();
 
               if(DR_top_gentop<0.4 && Dpt_top_gentop < 0.5)
@@ -849,7 +832,7 @@ void NtupleClass::Loop(std::string runtype)
           double minDR = 999;
           for (int i_gentop=0; i_gentop<hadtops.size(); ++i_gentop)
           {
-              double DR_top_gentop = calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
+              double DR_top_gentop = utility::calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
               if (DR_top_gentop < minDR)
               {
                   minDR = DR_top_gentop;
@@ -871,7 +854,7 @@ void NtupleClass::Loop(std::string runtype)
           double Dpt_top_neutralino = -1;
           for (int i_chi=0; i_chi<neutralinos.size(); ++i_chi)
           {
-              double DR_top_neutralino = calcDR(top->p().Eta(), neutralinos[i_chi].Eta(), top->p().Phi(), neutralinos[i_chi].Phi());
+              double DR_top_neutralino = utility::calcDR(top->p().Eta(), neutralinos[i_chi].Eta(), top->p().Phi(), neutralinos[i_chi].Phi());
               if(DR_top_neutralino < minDR_top_neutralino)
               {
                   minDR_top_neutralino = DR_top_neutralino;
@@ -892,7 +875,7 @@ void NtupleClass::Loop(std::string runtype)
           double Dpt_top_singlet = -1;
           for (int i_chi=0; i_chi<singlets.size(); ++i_chi)
           {
-              double DR_top_singlet = calcDR(top->p().Eta(), singlets[i_chi].Eta(), top->p().Phi(), singlets[i_chi].Phi());
+              double DR_top_singlet = utility::calcDR(top->p().Eta(), singlets[i_chi].Eta(), top->p().Phi(), singlets[i_chi].Phi());
               if(DR_top_singlet < minDR_top_singlet)
               {
                   minDR_top_singlet = DR_top_singlet;
@@ -910,7 +893,7 @@ void NtupleClass::Loop(std::string runtype)
           double Dpt_top_singlino = -1;
           for (int i_chi=0; i_chi<singlinos.size(); ++i_chi)
           {
-              double DR_top_singlino = calcDR(top->p().Eta(), singlinos[i_chi].Eta(), top->p().Phi(), singlinos[i_chi].Phi());
+              double DR_top_singlino = utility::calcDR(top->p().Eta(), singlinos[i_chi].Eta(), top->p().Phi(), singlinos[i_chi].Phi());
               if(DR_top_singlino < minDR_top_singlino)
               {
                   minDR_top_singlino = DR_top_singlino;
@@ -966,7 +949,7 @@ void NtupleClass::Loop(std::string runtype)
                   for(const TLorentzVector* daughter : matched_top_constituents)
                   {
                       // for each AK4, check whether we find a matched daughter
-                      double DR_daughter_constituent = calcDR(daughter->Eta(), constituent->p().Eta(), daughter->Phi(), constituent->p().Phi());
+                      double DR_daughter_constituent = utility::calcDR(daughter->Eta(), constituent->p().Eta(), daughter->Phi(), constituent->p().Phi());
                       if(DR_daughter_constituent < minDR_AK4_daughter)
                       {
                           minDR_AK4_daughter = DR_daughter_constituent;
@@ -1172,7 +1155,7 @@ void NtupleClass::Loop(std::string runtype)
           double minDR = 999;
           for (const TopObject* top : tops)
           {
-              double DR_top_gentop = calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
+              double DR_top_gentop = utility::calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
               if (DR_top_gentop < minDR)
               {
                   minDR = DR_top_gentop;
@@ -1228,7 +1211,7 @@ void NtupleClass::Loop(std::string runtype)
       h_baseline_ntops_2jet->Fill(ntops_2jet);
       h_baseline_ntops_1jet->Fill(ntops_1jet);
       
-      h_dphi_2tops->Fill(calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()));
+      h_dphi_2tops->Fill(utility::calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()));
 
       if(n_matched_other == 0)
       {
