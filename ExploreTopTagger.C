@@ -266,7 +266,7 @@ void ExploreTopTagger::InitHistos()
     my_histos.emplace("h_j2_QGL_nomatch", new TH1D("h_j2_QGL_nomatch", "h_j2_QGL_nomatch", 50, 0, 1));
     my_histos.emplace("h_j2_CSV_nomatch", new TH1D("h_j2_CSV_nomatch", "h_j2_CSV_nomatch", 50, 0, 1));
     my_histos.emplace("h_j3_m_nomatch", new TH1D("h_j3_m_nomatch", "h_j3_m_nomatch", 50, 0, 100));
-    my_histos.emplace("h_j3_p_nomatch", new TH1D("h_j3_p_nomatch", "h_j3_p_nomatch", 50, 0, 2500));
+    my_histos.emplace("h_j3_p_nomatch", new TH1D("h_j3_p_nomatch", "h_j3_p_nomatch", 50, 0, 250));
     my_histos.emplace("h_j3_QGL_nomatch", new TH1D("h_j3_QGL_nomatch", "h_j3_QGL_nomatch", 50, 0, 1));
     my_histos.emplace("h_j3_CSV_nomatch", new TH1D("h_j3_CSV_nomatch", "h_j3_CSV_nomatch", 50, 0, 1));
     
