@@ -1,5 +1,5 @@
-#define NtupleClass_cxx
-#include "NtupleClass.h"
+#define ExploreEventSelection_cxx
+#include "ExploreEventSelection.h"
 
 #include "Utility.h"
 #include <TH1D.h>
@@ -7,6 +7,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TEfficiency.h>
+#include <TRandom3.h>
 #include <iostream>
 
 //mandatory includes to use top tagger
@@ -16,45 +17,27 @@
 #include "TopTagger/CfgParser/include/TTException.h"
 
 
-void NtupleClass::Loop(std::string runtype)
+void ExploreEventSelection::InitHistos()
 {
-//   In a ROOT session, you can do:
-//      root> .L NtupleClass.C
-//      root> NtupleClass t
-//      root> t.GetEntry(12); // Fill t data members with entry number 12
-//      root> t.Show();       // Show values of entry 12
-//      root> t.Show(16);     // Read and show values of entry 16
-//      root> t.Loop();       // Loop on all entries
-//
+    // Declare all your histograms here, that way we can fill them for multiple chains
+    my_histos.emplace("h_met", new TH1D("h_met","h_met", 20, 0, 200));
+    my_histos.emplace("h_ht", new TH1D("h_ht","h_ht", 60, 0, 3000));
+    my_histos.emplace("h_ntops", new TH1D("h_ntops","h_ntops", 5, 0, 5));
+    
+    // Cut flows
+    my_efficiencies.emplace("event_sel", new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",8,0,8));
+    my_efficiencies.emplace("event_sel_total", new TEfficiency("event_sel_total","Total event selection efficiency;Cut;#epsilon",8,0,8));
 
-//     This is the loop skeleton where:
-//    jentry is the global entry number in the chain
-//    ientry is the entry number in the current Tree
-//  Note that the argument to GetEntry must be:
-//    jentry for TChain::GetEntry
-//    ientry for TTree::GetEntry and TBranch::GetEntry
-//
-//       To read only selected branches, Insert statements like:
-// METHOD1:
-//    fChain->SetBranchStatus("*",0);  // disable all branches
-//    fChain->SetBranchStatus("branchname",1);  // activate branchname
-// METHOD2: replace line
-//    fChain->GetEntry(jentry);       //read all branches
-//by  b_branchname->GetEntry(ientry); //read only this branch
+}
+
+void ExploreEventSelection::Loop(std::string runtype, double weight, int maxevents, bool isQuiet)
+{
    if (fChain == 0) return;
 
    Long64_t nentries = fChain->GetEntriesFast();
+   Long64_t nbytes_total = 0, nbytes = 0;
 
-   Long64_t nbytes = 0, nb = 0;
-
-   // -----------------------
-   // make some histograms
-   // -----------------------
-   TH1D *myHisto  = new TH1D("njets","njets", 20, 0, 20);
-   TH1D *h_met  = new TH1D("h_met","h_met", 20, 0, 200);
-   TH1D *h_ht  = new TH1D("h_ht","h_ht", 60, 0, 3000);
-   TH1D *h_ntops  = new TH1D("h_ntops","h_ntops", 5, 0, 5);
-
+   // make a toptagger object
    TopTagger tt;
    tt.setCfgFile("TopTagger.cfg");
 
@@ -62,9 +45,10 @@ void NtupleClass::Loop(std::string runtype)
    {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
-   
-      nb = fChain->GetEntry(jentry);   
-      nbytes += nb;
+      if(maxevents != -1 && jentry >= maxevents) break;
+
+      nbytes = fChain->GetEntry(jentry);   
+      nbytes_total += nbytes;
 
       if ( jentry % (nentries/10) == 0 ) printf("  Event %9llu / %9llu  (%2.0f%%)\n", jentry, nentries, 100*(jentry*1.)/(nentries*1.) ) ;
 
@@ -127,7 +111,6 @@ void NtupleClass::Loop(std::string runtype)
               }
           } 
       }
-
       // Now check the b quarks (we only want the ones associated with a hadronic W decay for now)
       for ( unsigned int gpi=0; gpi < GenParticles->size() ; gpi++ ) 
       {
@@ -152,19 +135,6 @@ void NtupleClass::Loop(std::string runtype)
                   // not yet found
                   //std::cout << "(b) Found a new leptonic top at idx " << momidx << std::endl;
               //}
-          }
-      }
-
-      bool verbose = false;
-      if (verbose)
-      {
-          for (int ht=0; ht<hadtops.size(); ++ht){
-              std::cout << "Hadtop index = " << hadtops_idx[ht] << std::endl;
-              std::cout << "       daughters: ";
-              for (int htd=0; htd<hadtopdaughters[ht].size(); ++htd){
-                  std::cout << (*hadtopdaughters[ht][htd]).Pt() << " " ;
-              }
-              std::cout << std::endl;
           }
       }
 
@@ -204,43 +174,31 @@ void NtupleClass::Loop(std::string runtype)
 
       // get reconstructed top
       const std::vector<TopObject*>& tops = ttr.getTops();
-      h_ntops->Fill(tops.size());
+      my_histos["h_ntops"]->Fill(tops.size(), weight);
 
       // get set of all constituents (i.e. AK4 and AK8 jets) used in one of the tops
       std::set<Constituent const *> usedConstituents = ttr.getUsedConstituents();
 
-      if (jentry < 10) 
+      // count number of tops per type
+      int ntops_3jet = 0;
+      int ntops_2jet=0;
+      int ntops_1jet=0;
+      for (const TopObject* top : tops)
       {
-          printf("\tN tops: %ld\n", tops.size());
-
-          // print top properties
-          for(const TopObject* top : tops)
+          if(top->getNConstituents() == 3 )
           {
-              //print basic top properties (top->p() gives a TLorentzVector)
-              //N constituents refers to the number of jets included in the top
-              //3 for resolved tops 
-              //2 for W+jet tops
-              //1 for fully merged AK8 tops
-              printf("\tTop properties: N constituents: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf,   Mass: %6.1lf\n", top->getNConstituents(), top->p().Pt(), top->p().Eta(), top->p().Phi(), top->p().M());
-              
-              //get vector of top constituents 
-              const std::vector<Constituent const *>& constituents = top->getConstituents();
-              
-              //Print properties of individual top constituent jets 
-              for(const Constituent* constituent : constituents)
-              {
-                  printf("\t\tConstituent properties: Constituent type: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf,   Mass: %6.1lf\n", constituent->getType(), constituent->p().Pt(), constituent->p().Eta(), constituent->p().Phi(), constituent->p().M());
-              }        
-          }        
-
-          std::cout << "Properties of all used constituents" << std::endl;
-          // Print properties of individual top constituent jets 
-          for(const Constituent* constituent : usedConstituents)
+              ntops_3jet++;
+          }
+          else if(top->getNConstituents() == 2 )
           {
-              printf("\t\tConstituent properties: Constituent type: %3d,   Pt: %6.1lf,   Eta: %7.3lf,   Phi: %7.3lf,   Mass: %6.1lf\n", constituent->getType(), constituent->p().Pt(), constituent->p().Eta(), constituent->p().Phi(), constituent->p().M());
-          }        
-          
+              ntops_2jet++;
+          }
+          else if(top->getNConstituents() == 1 )
+          {
+              ntops_1jet++;
+          }
       }
+
 
 
       // -------------------------------
@@ -270,18 +228,67 @@ void NtupleClass::Loop(std::string runtype)
       if ( !( HT_pt40>500 && rec_njet_pt45>=6 ) ) 
           passTrigger = false;
 
+      bool passLoose = passTrigger && rec_njet_pt45_btag>1;
       bool passBaseline = HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>1 && tops.size()>1;
- 
-      if (passBaseline)
-      {
-          myHisto->Fill(NJets);
-          h_met->Fill(MET);
-          h_ht->Fill(HT);
-      }
-   }
 
-   myHisto->Write();
-   h_met->Write();
-   h_ht->Write();
-   h_ntops->Write();
+
+      // Fill event selection efficiencies
+      my_efficiencies["event_sel_total"]->Fill(true,0);
+      my_efficiencies["event_sel_total"]->Fill(HT_pt40>500,1);
+      my_efficiencies["event_sel_total"]->Fill(HT_pt40>500 && rec_njet_pt45>=6 ,2);
+      my_efficiencies["event_sel_total"]->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 ,3);
+      my_efficiencies["event_sel_total"]->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 ,4);
+      my_efficiencies["event_sel_total"]->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 ,5);
+      my_efficiencies["event_sel_total"]->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 && tops.size()>1 ,6);
+      my_efficiencies["event_sel_total"]->Fill(HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>0 && tops.size()>0 && rec_njet_pt45_btag>1 && tops.size()>1 && rec_njet_pt20>=8 ,7);
+      
+      my_efficiencies["event_sel"]->Fill(true,0);
+      my_efficiencies["event_sel"]->Fill(HT_pt40>500,1);
+      if(HT_pt40>500)
+      {
+          my_efficiencies["event_sel"]->Fill(rec_njet_pt45>=6,2);
+          if (rec_njet_pt45>=6)
+          {
+              my_efficiencies["event_sel"]->Fill(rec_njet_pt45_btag>0,3);
+              if (rec_njet_pt45_btag>0)
+              {
+                  my_efficiencies["event_sel"]->Fill(tops.size()>0,4);
+                  if (tops.size()>0)
+                  {
+                      my_efficiencies["event_sel"]->Fill(rec_njet_pt45_btag>1,5);
+                      if (rec_njet_pt45_btag>1)
+                      {
+                          my_efficiencies["event_sel"]->Fill(tops.size()>1,6);
+                          if (tops.size()>1)
+                          {
+                              my_efficiencies["event_sel"]->Fill(rec_njet_pt20>=8,7);
+                          }
+                      }
+                  }
+              }
+          }
+      }
+ 
+      my_histos["h_met"]->Fill(MET, weight);
+      my_histos["h_ht"]->Fill(HT, weight);
+
+
+   } // end of event loop
+
+}
+
+void ExploreEventSelection::WriteHistos()
+{
+    for (const auto &p : my_histos) {
+        p.second->Write();
+    }
+    
+    for (const auto &p : my_2d_histos) {
+        p.second->Write();
+    }
+    
+    for (const auto &p : my_efficiencies) {
+        p.second->Write();
+    }
+    
 }
