@@ -7,6 +7,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TEfficiency.h>
+#include <TRandom3.h>
 #include <iostream>
 
 //mandatory includes to use top tagger
@@ -28,7 +29,9 @@ void ExploreTopTagger::InitHistos()
     my_histos.emplace("h_met", new TH1D("h_met","h_met", 20, 0, 200));
     my_histos.emplace("h_ht", new TH1D("h_ht","h_ht", 60, 0, 3000));
     my_histos.emplace("h_ntops", new TH1D("h_ntops","h_ntops", 5, 0, 5));
+    my_histos.emplace("h_ntops_presel", new TH1D("h_ntops_presel","h_ntops_presel;Ntop;Events", 5, 0, 5));
     my_histos.emplace("h_ntops_3jet", new TH1D("h_ntops_3jet","h_ntops_3jet", 5, 0, 5));
+    my_histos.emplace("h_ntops_3jet_presel", new TH1D("h_ntops_3jet_presel","h_ntops_3jet_presel;Ntop(trijet);Events", 5, 0, 5));
     my_histos.emplace("h_ntops_2jet", new TH1D("h_ntops_2jet","h_ntops_2jet", 5, 0, 5));
     my_histos.emplace("h_ntops_1jet", new TH1D("h_ntops_1jet","h_ntops_1jet", 5, 0, 5));
     my_histos.emplace("h_baseline_ntops", new TH1D("h_baseline_ntops","h_baseline_ntops", 5, 0, 5));
@@ -179,9 +182,12 @@ void ExploreTopTagger::InitHistos()
     my_efficiencies.emplace("toptag_singletrate_excl", new TEfficiency("toptag_singletrate_excl","Tagged top fraction that matches a singlet or singlino and no tops;reco top p_T;#epsilon",10,0,1000));
     my_efficiencies.emplace("toptag_singletrate_excl_baseline", new TEfficiency("toptag_singletrate_excl_baseline","Tagged top fraction that matches a singlet or singlino and no tops;reco top p_T;#epsilon",10,0,1000));
 
-    my_efficiencies.emplace("toptag_fully_matched", new TEfficiency("toptag_fully_matched","Both tops matched);top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5));
-    my_efficiencies.emplace("toptag_partially_matched", new TEfficiency("toptag_partially_matched","One top matched);top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5));
-    my_efficiencies.emplace("toptag_unmatched", new TEfficiency("toptag_unmatched","Both tops not matched);top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5));
+    my_efficiencies.emplace("toptag_fully_matched", new TEfficiency("toptag_fully_matched","Both tops matched;top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5));
+    my_efficiencies.emplace("toptag_partially_matched", new TEfficiency("toptag_partially_matched","One top matched;top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5));
+    my_efficiencies.emplace("toptag_unmatched", new TEfficiency("toptag_unmatched","Both tops not matched;top[0] category;top[1] category;#epsilon",3,0.5,3.5,3,0.5,3.5));
+
+    my_efficiencies.emplace("real_fakerate", new TEfficiency("real_fakerate", "Fake rate;reco cand pT[GeV];fake rate",10,0,1000 ));
+    my_efficiencies.emplace("real_fakerate_weighted", new TEfficiency("real_fakerate_weighted", "Fake rate;reco cand pT[GeV];fake rate",10,0,1000 ));
 
     my_2d_histos.emplace("toptag_breakdown", new TH2D("toptag_breakdown","Number of events/category;top[0] category;top[1] category;#Events",3,0.5,3.5,3,0.5,3.5));
 
@@ -286,11 +292,14 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
    TopTagger tt;
    tt.setCfgFile("TopTagger.cfg");
 
+   TRandom3 rand = TRandom3(123);
+
    for (Long64_t jentry=0; jentry<nentries;jentry++) 
    {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
-   
+      if(maxevents != -1 && jentry >= maxevents) break;
+
       nbytes = fChain->GetEntry(jentry);   
       nbytes_total += nbytes;
 
@@ -474,10 +483,30 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
 
       // get reconstructed top
       const std::vector<TopObject*>& tops = ttr.getTops();
-      my_histos["h_ntops"]->Fill(tops.size());
+      my_histos["h_ntops"]->Fill(tops.size(), weight);
 
       // get set of all constituents (i.e. AK4 and AK8 jets) used in one of the tops
       std::set<Constituent const *> usedConstituents = ttr.getUsedConstituents();
+
+      // count number of tops per type
+      int ntops_3jet = 0;
+      int ntops_2jet=0;
+      int ntops_1jet=0;
+      for (const TopObject* top : tops)
+      {
+          if(top->getNConstituents() == 3 )
+          {
+              ntops_3jet++;
+          }
+          else if(top->getNConstituents() == 2 )
+          {
+              ntops_2jet++;
+          }
+          else if(top->getNConstituents() == 1 )
+          {
+              ntops_1jet++;
+          }
+      }
 
       if (jentry < 10) 
       {
@@ -540,7 +569,13 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
       if ( !( HT_pt40>500 && rec_njet_pt45>=6 ) ) 
           passTrigger = false;
 
+      bool passLoose = passTrigger && rec_njet_pt45_btag>1;
       bool passBaseline = HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>1 && tops.size()>1;
+
+      if(passLoose)
+      {
+          my_histos["h_ntops_presel"]->Fill(tops.size(), weight);
+      }
 
       if(passBaseline)
       {
@@ -612,9 +647,9 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
           }
       }
  
-      my_histos["myHisto"]->Fill(NJets);
-      my_histos["h_met"]->Fill(MET);
-      my_histos["h_ht"]->Fill(HT);
+      my_histos["myHisto"]->Fill(NJets, weight);
+      my_histos["h_met"]->Fill(MET, weight);
+      my_histos["h_ht"]->Fill(HT, weight);
 
       // ----------------------------------
       // -- Study top tagger performance --
@@ -647,29 +682,30 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
       TIC.mapVars(myvars, mydata.data());
 
       // --- Check input variables for resolved tagger ---
-      for(const TopObject top : ttr.getTopCandidates())
+      const std::vector<TopObject> topcandidates = ttr.getTopCandidates();
+      for(const TopObject top : topcandidates)
       {
           TIC.calculateVars(top);
-          my_histos["h_cand_m"]->Fill(mydata[0]);
-          my_histos["h_cand_p"]->Fill(mydata[1]);
-          my_histos["h_j12_m"]->Fill(mydata[2]);
-          my_histos["h_j23_m"]->Fill(mydata[3]);
-          my_histos["h_j13_m"]->Fill(mydata[4]);
-          my_histos["h_dTheta12"]->Fill(mydata[5]);
-          my_histos["h_dTheta23"]->Fill(mydata[6]);
-          my_histos["h_dTheta13"]->Fill(mydata[7]);
-          my_histos["h_j1_m"]->Fill(mydata[8]);
-          my_histos["h_j1_p"]->Fill(mydata[9]);
-          my_histos["h_j1_QGL"]->Fill(mydata[10]);
-          my_histos["h_j1_CSV"]->Fill(mydata[11]);
-          my_histos["h_j2_m"]->Fill(mydata[12]);
-          my_histos["h_j2_p"]->Fill(mydata[13]);
-          my_histos["h_j2_QGL"]->Fill(mydata[14]);
-          my_histos["h_j2_CSV"]->Fill(mydata[15]);
-          my_histos["h_j3_m"]->Fill(mydata[16]);
-          my_histos["h_j3_p"]->Fill(mydata[17]);
-          my_histos["h_j3_QGL"]->Fill(mydata[18]);
-          my_histos["h_j3_CSV"]->Fill(mydata[19]);
+          my_histos["h_cand_m"]->Fill(mydata[0], weight);
+          my_histos["h_cand_p"]->Fill(mydata[1], weight);
+          my_histos["h_j12_m"]->Fill(mydata[2], weight);
+          my_histos["h_j23_m"]->Fill(mydata[3], weight);
+          my_histos["h_j13_m"]->Fill(mydata[4], weight);
+          my_histos["h_dTheta12"]->Fill(mydata[5], weight);
+          my_histos["h_dTheta23"]->Fill(mydata[6], weight);
+          my_histos["h_dTheta13"]->Fill(mydata[7], weight);
+          my_histos["h_j1_m"]->Fill(mydata[8], weight);
+          my_histos["h_j1_p"]->Fill(mydata[9], weight);
+          my_histos["h_j1_QGL"]->Fill(mydata[10], weight);
+          my_histos["h_j1_CSV"]->Fill(mydata[11], weight);
+          my_histos["h_j2_m"]->Fill(mydata[12], weight);
+          my_histos["h_j2_p"]->Fill(mydata[13], weight);
+          my_histos["h_j2_QGL"]->Fill(mydata[14], weight);
+          my_histos["h_j2_CSV"]->Fill(mydata[15], weight);
+          my_histos["h_j3_m"]->Fill(mydata[16], weight);
+          my_histos["h_j3_p"]->Fill(mydata[17], weight);
+          my_histos["h_j3_QGL"]->Fill(mydata[18], weight);
+          my_histos["h_j3_CSV"]->Fill(mydata[19], weight);
 
           // Also divide this into categories
           bool matches_top = false;
@@ -722,72 +758,72 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
 
           if(matches_top)
           {
-              my_histos["h_cand_m_topmatch"]->Fill(mydata[0]);
-              my_histos["h_cand_p_topmatch"]->Fill(mydata[1]);
-              my_histos["h_j12_m_topmatch"]->Fill(mydata[2]);
-              my_histos["h_j23_m_topmatch"]->Fill(mydata[3]);
-              my_histos["h_j13_m_topmatch"]->Fill(mydata[4]);
-              my_histos["h_dTheta12_topmatch"]->Fill(mydata[5]);
-              my_histos["h_dTheta23_topmatch"]->Fill(mydata[6]);
-              my_histos["h_dTheta13_topmatch"]->Fill(mydata[7]);
-              my_histos["h_j1_m_topmatch"]->Fill(mydata[8]);
-              my_histos["h_j1_p_topmatch"]->Fill(mydata[9]);
-              my_histos["h_j1_QGL_topmatch"]->Fill(mydata[10]);
-              my_histos["h_j1_CSV_topmatch"]->Fill(mydata[11]);
-              my_histos["h_j2_m_topmatch"]->Fill(mydata[12]);
-              my_histos["h_j2_p_topmatch"]->Fill(mydata[13]);
-              my_histos["h_j2_QGL_topmatch"]->Fill(mydata[14]);
-              my_histos["h_j2_CSV_topmatch"]->Fill(mydata[15]);
-              my_histos["h_j3_m_topmatch"]->Fill(mydata[16]);
-              my_histos["h_j3_p_topmatch"]->Fill(mydata[17]);
-              my_histos["h_j3_QGL_topmatch"]->Fill(mydata[18]);
-              my_histos["h_j3_CSV_topmatch"]->Fill(mydata[19]);
+              my_histos["h_cand_m_topmatch"]->Fill(mydata[0], weight);
+              my_histos["h_cand_p_topmatch"]->Fill(mydata[1], weight);
+              my_histos["h_j12_m_topmatch"]->Fill(mydata[2], weight);
+              my_histos["h_j23_m_topmatch"]->Fill(mydata[3], weight);
+              my_histos["h_j13_m_topmatch"]->Fill(mydata[4], weight);
+              my_histos["h_dTheta12_topmatch"]->Fill(mydata[5], weight);
+              my_histos["h_dTheta23_topmatch"]->Fill(mydata[6], weight);
+              my_histos["h_dTheta13_topmatch"]->Fill(mydata[7], weight);
+              my_histos["h_j1_m_topmatch"]->Fill(mydata[8], weight);
+              my_histos["h_j1_p_topmatch"]->Fill(mydata[9], weight);
+              my_histos["h_j1_QGL_topmatch"]->Fill(mydata[10], weight);
+              my_histos["h_j1_CSV_topmatch"]->Fill(mydata[11], weight);
+              my_histos["h_j2_m_topmatch"]->Fill(mydata[12], weight);
+              my_histos["h_j2_p_topmatch"]->Fill(mydata[13], weight);
+              my_histos["h_j2_QGL_topmatch"]->Fill(mydata[14], weight);
+              my_histos["h_j2_CSV_topmatch"]->Fill(mydata[15], weight);
+              my_histos["h_j3_m_topmatch"]->Fill(mydata[16], weight);
+              my_histos["h_j3_p_topmatch"]->Fill(mydata[17], weight);
+              my_histos["h_j3_QGL_topmatch"]->Fill(mydata[18], weight);
+              my_histos["h_j3_CSV_topmatch"]->Fill(mydata[19], weight);
           }
           else if(matches_susy)
           {
-              my_histos["h_cand_m_susymatch"]->Fill(mydata[0]);
-              my_histos["h_cand_p_susymatch"]->Fill(mydata[1]);
-              my_histos["h_j12_m_susymatch"]->Fill(mydata[2]);
-              my_histos["h_j23_m_susymatch"]->Fill(mydata[3]);
-              my_histos["h_j13_m_susymatch"]->Fill(mydata[4]);
-              my_histos["h_dTheta12_susymatch"]->Fill(mydata[5]);
-              my_histos["h_dTheta23_susymatch"]->Fill(mydata[6]);
-              my_histos["h_dTheta13_susymatch"]->Fill(mydata[7]);
-              my_histos["h_j1_m_susymatch"]->Fill(mydata[8]);
-              my_histos["h_j1_p_susymatch"]->Fill(mydata[9]);
-              my_histos["h_j1_QGL_susymatch"]->Fill(mydata[10]);
-              my_histos["h_j1_CSV_susymatch"]->Fill(mydata[11]);
-              my_histos["h_j2_m_susymatch"]->Fill(mydata[12]);
-              my_histos["h_j2_p_susymatch"]->Fill(mydata[13]);
-              my_histos["h_j2_QGL_susymatch"]->Fill(mydata[14]);
-              my_histos["h_j2_CSV_susymatch"]->Fill(mydata[15]);
-              my_histos["h_j3_m_susymatch"]->Fill(mydata[16]);
-              my_histos["h_j3_p_susymatch"]->Fill(mydata[17]);
-              my_histos["h_j3_QGL_susymatch"]->Fill(mydata[18]);
-              my_histos["h_j3_CSV_susymatch"]->Fill(mydata[19]);
+              my_histos["h_cand_m_susymatch"]->Fill(mydata[0], weight);
+              my_histos["h_cand_p_susymatch"]->Fill(mydata[1], weight);
+              my_histos["h_j12_m_susymatch"]->Fill(mydata[2], weight);
+              my_histos["h_j23_m_susymatch"]->Fill(mydata[3], weight);
+              my_histos["h_j13_m_susymatch"]->Fill(mydata[4], weight);
+              my_histos["h_dTheta12_susymatch"]->Fill(mydata[5], weight);
+              my_histos["h_dTheta23_susymatch"]->Fill(mydata[6], weight);
+              my_histos["h_dTheta13_susymatch"]->Fill(mydata[7], weight);
+              my_histos["h_j1_m_susymatch"]->Fill(mydata[8], weight);
+              my_histos["h_j1_p_susymatch"]->Fill(mydata[9], weight);
+              my_histos["h_j1_QGL_susymatch"]->Fill(mydata[10], weight);
+              my_histos["h_j1_CSV_susymatch"]->Fill(mydata[11], weight);
+              my_histos["h_j2_m_susymatch"]->Fill(mydata[12], weight);
+              my_histos["h_j2_p_susymatch"]->Fill(mydata[13], weight);
+              my_histos["h_j2_QGL_susymatch"]->Fill(mydata[14], weight);
+              my_histos["h_j2_CSV_susymatch"]->Fill(mydata[15], weight);
+              my_histos["h_j3_m_susymatch"]->Fill(mydata[16], weight);
+              my_histos["h_j3_p_susymatch"]->Fill(mydata[17], weight);
+              my_histos["h_j3_QGL_susymatch"]->Fill(mydata[18], weight);
+              my_histos["h_j3_CSV_susymatch"]->Fill(mydata[19], weight);
           }
           else 
           {
-              my_histos["h_cand_m_nomatch"]->Fill(mydata[0]);
-              my_histos["h_cand_p_nomatch"]->Fill(mydata[1]);
-              my_histos["h_j12_m_nomatch"]->Fill(mydata[2]);
-              my_histos["h_j23_m_nomatch"]->Fill(mydata[3]);
-              my_histos["h_j13_m_nomatch"]->Fill(mydata[4]);
-              my_histos["h_dTheta12_nomatch"]->Fill(mydata[5]);
-              my_histos["h_dTheta23_nomatch"]->Fill(mydata[6]);
-              my_histos["h_dTheta13_nomatch"]->Fill(mydata[7]);
-              my_histos["h_j1_m_nomatch"]->Fill(mydata[8]);
-              my_histos["h_j1_p_nomatch"]->Fill(mydata[9]);
-              my_histos["h_j1_QGL_nomatch"]->Fill(mydata[10]);
-              my_histos["h_j1_CSV_nomatch"]->Fill(mydata[11]);
-              my_histos["h_j2_m_nomatch"]->Fill(mydata[12]);
-              my_histos["h_j2_p_nomatch"]->Fill(mydata[13]);
-              my_histos["h_j2_QGL_nomatch"]->Fill(mydata[14]);
-              my_histos["h_j2_CSV_nomatch"]->Fill(mydata[15]);
-              my_histos["h_j3_m_nomatch"]->Fill(mydata[16]);
-              my_histos["h_j3_p_nomatch"]->Fill(mydata[17]);
-              my_histos["h_j3_QGL_nomatch"]->Fill(mydata[18]);
-              my_histos["h_j3_CSV_nomatch"]->Fill(mydata[19]);
+              my_histos["h_cand_m_nomatch"]->Fill(mydata[0], weight);
+              my_histos["h_cand_p_nomatch"]->Fill(mydata[1], weight);
+              my_histos["h_j12_m_nomatch"]->Fill(mydata[2], weight);
+              my_histos["h_j23_m_nomatch"]->Fill(mydata[3], weight);
+              my_histos["h_j13_m_nomatch"]->Fill(mydata[4], weight);
+              my_histos["h_dTheta12_nomatch"]->Fill(mydata[5], weight);
+              my_histos["h_dTheta23_nomatch"]->Fill(mydata[6], weight);
+              my_histos["h_dTheta13_nomatch"]->Fill(mydata[7], weight);
+              my_histos["h_j1_m_nomatch"]->Fill(mydata[8], weight);
+              my_histos["h_j1_p_nomatch"]->Fill(mydata[9], weight);
+              my_histos["h_j1_QGL_nomatch"]->Fill(mydata[10], weight);
+              my_histos["h_j1_CSV_nomatch"]->Fill(mydata[11], weight);
+              my_histos["h_j2_m_nomatch"]->Fill(mydata[12], weight);
+              my_histos["h_j2_p_nomatch"]->Fill(mydata[13], weight);
+              my_histos["h_j2_QGL_nomatch"]->Fill(mydata[14], weight);
+              my_histos["h_j2_CSV_nomatch"]->Fill(mydata[15], weight);
+              my_histos["h_j3_m_nomatch"]->Fill(mydata[16], weight);
+              my_histos["h_j3_p_nomatch"]->Fill(mydata[17], weight);
+              my_histos["h_j3_QGL_nomatch"]->Fill(mydata[18], weight);
+              my_histos["h_j3_CSV_nomatch"]->Fill(mydata[19], weight);
           }
 
       }
@@ -798,330 +834,329 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
       int n_matched_recotops = 0;
       int n_matched_other = 0;
       int n_matched_recotops_auto = 0;
-      int ntops_3jet=0;
-      int ntops_2jet=0;
-      int ntops_1jet=0;
       // How often does a tagged top match with genlevel?
       std::vector<bool> top_matches;
-      for (const TopObject* top : tops)
+      if(hadtops.size() > 0)
       {
-          bool matched_top = false;
-          bool matched_neutralino = false;
-          bool matched_singlet = false;
-          bool matched_singlino = false;
-
-          TLorentzVector matched_top_LV;
-          std::vector<const TLorentzVector*> matched_top_constituents;
-          double minDR = 999;
-          for (int i_gentop=0; i_gentop<hadtops.size(); ++i_gentop)
+          for (const TopObject* top : tops)
           {
-              double DR_top_gentop = utility::calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
-              if (DR_top_gentop < minDR)
+              bool matched_top = false;
+              bool matched_neutralino = false;
+              bool matched_singlet = false;
+              bool matched_singlino = false;
+
+              TLorentzVector matched_top_LV;
+              std::vector<const TLorentzVector*> matched_top_constituents;
+              double minDR = 999;
+              for (int i_gentop=0; i_gentop<hadtops.size(); ++i_gentop)
               {
-                  minDR = DR_top_gentop;
-                  matched_top_LV = hadtops[i_gentop];
-                  matched_top_constituents = hadtopdaughters[i_gentop];
-              }
-          }
-          // std::cout << "Top Pt, Eta, Phi: " << top->p().Pt() << " " << top->p().Eta() << " " << top->p().Phi() << std::endl;
-          //std::cout << "Gen top Pt, Eta, Phi, DR: " << matched_top.Pt() << " " << matched_top.Eta() << " " << matched_top.Phi() << " " << minDR << std::endl;
-
-          double Dpt_top_gentop = abs(top->p().Pt() - matched_top_LV.Pt())/top->p().Pt();
-          my_histos["h_top_gentop_minDR"]->Fill(minDR);
-          my_histos["h_top_gentop_Dpt"]->Fill(Dpt_top_gentop);
-          my_2d_histos["h_top_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
-          matched_top = minDR<0.4 && Dpt_top_gentop < 0.5;
-          top_matches.push_back(matched_top);
-
-          double minDR_top_neutralino = 999;
-          double Dpt_top_neutralino = -1;
-          for (int i_chi=0; i_chi<neutralinos.size(); ++i_chi)
-          {
-              double DR_top_neutralino = utility::calcDR(top->p().Eta(), neutralinos[i_chi].Eta(), top->p().Phi(), neutralinos[i_chi].Phi());
-              if(DR_top_neutralino < minDR_top_neutralino)
-              {
-                  minDR_top_neutralino = DR_top_neutralino;
-                  Dpt_top_neutralino = abs(top->p().Pt() - neutralinos[i_chi].Pt())/top->p().Pt();
-              }
-          }
-          matched_neutralino = minDR_top_neutralino < 0.4 && Dpt_top_neutralino < 0.5;
-          if (verbose && matched_neutralino && matched_top)
-          {
-              std::cout << "Matched to a neutralino and to a top quark..." << std::endl;
-              std::cout << "DR and Dpt for neutralino: " << minDR_top_neutralino << ", " << Dpt_top_neutralino << std::endl;
-              std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
-          }
-          my_efficiencies["toptag_chitagrate"]->Fill( matched_neutralino, top->p().Pt());
-          my_efficiencies["toptag_chitagrate_excl"]->Fill( matched_neutralino && (!matched_top), top->p().Pt());
-
-          double minDR_top_singlet = 999;
-          double Dpt_top_singlet = -1;
-          for (int i_chi=0; i_chi<singlets.size(); ++i_chi)
-          {
-              double DR_top_singlet = utility::calcDR(top->p().Eta(), singlets[i_chi].Eta(), top->p().Phi(), singlets[i_chi].Phi());
-              if(DR_top_singlet < minDR_top_singlet)
-              {
-                  minDR_top_singlet = DR_top_singlet;
-                  Dpt_top_singlet = abs(top->p().Pt() - singlets[i_chi].Pt())/top->p().Pt();
-              }
-          }
-          matched_singlet = minDR_top_singlet < 0.4 && Dpt_top_singlet < 0.5;
-          if (verbose && matched_singlet && matched_top)
-          {
-              std::cout << "Matched to a singlet and to a top quark..." << std::endl;
-              std::cout << "DR and Dpt for singlet: " << minDR_top_singlet << ", " << Dpt_top_singlet << std::endl;
-              std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
-          }
-          double minDR_top_singlino = 999;
-          double Dpt_top_singlino = -1;
-          for (int i_chi=0; i_chi<singlinos.size(); ++i_chi)
-          {
-              double DR_top_singlino = utility::calcDR(top->p().Eta(), singlinos[i_chi].Eta(), top->p().Phi(), singlinos[i_chi].Phi());
-              if(DR_top_singlino < minDR_top_singlino)
-              {
-                  minDR_top_singlino = DR_top_singlino;
-                  Dpt_top_singlino = abs(top->p().Pt() - singlinos[i_chi].Pt())/top->p().Pt();
-              }
-          }
-          matched_singlino = minDR_top_singlino < 0.4 && Dpt_top_singlino < 0.5;
-          if (verbose && matched_singlino && matched_top)
-          {
-              std::cout << "Matched to a singlino and to a top quark..." << std::endl;
-              std::cout << "DR and Dpt for singlino: " << minDR_top_singlino << ", " << Dpt_top_singlino << std::endl;
-              std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
-          }
-          my_efficiencies["toptag_singletrate"]->Fill( matched_singlet || matched_singlino, top->p().Pt());
-          my_efficiencies["toptag_singletrate_excl"]->Fill( (matched_singlet || matched_singlino) && (!matched_top), top->p().Pt());
-
-          // Fake rate defined as not matching a top, neutralino, singlet, or singlino
-          my_efficiencies["toptag_fakerate"]->Fill( !matched_top, top->p().Pt());
-          my_efficiencies["toptag_fakerate_excl"]->Fill( !( matched_top || matched_neutralino || matched_singlet || matched_singlino ), top->p().Pt());
-          if(passBaseline)
-          {
-              my_histos["h_baseline_top_gentop_minDR"]->Fill(minDR);
-              my_histos["h_baseline_top_gentop_Dpt"]->Fill(Dpt_top_gentop);
-              my_2d_histos["h_baseline_top_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
-              my_efficiencies["toptag_fakerate_baseline"]->Fill( !matched_top , top->p().Pt());
-              my_efficiencies["toptag_fakerate_excl_baseline"]->Fill( !( matched_top || matched_neutralino || matched_singlet || matched_singlino ) , top->p().Pt());
-              my_efficiencies["toptag_chitagrate_baseline"]->Fill( matched_neutralino, top->p().Pt());
-              my_efficiencies["toptag_chitagrate_excl_baseline"]->Fill( matched_neutralino && (!matched_top), top->p().Pt());
-              my_efficiencies["toptag_singletrate_baseline"]->Fill(matched_singlet || matched_singlino, top->p().Pt());
-              my_efficiencies["toptag_singletrate_excl_baseline"]->Fill( (matched_singlet || matched_singlino) && (!matched_top), top->p().Pt());
-          }
-          if(matched_top) n_matched_recotops++;
-          if((matched_neutralino || matched_singlet || matched_singlino) && (!matched_top))
-              n_matched_other++;
-          // Compare with what comes out of the top tagger itself: 
-          const TLorentzVector* bestgentop = top->getBestGenTopMatch(0.4);
-          if(bestgentop != nullptr) n_matched_recotops_auto++;
-
-          if(top->getNConstituents() == 3 )
-          {
-              ntops_3jet++;
-              // do stuff for trijet
-              my_histos["h_top_3jet_gentop_minDR"]->Fill(minDR);
-              my_histos["h_top_3jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
-              my_2d_histos["h_top_3jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
-
-              int n_matched_constituents = 0;
-              for(const Constituent* constituent : top->getConstituents())
-              {
-                  double minDR_AK4_daughter = 999;
-                  const TLorentzVector *matched_daughter;
-
-                  for(const TLorentzVector* daughter : matched_top_constituents)
+                  double DR_top_gentop = utility::calcDR(top->p().Eta(), hadtops[i_gentop].Eta(), top->p().Phi(), hadtops[i_gentop].Phi());
+                  if (DR_top_gentop < minDR)
                   {
-                      // for each AK4, check whether we find a matched daughter
-                      double DR_daughter_constituent = utility::calcDR(daughter->Eta(), constituent->p().Eta(), daughter->Phi(), constituent->p().Phi());
-                      if(DR_daughter_constituent < minDR_AK4_daughter)
+                      minDR = DR_top_gentop;
+                      matched_top_LV = hadtops[i_gentop];
+                      matched_top_constituents = hadtopdaughters[i_gentop];
+                  }
+              }
+              // std::cout << "Top Pt, Eta, Phi: " << top->p().Pt() << " " << top->p().Eta() << " " << top->p().Phi() << std::endl;
+              //std::cout << "Gen top Pt, Eta, Phi, DR: " << matched_top.Pt() << " " << matched_top.Eta() << " " << matched_top.Phi() << " " << minDR << std::endl;
+
+              double Dpt_top_gentop = abs(top->p().Pt() - matched_top_LV.Pt())/top->p().Pt();
+              my_histos["h_top_gentop_minDR"]->Fill(minDR);
+              my_histos["h_top_gentop_Dpt"]->Fill(Dpt_top_gentop);
+              my_2d_histos["h_top_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+              matched_top = minDR<0.4 && Dpt_top_gentop < 0.5;
+              top_matches.push_back(matched_top);
+
+              double minDR_top_neutralino = 999;
+              double Dpt_top_neutralino = -1;
+              for (int i_chi=0; i_chi<neutralinos.size(); ++i_chi)
+              {
+                  double DR_top_neutralino = utility::calcDR(top->p().Eta(), neutralinos[i_chi].Eta(), top->p().Phi(), neutralinos[i_chi].Phi());
+                  if(DR_top_neutralino < minDR_top_neutralino)
+                  {
+                      minDR_top_neutralino = DR_top_neutralino;
+                      Dpt_top_neutralino = abs(top->p().Pt() - neutralinos[i_chi].Pt())/top->p().Pt();
+                  }
+              }
+              matched_neutralino = minDR_top_neutralino < 0.4 && Dpt_top_neutralino < 0.5;
+              if (verbose && matched_neutralino && matched_top)
+              {
+                  std::cout << "Matched to a neutralino and to a top quark..." << std::endl;
+                  std::cout << "DR and Dpt for neutralino: " << minDR_top_neutralino << ", " << Dpt_top_neutralino << std::endl;
+                  std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
+              }
+              my_efficiencies["toptag_chitagrate"]->Fill( matched_neutralino, top->p().Pt());
+              my_efficiencies["toptag_chitagrate_excl"]->Fill( matched_neutralino && (!matched_top), top->p().Pt());
+
+              double minDR_top_singlet = 999;
+              double Dpt_top_singlet = -1;
+              for (int i_chi=0; i_chi<singlets.size(); ++i_chi)
+              {
+                  double DR_top_singlet = utility::calcDR(top->p().Eta(), singlets[i_chi].Eta(), top->p().Phi(), singlets[i_chi].Phi());
+                  if(DR_top_singlet < minDR_top_singlet)
+                  {
+                      minDR_top_singlet = DR_top_singlet;
+                      Dpt_top_singlet = abs(top->p().Pt() - singlets[i_chi].Pt())/top->p().Pt();
+                  }
+              }
+              matched_singlet = minDR_top_singlet < 0.4 && Dpt_top_singlet < 0.5;
+              if (verbose && matched_singlet && matched_top)
+              {
+                  std::cout << "Matched to a singlet and to a top quark..." << std::endl;
+                  std::cout << "DR and Dpt for singlet: " << minDR_top_singlet << ", " << Dpt_top_singlet << std::endl;
+                  std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
+              }
+              double minDR_top_singlino = 999;
+              double Dpt_top_singlino = -1;
+              for (int i_chi=0; i_chi<singlinos.size(); ++i_chi)
+              {
+                  double DR_top_singlino = utility::calcDR(top->p().Eta(), singlinos[i_chi].Eta(), top->p().Phi(), singlinos[i_chi].Phi());
+                  if(DR_top_singlino < minDR_top_singlino)
+                  {
+                      minDR_top_singlino = DR_top_singlino;
+                      Dpt_top_singlino = abs(top->p().Pt() - singlinos[i_chi].Pt())/top->p().Pt();
+                  }
+              }
+              matched_singlino = minDR_top_singlino < 0.4 && Dpt_top_singlino < 0.5;
+              if (verbose && matched_singlino && matched_top)
+              {
+                  std::cout << "Matched to a singlino and to a top quark..." << std::endl;
+                  std::cout << "DR and Dpt for singlino: " << minDR_top_singlino << ", " << Dpt_top_singlino << std::endl;
+                  std::cout << "DR and Dpt for top:        " << minDR << ", " << Dpt_top_gentop << std::endl;
+              }
+              my_efficiencies["toptag_singletrate"]->Fill( matched_singlet || matched_singlino, top->p().Pt());
+              my_efficiencies["toptag_singletrate_excl"]->Fill( (matched_singlet || matched_singlino) && (!matched_top), top->p().Pt());
+
+              // Fake rate defined as not matching a top, neutralino, singlet, or singlino
+              my_efficiencies["toptag_fakerate"]->Fill( !matched_top, top->p().Pt());
+              my_efficiencies["toptag_fakerate_excl"]->Fill( !( matched_top || matched_neutralino || matched_singlet || matched_singlino ), top->p().Pt());
+              if(passBaseline)
+              {
+                  my_histos["h_baseline_top_gentop_minDR"]->Fill(minDR);
+                  my_histos["h_baseline_top_gentop_Dpt"]->Fill(Dpt_top_gentop);
+                  my_2d_histos["h_baseline_top_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+                  my_efficiencies["toptag_fakerate_baseline"]->Fill( !matched_top , top->p().Pt());
+                  my_efficiencies["toptag_fakerate_excl_baseline"]->Fill( !( matched_top || matched_neutralino || matched_singlet || matched_singlino ) , top->p().Pt());
+                  my_efficiencies["toptag_chitagrate_baseline"]->Fill( matched_neutralino, top->p().Pt());
+                  my_efficiencies["toptag_chitagrate_excl_baseline"]->Fill( matched_neutralino && (!matched_top), top->p().Pt());
+                  my_efficiencies["toptag_singletrate_baseline"]->Fill(matched_singlet || matched_singlino, top->p().Pt());
+                  my_efficiencies["toptag_singletrate_excl_baseline"]->Fill( (matched_singlet || matched_singlino) && (!matched_top), top->p().Pt());
+              }
+              if(matched_top) n_matched_recotops++;
+              if((matched_neutralino || matched_singlet || matched_singlino) && (!matched_top))
+                  n_matched_other++;
+              // Compare with what comes out of the top tagger itself: 
+              const TLorentzVector* bestgentop = top->getBestGenTopMatch(0.4);
+              if(bestgentop != nullptr) n_matched_recotops_auto++;
+
+              if(top->getNConstituents() == 3 )
+              {
+                  // do stuff for trijet
+                  my_histos["h_top_3jet_gentop_minDR"]->Fill(minDR);
+                  my_histos["h_top_3jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
+                  my_2d_histos["h_top_3jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+
+                  int n_matched_constituents = 0;
+                  for(const Constituent* constituent : top->getConstituents())
+                  {
+                      double minDR_AK4_daughter = 999;
+                      const TLorentzVector *matched_daughter;
+
+                      for(const TLorentzVector* daughter : matched_top_constituents)
                       {
-                          minDR_AK4_daughter = DR_daughter_constituent;
-                          matched_daughter = daughter;
+                          // for each AK4, check whether we find a matched daughter
+                          double DR_daughter_constituent = utility::calcDR(daughter->Eta(), constituent->p().Eta(), daughter->Phi(), constituent->p().Phi());
+                          if(DR_daughter_constituent < minDR_AK4_daughter)
+                          {
+                              minDR_AK4_daughter = DR_daughter_constituent;
+                              matched_daughter = daughter;
+                          }
                       }
-                  }
-                  double Dpt_3jet_daughter = abs(constituent->p().Pt() - matched_daughter->Pt())/constituent->p().Pt();
-                  my_histos["h_top_gentop_minDR_3jet_daughters"]->Fill(minDR_AK4_daughter);
-                  my_histos["h_top_gentop_Dpt_3jet_daughters"]->Fill( Dpt_3jet_daughter );
-                  my_2d_histos["h_top_gentop_minDR_Dpt_3jet_daughters"]->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
-                  if(passBaseline)
-                  {
-                      my_histos["h_baseline_top_gentop_minDR_3jet_daughters"]->Fill(minDR_AK4_daughter);
-                      my_histos["h_baseline_top_gentop_Dpt_3jet_daughters"]->Fill( Dpt_3jet_daughter );
-                      my_2d_histos["h_baseline_top_gentop_minDR_Dpt_3jet_daughters"]->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );                      
-                  }
-                  if(minDR<0.4)
-                  {
-                      my_histos["h_top_gentop_topmatch_minDR_3jet_daughters"]->Fill(minDR_AK4_daughter);
-                      my_histos["h_top_gentop_topmatch_Dpt_3jet_daughters"]->Fill( Dpt_3jet_daughter );
-                      my_2d_histos["h_top_gentop_topmatch_minDR_Dpt_3jet_daughters"]->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                      double Dpt_3jet_daughter = abs(constituent->p().Pt() - matched_daughter->Pt())/constituent->p().Pt();
+                      my_histos["h_top_gentop_minDR_3jet_daughters"]->Fill(minDR_AK4_daughter);
+                      my_histos["h_top_gentop_Dpt_3jet_daughters"]->Fill( Dpt_3jet_daughter );
+                      my_2d_histos["h_top_gentop_minDR_Dpt_3jet_daughters"]->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
                       if(passBaseline)
                       {
-                          my_histos["h_baseline_top_gentop_topmatch_minDR_3jet_daughters"]->Fill(minDR_AK4_daughter);
-                          my_histos["h_baseline_top_gentop_topmatch_Dpt_3jet_daughters"]->Fill( Dpt_3jet_daughter );
-                          my_2d_histos["h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters"]->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                          my_histos["h_baseline_top_gentop_minDR_3jet_daughters"]->Fill(minDR_AK4_daughter);
+                          my_histos["h_baseline_top_gentop_Dpt_3jet_daughters"]->Fill( Dpt_3jet_daughter );
+                          my_2d_histos["h_baseline_top_gentop_minDR_Dpt_3jet_daughters"]->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );                      
+                      }
+                      if(minDR<0.4)
+                      {
+                          my_histos["h_top_gentop_topmatch_minDR_3jet_daughters"]->Fill(minDR_AK4_daughter);
+                          my_histos["h_top_gentop_topmatch_Dpt_3jet_daughters"]->Fill( Dpt_3jet_daughter );
+                          my_2d_histos["h_top_gentop_topmatch_minDR_Dpt_3jet_daughters"]->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                          if(passBaseline)
+                          {
+                              my_histos["h_baseline_top_gentop_topmatch_minDR_3jet_daughters"]->Fill(minDR_AK4_daughter);
+                              my_histos["h_baseline_top_gentop_topmatch_Dpt_3jet_daughters"]->Fill( Dpt_3jet_daughter );
+                              my_2d_histos["h_baseline_top_gentop_topmatch_minDR_Dpt_3jet_daughters"]->Fill(minDR_AK4_daughter, Dpt_3jet_daughter );
+                          }
+                      }
+
+                      if(minDR_AK4_daughter < 0.3 && Dpt_3jet_daughter < 0.5)
+                      {
+                          n_matched_constituents++;
+                          //std::cout << "Found a match for this AK4 jet" << std::endl;
+                          //std::cout << "\t matched daughter pt, eta, phi: " << matched_daughter->Pt() << ", " << matched_daughter->Eta() << ", " << matched_daughter->Phi() << std::endl;
+                          //std::cout << "\t AK4 jet pt, eta, phi: " << constituent->p().Pt() << ", " << constituent->p().Eta() << ", " << constituent->p().Phi() << std::endl;
+                      }
+                      else 
+                      {
+                          //std::cout << "Did not find a match for this AK4 jet" << std::endl;
+                          //std::cout << "\t AK4 jet pt, eta, phi: " << constituent->p().Pt() << ", " << constituent->p().Eta() << ", " << constituent->p().Phi() << std::endl;
                       }
                   }
-
-                  if(minDR_AK4_daughter < 0.3 && Dpt_3jet_daughter < 0.5)
-                  {
-                      n_matched_constituents++;
-                      //std::cout << "Found a match for this AK4 jet" << std::endl;
-                      //std::cout << "\t matched daughter pt, eta, phi: " << matched_daughter->Pt() << ", " << matched_daughter->Eta() << ", " << matched_daughter->Phi() << std::endl;
-                      //std::cout << "\t AK4 jet pt, eta, phi: " << constituent->p().Pt() << ", " << constituent->p().Eta() << ", " << constituent->p().Phi() << std::endl;
-                  }
-                  else 
-                  {
-                      //std::cout << "Did not find a match for this AK4 jet" << std::endl;
-                      //std::cout << "\t AK4 jet pt, eta, phi: " << constituent->p().Pt() << ", " << constituent->p().Eta() << ", " << constituent->p().Phi() << std::endl;
-                  }
-              }
-              //std::cout << "Was able to match " << n_matched_constituents << " AK4 constituents to a genlevel top daughter" << std::endl;
-              my_histos["h_top_trijet_n_matched_constituents"]->Fill(n_matched_constituents);
-              if(matched_top)
-                  my_histos["h_top_trijet_match_n_matched_constituents"]->Fill(n_matched_constituents);
-              my_2d_histos["h_top_gentop_minDR_Dpt_anymatch"]->Fill(minDR, Dpt_top_gentop);
-              my_histos["h_top_gentop_discr_anymatch"]->Fill(top->getDiscriminator());
-              if(passBaseline)
-              {
-                  my_histos["h_baseline_top_3jet_gentop_minDR"]->Fill(minDR);
-                  my_histos["h_baseline_top_3jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
-                  my_2d_histos["h_baseline_top_3jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
-
-                  my_histos["h_baseline_top_trijet_n_matched_constituents"]->Fill(n_matched_constituents);
-                  my_2d_histos["h_baseline_top_gentop_minDR_Dpt_anymatch"]->Fill(minDR, Dpt_top_gentop);
-                  my_histos["h_baseline_top_gentop_discr_anymatch"]->Fill(top->getDiscriminator());
+                  //std::cout << "Was able to match " << n_matched_constituents << " AK4 constituents to a genlevel top daughter" << std::endl;
+                  my_histos["h_top_trijet_n_matched_constituents"]->Fill(n_matched_constituents);
                   if(matched_top)
-                      my_histos["h_baseline_top_trijet_match_n_matched_constituents"]->Fill(n_matched_constituents);
-              }
-              if(matched_top)
-              {
-                  my_histos["h_top_gentop_discr_anymatch_topmatch"]->Fill(top->getDiscriminator());
+                      my_histos["h_top_trijet_match_n_matched_constituents"]->Fill(n_matched_constituents);
+                  my_2d_histos["h_top_gentop_minDR_Dpt_anymatch"]->Fill(minDR, Dpt_top_gentop);
+                  my_histos["h_top_gentop_discr_anymatch"]->Fill(top->getDiscriminator());
                   if(passBaseline)
-                      my_histos["h_baseline_top_gentop_discr_anymatch_topmatch"]->Fill(top->getDiscriminator());
-              }
-              if(n_matched_constituents == 3)
-              {
-                  my_2d_histos["h_top_gentop_minDR_Dpt_3match"]->Fill(minDR, Dpt_top_gentop);
-                  my_histos["h_top_gentop_discr_3match"]->Fill(top->getDiscriminator());
-                  if(minDR<0.4)
-                      my_histos["h_top_gentop_discr_3match_topmatch"]->Fill(top->getDiscriminator());
-              }
-              else if(n_matched_constituents == 2)
-              {
-                  my_2d_histos["h_top_gentop_minDR_Dpt_2match"]->Fill(minDR, Dpt_top_gentop);
-                  my_histos["h_top_gentop_discr_2match"]->Fill(top->getDiscriminator());
-                  if(minDR<0.4)
-                      my_histos["h_top_gentop_discr_2match_topmatch"]->Fill(top->getDiscriminator());
-              }
-              else if(n_matched_constituents == 1)
-              {
-                  my_2d_histos["h_top_gentop_minDR_Dpt_1match"]->Fill(minDR, Dpt_top_gentop);
-                  my_histos["h_top_gentop_discr_1match"]->Fill(top->getDiscriminator());
-                  if(minDR<0.4)
-                      my_histos["h_top_gentop_discr_1match_topmatch"]->Fill(top->getDiscriminator());
-              }
-              else if(n_matched_constituents == 0)
-              {
-                  my_2d_histos["h_top_gentop_minDR_Dpt_0match"]->Fill(minDR, Dpt_top_gentop);
-                  my_histos["h_top_gentop_discr_0match"]->Fill(top->getDiscriminator());
-                  if(minDR<0.4)
-                      my_histos["h_top_gentop_discr_0match_topmatch"]->Fill(top->getDiscriminator());
-              }
-              if(passBaseline)
-              {
+                  {
+                      my_histos["h_baseline_top_3jet_gentop_minDR"]->Fill(minDR);
+                      my_histos["h_baseline_top_3jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
+                      my_2d_histos["h_baseline_top_3jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+
+                      my_histos["h_baseline_top_trijet_n_matched_constituents"]->Fill(n_matched_constituents);
+                      my_2d_histos["h_baseline_top_gentop_minDR_Dpt_anymatch"]->Fill(minDR, Dpt_top_gentop);
+                      my_histos["h_baseline_top_gentop_discr_anymatch"]->Fill(top->getDiscriminator());
+                      if(matched_top)
+                          my_histos["h_baseline_top_trijet_match_n_matched_constituents"]->Fill(n_matched_constituents);
+                  }
+                  if(matched_top)
+                  {
+                      my_histos["h_top_gentop_discr_anymatch_topmatch"]->Fill(top->getDiscriminator());
+                      if(passBaseline)
+                          my_histos["h_baseline_top_gentop_discr_anymatch_topmatch"]->Fill(top->getDiscriminator());
+                  }
                   if(n_matched_constituents == 3)
                   {
-                      my_2d_histos["h_baseline_top_gentop_minDR_Dpt_3match"]->Fill(minDR, Dpt_top_gentop);
-                      my_histos["h_baseline_top_gentop_discr_3match"]->Fill(top->getDiscriminator());
+                      my_2d_histos["h_top_gentop_minDR_Dpt_3match"]->Fill(minDR, Dpt_top_gentop);
+                      my_histos["h_top_gentop_discr_3match"]->Fill(top->getDiscriminator());
                       if(minDR<0.4)
-                          my_histos["h_baseline_top_gentop_discr_3match_topmatch"]->Fill(top->getDiscriminator());
+                          my_histos["h_top_gentop_discr_3match_topmatch"]->Fill(top->getDiscriminator());
                   }
                   else if(n_matched_constituents == 2)
                   {
-                      my_2d_histos["h_baseline_top_gentop_minDR_Dpt_2match"]->Fill(minDR, Dpt_top_gentop);
-                      my_histos["h_baseline_top_gentop_discr_2match"]->Fill(top->getDiscriminator());
+                      my_2d_histos["h_top_gentop_minDR_Dpt_2match"]->Fill(minDR, Dpt_top_gentop);
+                      my_histos["h_top_gentop_discr_2match"]->Fill(top->getDiscriminator());
                       if(minDR<0.4)
-                          my_histos["h_baseline_top_gentop_discr_2match_topmatch"]->Fill(top->getDiscriminator());
+                          my_histos["h_top_gentop_discr_2match_topmatch"]->Fill(top->getDiscriminator());
                   }
                   else if(n_matched_constituents == 1)
                   {
-                      my_2d_histos["h_baseline_top_gentop_minDR_Dpt_1match"]->Fill(minDR, Dpt_top_gentop);
-                      my_histos["h_baseline_top_gentop_discr_1match"]->Fill(top->getDiscriminator());
+                      my_2d_histos["h_top_gentop_minDR_Dpt_1match"]->Fill(minDR, Dpt_top_gentop);
+                      my_histos["h_top_gentop_discr_1match"]->Fill(top->getDiscriminator());
                       if(minDR<0.4)
-                          my_histos["h_baseline_top_gentop_discr_1match_topmatch"]->Fill(top->getDiscriminator());
+                          my_histos["h_top_gentop_discr_1match_topmatch"]->Fill(top->getDiscriminator());
                   }
                   else if(n_matched_constituents == 0)
                   {
-                      my_2d_histos["h_baseline_top_gentop_minDR_Dpt_0match"]->Fill(minDR, Dpt_top_gentop);
-                      my_histos["h_baseline_top_gentop_discr_0match"]->Fill(top->getDiscriminator());
+                      my_2d_histos["h_top_gentop_minDR_Dpt_0match"]->Fill(minDR, Dpt_top_gentop);
+                      my_histos["h_top_gentop_discr_0match"]->Fill(top->getDiscriminator());
                       if(minDR<0.4)
-                          my_histos["h_baseline_top_gentop_discr_0match_topmatch"]->Fill(top->getDiscriminator());
+                          my_histos["h_top_gentop_discr_0match_topmatch"]->Fill(top->getDiscriminator());
                   }
+                  if(passBaseline)
+                  {
+                      if(n_matched_constituents == 3)
+                      {
+                          my_2d_histos["h_baseline_top_gentop_minDR_Dpt_3match"]->Fill(minDR, Dpt_top_gentop);
+                          my_histos["h_baseline_top_gentop_discr_3match"]->Fill(top->getDiscriminator());
+                          if(minDR<0.4)
+                              my_histos["h_baseline_top_gentop_discr_3match_topmatch"]->Fill(top->getDiscriminator());
+                      }
+                      else if(n_matched_constituents == 2)
+                      {
+                          my_2d_histos["h_baseline_top_gentop_minDR_Dpt_2match"]->Fill(minDR, Dpt_top_gentop);
+                          my_histos["h_baseline_top_gentop_discr_2match"]->Fill(top->getDiscriminator());
+                          if(minDR<0.4)
+                              my_histos["h_baseline_top_gentop_discr_2match_topmatch"]->Fill(top->getDiscriminator());
+                      }
+                      else if(n_matched_constituents == 1)
+                      {
+                          my_2d_histos["h_baseline_top_gentop_minDR_Dpt_1match"]->Fill(minDR, Dpt_top_gentop);
+                          my_histos["h_baseline_top_gentop_discr_1match"]->Fill(top->getDiscriminator());
+                          if(minDR<0.4)
+                              my_histos["h_baseline_top_gentop_discr_1match_topmatch"]->Fill(top->getDiscriminator());
+                      }
+                      else if(n_matched_constituents == 0)
+                      {
+                          my_2d_histos["h_baseline_top_gentop_minDR_Dpt_0match"]->Fill(minDR, Dpt_top_gentop);
+                          my_histos["h_baseline_top_gentop_discr_0match"]->Fill(top->getDiscriminator());
+                          if(minDR<0.4)
+                              my_histos["h_baseline_top_gentop_discr_0match_topmatch"]->Fill(top->getDiscriminator());
+                      }
                   
+                  }
               }
-          }
-          else if(top->getNConstituents() == 2 )
-          {
-              ntops_2jet++;
-              // do stuff for dijet
-              my_histos["h_top_2jet_gentop_minDR"]->Fill(minDR);
-              my_histos["h_top_2jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
-              my_2d_histos["h_top_2jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
-              if(passBaseline)
+              else if(top->getNConstituents() == 2 )
               {
-                  my_histos["h_baseline_top_2jet_gentop_minDR"]->Fill(minDR);
-                  my_histos["h_baseline_top_2jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
-                  my_2d_histos["h_baseline_top_2jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+                  // do stuff for dijet
+                  my_histos["h_top_2jet_gentop_minDR"]->Fill(minDR);
+                  my_histos["h_top_2jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
+                  my_2d_histos["h_top_2jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+                  if(passBaseline)
+                  {
+                      my_histos["h_baseline_top_2jet_gentop_minDR"]->Fill(minDR);
+                      my_histos["h_baseline_top_2jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
+                      my_2d_histos["h_baseline_top_2jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+                  }
               }
-          }
-          else if(top->getNConstituents() == 1 )
-          {
-              ntops_1jet++;
-              my_histos["h_top_1jet_gentop_minDR"]->Fill(minDR);
-              my_histos["h_top_1jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
-              my_2d_histos["h_top_1jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
-              if(passBaseline)
+              else if(top->getNConstituents() == 1 )
               {
-                  my_histos["h_baseline_top_1jet_gentop_minDR"]->Fill(minDR);
-                  my_histos["h_baseline_top_1jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
-                  my_2d_histos["h_baseline_top_1jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
-              }
+                  my_histos["h_top_1jet_gentop_minDR"]->Fill(minDR);
+                  my_histos["h_top_1jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
+                  my_2d_histos["h_top_1jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+                  if(passBaseline)
+                  {
+                      my_histos["h_baseline_top_1jet_gentop_minDR"]->Fill(minDR);
+                      my_histos["h_baseline_top_1jet_gentop_Dpt"]->Fill(Dpt_top_gentop);
+                      my_2d_histos["h_baseline_top_1jet_gentop_minDR_Dpt"]->Fill(minDR, Dpt_top_gentop);
+                  }
 
-              Constituent const *thistop = top->getConstituents()[0];
-              // do stuff for monojet
-              // check mindr, dpt/pt, nsubjettiness
-              //TLorentzVector matched_top;
-              //std::vector<const TLorentzVector*> matched_top_constituents;
-              //double minDR = 999;
-              // need to look at the AK4s that were removed as well. 
-              if (minDR<0.4 && Dpt_top_gentop < 0.5)
-              {
-                  my_histos["h_top_type1_matched_nsub"]->Fill(thistop->getTau3()/thistop->getTau2());
-                  my_histos["h_top_type1_matched_softdrop"]->Fill(thistop->getSoftDropMass());
-              } 
-              else 
-              {
-                  my_histos["h_top_type1_unmatched_nsub"]->Fill(thistop->getTau3()/thistop->getTau2());
-                  my_histos["h_top_type1_unmatched_softdrop"]->Fill(thistop->getSoftDropMass());
-              }
-              if (passBaseline)
-              {
+                  Constituent const *thistop = top->getConstituents()[0];
+                  // do stuff for monojet
+                  // check mindr, dpt/pt, nsubjettiness
+                  //TLorentzVector matched_top;
+                  //std::vector<const TLorentzVector*> matched_top_constituents;
+                  //double minDR = 999;
+                  // need to look at the AK4s that were removed as well. 
                   if (minDR<0.4 && Dpt_top_gentop < 0.5)
                   {
-                      my_histos["h_baseline_top_type1_matched_nsub"]->Fill(thistop->getTau3()/thistop->getTau2());
-                      my_histos["h_baseline_top_type1_matched_softdrop"]->Fill(thistop->getSoftDropMass());
+                      my_histos["h_top_type1_matched_nsub"]->Fill(thistop->getTau3()/thistop->getTau2());
+                      my_histos["h_top_type1_matched_softdrop"]->Fill(thistop->getSoftDropMass());
                   } 
                   else 
                   {
-                      my_histos["h_baseline_top_type1_unmatched_nsub"]->Fill(thistop->getTau3()/thistop->getTau2());
-                      my_histos["h_baseline_top_type1_unmatched_softdrop"]->Fill(thistop->getSoftDropMass());
-                  }                  
+                      my_histos["h_top_type1_unmatched_nsub"]->Fill(thistop->getTau3()/thistop->getTau2());
+                      my_histos["h_top_type1_unmatched_softdrop"]->Fill(thistop->getSoftDropMass());
+                  }
+                  if (passBaseline)
+                  {
+                      if (minDR<0.4 && Dpt_top_gentop < 0.5)
+                      {
+                          my_histos["h_baseline_top_type1_matched_nsub"]->Fill(thistop->getTau3()/thistop->getTau2());
+                          my_histos["h_baseline_top_type1_matched_softdrop"]->Fill(thistop->getSoftDropMass());
+                      } 
+                      else 
+                      {
+                          my_histos["h_baseline_top_type1_unmatched_nsub"]->Fill(thistop->getTau3()/thistop->getTau2());
+                          my_histos["h_baseline_top_type1_unmatched_softdrop"]->Fill(thistop->getSoftDropMass());
+                      }                  
+                  }
               }
           }
       }
-      my_histos["h_ntops_3jet"]->Fill(ntops_3jet);
-      my_histos["h_ntops_2jet"]->Fill(ntops_2jet);
-      my_histos["h_ntops_1jet"]->Fill(ntops_1jet);
+      my_histos["h_ntops_3jet"]->Fill(ntops_3jet, weight);
+      if(passLoose)
+          my_histos["h_ntops_3jet_presel"]->Fill(ntops_3jet, weight);
+      my_histos["h_ntops_2jet"]->Fill(ntops_2jet, weight);
+      my_histos["h_ntops_1jet"]->Fill(ntops_1jet, weight);
       if(n_matched_recotops>2)
           std::cout << "Double matched a gentop!" << std::endl;
 
@@ -1184,15 +1219,82 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
           }
 
       }
+
+
+      if(!passLoose) continue;
+
+      // Now check the actual fake rate (not the impurity)
+      // Take a random candidate that is not genmatched and check how often it passes the tagger      
+      // Only do this for 3-jet category
+      std::vector<TopObject> trijetcandidates;
+      for(TopObject mycand : topcandidates)
+      {
+          if(mycand.getNConstituents() == 3)
+              trijetcandidates.push_back(mycand);
+      }
+      int ncands = trijetcandidates.size();
+      //std::cout << "Start fake rate check " << std::endl;
+      if(ncands > 0)
+      {
+          int myrandint = rand.Integer(ncands);
+          TopObject mycand = trijetcandidates[myrandint];
+          bool found_not_matched = false;
+          int ntries = 0;
+          //std::cout << "Cand top pT, eta, phi: " << mycand.p().Pt() << " " << mycand.p().Eta() << " " << mycand.p().Phi() << std::endl; 
+          while (!found_not_matched && (ntries < 100) && (hadtops.size() > 0))
+          {
+              ntries++;
+              double minDR = 999;
+              double Dpt = 0;
+              for (int gt=0; gt<hadtops.size(); gt++)
+              {
+                  //std::cout << "had top pT, eta, phi: " << hadtops[gt].Pt() << " " << hadtops[gt].Eta() << " " << hadtops[gt].Phi() << std::endl; 
+                  
+                  double DR_top_gentop = utility::calcDR(mycand.p().Eta(), hadtops[gt].Eta(), mycand.p().Phi(), hadtops[gt].Phi());
+                  double Dpt_top_gentop = abs(mycand.p().Pt() - hadtops[gt].Pt())/mycand.p().Pt();
+                  if (DR_top_gentop < minDR)
+                  {
+                      minDR = DR_top_gentop;
+                      Dpt = Dpt_top_gentop;
+                  }
+              }
+              if(minDR > 0.4 || Dpt > 0.5)
+              {
+                  found_not_matched = true;
+                  //std::cout << "Found a candidate not matching any gentops" << std::endl;
+                  }
+              else
+              {
+                  mycand = topcandidates[rand.Integer(ncands)];
+                  //std::cout << "updating candidate: " << mycand.p().Pt() << " " << mycand.p().Eta() << " " << mycand.p().Phi() << std::endl;
+              }
+          }
+          
+          bool found_match_reco = false;
+          for (const TopObject* mytop : tops)
+          {
+              //std::cout << "reco top: " << mytop->p().Pt() << " " << mytop->p().Eta() << " " << mytop->p().Phi() << std::endl;
+              // check whether mytop and mycand match
+              double DR_top_recotop = utility::calcDR(mycand.p().Eta(), mytop->p().Eta(), mycand.p().Phi(), mytop->p().Phi());
+              double Dpt_top_recotop = abs(mycand.p().Pt() - mytop->p().Pt())/mycand.p().Pt();
+              //std::cout << "DR, Dpt: " << DR_top_recotop << " " << Dpt_top_recotop << std::endl;
+              if(DR_top_recotop < 0.1 && Dpt_top_recotop < 0.1)
+              {
+                  found_match_reco = true;
+                  //std::cout << "Found matching reco top" << std::endl;
+                  break;
+              }
+          }
+          my_efficiencies["real_fakerate"]->Fill(found_match_reco, mycand.p().Pt());
+          my_efficiencies["real_fakerate_weighted"]->FillWeighted(found_match_reco, weight, mycand.p().Pt());
+      }
       
-
-
       if(!passBaseline) continue;
       
-      my_histos["h_baseline_ntops"]->Fill(tops.size());
-      my_histos["h_baseline_ntops_3jet"]->Fill(ntops_3jet);
-      my_histos["h_baseline_ntops_2jet"]->Fill(ntops_2jet);
-      my_histos["h_baseline_ntops_1jet"]->Fill(ntops_1jet);
+      my_histos["h_baseline_ntops"]->Fill(tops.size(), weight);
+      my_histos["h_baseline_ntops_3jet"]->Fill(ntops_3jet, weight);
+      my_histos["h_baseline_ntops_2jet"]->Fill(ntops_2jet, weight);
+      my_histos["h_baseline_ntops_1jet"]->Fill(ntops_1jet, weight);
       
       my_histos["h_dphi_2tops"]->Fill( utility::calcDPhi(tops[0]->p().Phi(), tops[1]->p().Phi()) );
 
@@ -1213,8 +1315,11 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
           my_efficiencies["toptag_partially_matched"]->Fill(partially_matched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
           my_efficiencies["toptag_unmatched"]->Fill(unmatched, tops[0]->getNConstituents(), tops[1]->getNConstituents());
       }
-      my_2d_histos["toptag_breakdown"]->Fill(tops[0]->getNConstituents(), tops[1]->getNConstituents());
-   }
+      my_2d_histos["toptag_breakdown"]->Fill(tops[0]->getNConstituents(), tops[1]->getNConstituents(), weight);
+
+
+
+   } // end of event loop
 
 }
 
