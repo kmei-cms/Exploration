@@ -1,4 +1,4 @@
-#include "NtupleClass.h"
+#include "ExploreBackground.h"
 
 #include "TH1D.h"
 #include "TFile.h"
@@ -25,6 +25,11 @@ int main(int argc, char *argv[])
     {
         outfile = argv[2];
     } 
+    double weight = 1.0;
+    if (argc > 3)
+    {
+        weight = atof(argv[3]);
+    }
 
     TFile* myfile = TFile::Open(outfile.c_str(), "RECREATE");
 
@@ -32,8 +37,10 @@ int main(int argc, char *argv[])
     if(infile.find("qcd") != std::string::npos)
         type = "qcd";
     
-    NtupleClass t = NtupleClass(mytree);
-    t.Loop(type);
+    ExploreBackground t = ExploreBackground(mytree);
+    t.InitHistos();
+    t.Loop(type, weight);
+    t.WriteHistos();
 
 
     myfile->Close();

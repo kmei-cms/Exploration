@@ -68,7 +68,7 @@ $(ODIR)/%.o : $(TTSDIR)/%.cc
 $(ODIR)/%.o : $(TTSDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXDEPFLAGS)  -o $@ -c $<
 
-MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/ExploreTopTagger.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/ExploreBackground.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 MyAnalysisMultiFile: $(ODIR)/MyAnalysisMultiFile.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
