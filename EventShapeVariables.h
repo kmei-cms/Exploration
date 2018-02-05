@@ -72,18 +72,33 @@ class EventShapeVariables {
 
   TVectorD getEigenValues() { return compEigenValues() ; }
   TVectorD getEigenValuesNoNorm() { return compEigenValuesNoNorm() ; }
+  TMatrixD getEigenVectors() { return compEigenVectors() ; }
+
+  double getFWmoment( int l ) ;
 
  private:
   /// helper function to fill the 3 dimensional momentum tensor from the inputVectors where 
   /// needed
   TMatrixDSym compMomentumTensor(double = 2.) const;
   TVectorD compEigenValues(double = 2.) const;
+  TMatrixD compEigenVectors(double = 2.) const;
 
   TMatrixDSym compMomentumTensorNoNorm(double = 2.) const;
   TVectorD compEigenValuesNoNorm(double = 2.) const;
 
+  void computeFWmoments() ;
+
   /// cashing of input vectors
   std::vector<math::XYZVector> inputVectors_;
+
+  /// Owen ; save computed Fox-Wolfram moments
+  const static int fwmom_maxl_ = 30 ;
+  double fwmom_[fwmom_maxl_+1] ;
+  bool   fwmom_computed_ ;
+
+
+
+
 };
 
 #endif
