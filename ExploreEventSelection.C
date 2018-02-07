@@ -23,10 +23,12 @@ void ExploreEventSelection::InitHistos()
     my_histos.emplace("h_met", new TH1D("h_met","h_met", 20, 0, 200));
     my_histos.emplace("h_ht", new TH1D("h_ht","h_ht", 60, 0, 3000));
     my_histos.emplace("h_ntops", new TH1D("h_ntops","h_ntops", 5, 0, 5));
+    my_histos.emplace("h_nbtags", new TH1D("h_nbtags","h_nbtags", 8, 0, 8));
     
     // Cut flows
     my_efficiencies.emplace("event_sel", new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",8,0,8));
     my_efficiencies.emplace("event_sel_total", new TEfficiency("event_sel_total","Total event selection efficiency;Cut;#epsilon",8,0,8));
+    my_efficiencies.emplace("event_btag_sel_total", new TEfficiency("event_btag_sel_total","Total btag event selection efficiency;Cut;#epsilon",8,0,8));
 
 }
 
@@ -231,6 +233,7 @@ void ExploreEventSelection::Loop(std::string runtype, double weight, int maxeven
       bool passLoose = passTrigger && rec_njet_pt45_btag>1;
       bool passBaseline = HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>1 && tops.size()>1;
 
+	  int nBTags = BTags;
 
       // Fill event selection efficiencies
       my_efficiencies["event_sel_total"]->Fill(true,0);
@@ -268,9 +271,20 @@ void ExploreEventSelection::Loop(std::string runtype, double weight, int maxeven
               }
           }
       }
+	  
+	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > -1,0);
+	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 0 ,1);
+	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 1 ,2);
+	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 2 ,3);
+	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 3 ,4);
+	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 4 ,5);
+	  
+	  
+	  
  
       my_histos["h_met"]->Fill(MET, weight);
       my_histos["h_ht"]->Fill(HT, weight);
+	  my_histos["h_nbtags"]->Fill(nBTags, weight);
 
 
    } // end of event loop
