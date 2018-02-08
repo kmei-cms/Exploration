@@ -30,7 +30,7 @@ LIBSTOPTAGGER += -L$(TTTDIR) -lTopTagger
 #OBJS       = $(patsubst %, $(ODIR)/%, $(OBJ))
 
 
-PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple RunExploreTopTagger RunExploreEventSelection
+PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple RunExploreTopTagger RunExploreEventSelection nEvts
 
 
 all: mkobj $(PROGRAMS)
@@ -68,7 +68,7 @@ $(ODIR)/%.o : $(TTSDIR)/%.cc
 $(ODIR)/%.o : $(TTSDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXDEPFLAGS)  -o $@ -c $<
 
-MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/ExploreBackground.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/ExploreBackground.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o $(ODIR)/samples.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 MyAnalysisMultiFile: $(ODIR)/MyAnalysisMultiFile.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
@@ -88,6 +88,9 @@ RunExploreTopTagger: $(ODIR)/RunExploreTopTagger.o $(ODIR)/ExploreTopTagger.o $(
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 RunExploreEventSelection: $(ODIR)/RunExploreEventSelection.o $(ODIR)/ExploreEventSelection.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
+nEvts: $(ODIR)/nEvts.o $(ODIR)/NtupleClass.o $(ODIR)/samples.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 clean:
