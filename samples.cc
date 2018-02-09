@@ -201,6 +201,8 @@ namespace AnaSamples
 
         addSampleSet(samples, "Rare", {"TTHH", "TTTW", "TTWH", "TTWW", "TTWZ", "TTZH", "TTZZ"});
 
+        addSampleSet(samples, "AllBG", {"TT", "WJetsToLNu_HT_2500toInf", "WJetsToLNu_HT_1200to2500", "WJetsToLNu_HT_800to1200", "WJetsToLNu_HT_600to800", "WJetsToLNu_HT_400to600", "WJetsToLNu_HT_200to400", "WJetsToLNu_HT_100to200", "WJetsToLNu_HT_70to100", "QCD_HT2000toInf", "QCD_HT1500to2000", "QCD_HT1000to1500", "QCD_HT700to1000", "QCD_HT500to700", "QCD_HT300to500", "QCD_HT200to300", "ST_tW_top", "ST_tW_antitop", /*"ST_s",*/ "ST_t-channel_top", "ST_t-channel_antitop", "WW", "WZ", "ZZ", "TTHH", "TTTW", "TTWH", "TTWW", "TTWZ", "TTZH", "TTZZ"});
+
         addSampleSet(samples, "ALL_MC", {});
 
         //addSampleSet(samples, "Data_MET", {"Data_MET_2016"});
