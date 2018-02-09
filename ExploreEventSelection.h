@@ -19,7 +19,7 @@ public :
 
    ExploreEventSelection(TTree* tree) : NtupleClass(tree) {}
 
-   void     Loop(std::string runtype, double weight, int maxevents = -1, bool isQuiet = false);
+   void     Loop(double weight, int maxevents = -1, bool isQuiet = false);
    virtual void     InitHistos();
    virtual void     WriteHistos();
 
