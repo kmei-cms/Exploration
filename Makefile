@@ -30,7 +30,7 @@ LIBSTOPTAGGER += -L$(TTTDIR) -lTopTagger
 #OBJS       = $(patsubst %, $(ODIR)/%, $(OBJ))
 
 
-PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple RunExploreTopTagger RunExploreEventSelection
+PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple RunExploreTopTagger RunExploreEventSelection RunTest
 
 
 all: mkobj sampPyWrap $(PROGRAMS)
@@ -97,6 +97,9 @@ MicroNtuple: $(ODIR)/MicroNtuple.o $(ODIR)/NtupleClassMicroNtuple.o $(ODIR)/Even
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 RunExploreTopTagger: $(ODIR)/RunExploreTopTagger.o $(ODIR)/ExploreTopTagger.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
+RunTest: $(ODIR)/RunTest.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 RunExploreEventSelection: $(ODIR)/RunExploreEventSelection.o $(ODIR)/ExploreEventSelection.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
