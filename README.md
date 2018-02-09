@@ -111,10 +111,7 @@ Now also check out our repository if not done already:
 cd $CMSSW_BASE/src
 git clone git@github.com:StealthStop/Exploration.git
 cd Exploration
-# best option:
-source ../TopTagger/TopTagger/test/taggerSetup.sh
-# or update the taggerSetup.csh in the Exploration repo to point to the TopTagger repo in the CMSSW93 area
-source taggerSetup.csh
+source setup.csh
 ```
 
 Last step is to get the cfg file for the top tagger, and the TF output model file for the resolved part.
