@@ -30,7 +30,7 @@ void ExploreEventSelection::InitHistos()
 
 }
 
-void ExploreEventSelection::Loop(std::string runtype, double weight, int maxevents, bool isQuiet)
+void ExploreEventSelection::Loop(double weight, int maxevents, bool isQuiet)
 {
    if (fChain == 0) return;
 

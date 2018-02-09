@@ -44,7 +44,7 @@ void ExploreBackground::InitHistos()
 
 }
 
-void ExploreBackground::Loop(std::string runtype, double weight, int maxevents, bool isQuiet)
+void ExploreBackground::Loop(double weight, int maxevents, bool isQuiet)
 {
    if (fChain == 0) return;
 

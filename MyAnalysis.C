@@ -124,11 +124,49 @@ int main(int argc, char *argv[])
             t.Init(new_ch);
             file.addFilesToChain(new_ch, startFile, nFiles);
             double weight = file.getWeight();
+            std::cout << "starting loop" << std::endl;
+            t.Loop(weight, maxEvts);            
+        }
+        std::cout << "Writing histograms..." << std::endl;
+        t.WriteHistos();
+    }
+
+    if(doTopTagger)
+    {
+        ExploreTopTagger t = ExploreTopTagger(ch);
+        std::cout << "Initializing..." << std::endl;
+        t.InitHistos();
+        for(const AnaSamples::FileSummary& file : vvf)
+        {
+            std::cout << "Running over sample " << file.tag << std::endl;
+            TChain* new_ch = new TChain( (AnaSamples::treeName).c_str());
+            t.Init(new_ch);
+            file.addFilesToChain(new_ch, startFile, nFiles);
+            double weight = file.getWeight();
             std::string type = "";
             if(file.tag.find("qcd") != std::string::npos)
                 type = "qcd";
             std::cout << "starting loop" << std::endl;
             t.Loop(type, weight, maxEvts);            
+        }
+        std::cout << "Writing histograms..." << std::endl;
+        t.WriteHistos();
+    }
+
+    if(doEventSelection)
+    {
+        ExploreEventSelection t = ExploreEventSelection(ch);
+        std::cout << "Initializing..." << std::endl;
+        t.InitHistos();
+        for(const AnaSamples::FileSummary& file : vvf)
+        {
+            std::cout << "Running over sample " << file.tag << std::endl;
+            TChain* new_ch = new TChain( (AnaSamples::treeName).c_str());
+            t.Init(new_ch);
+            file.addFilesToChain(new_ch, startFile, nFiles);
+            double weight = file.getWeight();
+            std::cout << "starting loop" << std::endl;
+            t.Loop(weight, maxEvts);            
         }
         std::cout << "Writing histograms..." << std::endl;
         t.WriteHistos();

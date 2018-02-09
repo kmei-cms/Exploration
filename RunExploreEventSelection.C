@@ -74,19 +74,12 @@ int main(int argc, char *argv[])
     if ( nentries <= 0 ) { printf("\n\n Nothing to do.\n\n") ; gSystem->Exit(-1) ; }
 
 
-    std::string type = "";
-    std::string filepattern = std::string(file_pattern);
-    if(filepattern.find("qcd") != std::string::npos)
-        type = "qcd";
-
-
     TFile* myfile = TFile::Open(outfile.c_str(), "RECREATE");
-
     
     bool isQuiet = true;
     ExploreEventSelection t = ExploreEventSelection( ch );
     t.InitHistos();
-    t.Loop(type, 1.0, -1, isQuiet);
+    t.Loop(1.0, -1, isQuiet);
     t.WriteHistos();
 
     myfile->Close();
