@@ -23,13 +23,33 @@ void ExploreEventSelection::InitHistos()
     my_histos.emplace("h_met", new TH1D("h_met","h_met", 20, 0, 200));
     my_histos.emplace("h_ht", new TH1D("h_ht","h_ht", 60, 0, 3000));
     my_histos.emplace("h_ntops", new TH1D("h_ntops","h_ntops", 5, 0, 5));
-    my_histos.emplace("h_nbtags", new TH1D("h_nbtags","h_nbtags", 8, 0, 8));
-    
-    // Cut flows
-    my_efficiencies.emplace("event_sel", new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",8,0,8));
-    my_efficiencies.emplace("event_sel_total", new TEfficiency("event_sel_total","Total event selection efficiency;Cut;#epsilon",8,0,8));
-    my_efficiencies.emplace("event_btag_sel_total", new TEfficiency("event_btag_sel_total","Total btag event selection efficiency;Cut;#epsilon",8,0,8));
 
+	my_histos.emplace("h_nbtags_loose_pt20", new TH1D("h_nbtags_loose_pt20","h_nbtags_loose_pt20", 8, 0, 8));
+    my_histos.emplace("h_nbtags_medium_pt20", new TH1D("h_nbtags_medium_pt20","h_nbtags_medium_pt20", 8, 0, 8));
+    my_histos.emplace("h_nbtags_tight_pt20", new TH1D("h_nbtags_tight_pt20","h_nbtags_tight_pt20", 8, 0, 8));
+	
+	my_histos.emplace("h_nbtags_loose_pt30", new TH1D("h_nbtags_loose_pt30","h_nbtags_loose_pt30", 8, 0, 8));
+    my_histos.emplace("h_nbtags_medium_pt30", new TH1D("h_nbtags_medium_pt30","h_nbtags_medium_pt30", 8, 0, 8));
+    my_histos.emplace("h_nbtags_tight_pt30", new TH1D("h_nbtags_tight_pt30","h_nbtags_tight_pt30", 8, 0, 8));
+	
+	my_histos.emplace("h_nbtags_loose_pt40", new TH1D("h_nbtags_loose_pt40","h_nbtags_loose_pt40", 8, 0, 8));
+    my_histos.emplace("h_nbtags_medium_pt40", new TH1D("h_nbtags_medium_pt40","h_nbtags_medium_pt40", 8, 0, 8));
+    my_histos.emplace("h_nbtags_tight_pt40", new TH1D("h_nbtags_tight_pt40","h_nbtags_tight_pt40", 8, 0, 8));
+    
+	// Cut flows
+    //my_efficiencies.emplace("event_sel", new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",8,0,8));
+   // my_efficiencies.emplace("event_sel_total", new TEfficiency("event_sel_total","Total event selection efficiency;Cut;#epsilon",8,0,8));
+    my_efficiencies.emplace("event_btag_loose_pt20", new TEfficiency("event_btag_loose_pt20","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
+    my_efficiencies.emplace("event_btag_medium_pt20", new TEfficiency("event_btag_medium_pt20","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
+    my_efficiencies.emplace("event_btag_tight_pt20", new TEfficiency("event_btag_tight_pt20","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
+
+    my_efficiencies.emplace("event_btag_loose_pt30", new TEfficiency("event_btag_loose_pt30","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
+    my_efficiencies.emplace("event_btag_medium_pt30", new TEfficiency("event_btag_medium_pt30","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
+    my_efficiencies.emplace("event_btag_tight_pt30", new TEfficiency("event_btag_tight_pt30","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
+    
+	my_efficiencies.emplace("event_btag_loose_pt40", new TEfficiency("event_btag_loose_pt40","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
+    my_efficiencies.emplace("event_btag_medium_pt40", new TEfficiency("event_btag_medium_pt40","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
+    my_efficiencies.emplace("event_btag_tight_pt40", new TEfficiency("event_btag_tight_pt40","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
 }
 
 void ExploreEventSelection::Loop(std::string runtype, double weight, int maxevents, bool isQuiet)
@@ -207,19 +227,130 @@ void ExploreEventSelection::Loop(std::string runtype, double weight, int maxeven
       // -- Basic event selection stuff
       // -------------------------------
 
-      // Check whether event would pass the trigger requirement
+	  // Adding a number of btags based selection cut.
+	  // 	To accomplish this - making a loop over all jets
+	  // 	Impose a pT / eta cut (pT > 20, 30, 40) / (eta < 2.4)
+	  // 	Apply preselection of njets >= 6 and HT > 500 GeV
+	  // 	Three different CSV btag requirements: 
+	  // 		Loose - 0.5436 (10%)
+	  // 		Medium - 0.8484 (1%)
+	  // 		Tight - 0.9535 (0.1%)
+	  
+	  int rec_njet_KM_pt40(0);
+	  int rec_njet_KM_pt30(0);
+	  int rec_njet_KM_pt20(0);
+
+	  int rec_njet_passLooseBtag_pt20(0);
+	  int rec_njet_passMediumBtag_pt20(0);
+	  int rec_njet_passTightBtag_pt20(0);
+
+	  int rec_njet_passLooseBtag_pt30(0);
+	  int rec_njet_passMediumBtag_pt30(0);
+	  int rec_njet_passTightBtag_pt30(0);
+
+	  int rec_njet_passLooseBtag_pt40(0);
+	  int rec_njet_passMediumBtag_pt40(0);
+	  int rec_njet_passTightBtag_pt40(0);
+
+	  double HT_pt20(0.0);
+	  double HT_pt30(0.0);
+	  double HT_pt40(0.0);
+
+	  bool passPreselection_pt20(true);
+	  bool passPreselection_pt30(true);
+	  bool passPreselection_pt40(true);
+
+	  for ( unsigned int itJet = 0; itJet < Jets->size(); itJet++ ) {
+
+		TLorentzVector jlv ( Jets->at(itJet) );
+
+		if ( std::fabs( jlv.Eta() ) > 2.4 ) continue;
+		
+		bool passLooseBtag  = ( Jets_bDiscriminatorCSV->at(itJet) > 0.5436 ); 
+		bool passMediumBtag = ( Jets_bDiscriminatorCSV->at(itJet) > 0.8484 ); 
+		bool passTightBtag  = ( Jets_bDiscriminatorCSV->at(itJet) > 0.9535 ); 
+	    
+		bool passPt20 = ( jlv.Pt() > 20.0 );
+		bool passPt30 = ( jlv.Pt() > 30.0 );
+		bool passPt40 = ( jlv.Pt() > 40.0 );
+
+		if ( passPt20 ) { 
+			
+			HT_pt20 += jlv.Pt(); 
+			rec_njet_KM_pt20++; 
+			
+			if ( passTightBtag ) { 
+				rec_njet_passTightBtag_pt20++; 
+				rec_njet_passMediumBtag_pt20++; 
+				rec_njet_passLooseBtag_pt20++; 
+			}
+			else if ( passMediumBtag ) {
+				rec_njet_passMediumBtag_pt20++;
+				rec_njet_passLooseBtag_pt20++;
+			}
+			else if ( passLooseBtag ) {
+				rec_njet_passLooseBtag_pt20++;
+			}
+		}//end of passPt20
+		
+		if ( passPt30 ) {
+
+			HT_pt30 += jlv.Pt(); 
+			rec_njet_KM_pt30++; 
+				
+			if ( passTightBtag ) { 
+				rec_njet_passTightBtag_pt30++; 
+				rec_njet_passMediumBtag_pt30++; 
+				rec_njet_passLooseBtag_pt30++; 
+			}
+			else if ( passMediumBtag ) {
+				rec_njet_passMediumBtag_pt30++;
+				rec_njet_passLooseBtag_pt30++;
+			}
+			else if ( passLooseBtag ) {
+				rec_njet_passLooseBtag_pt30++;
+			}
+		}//end of passPt30
+		
+		if ( passPt40 ) {
+		
+			HT_pt40 += jlv.Pt();
+			rec_njet_KM_pt40++; 
+			
+			if ( passTightBtag ) { 
+				rec_njet_passTightBtag_pt40++; 
+				rec_njet_passMediumBtag_pt40++; 
+				rec_njet_passLooseBtag_pt40++; 
+			}
+			else if ( passMediumBtag ) {
+				rec_njet_passMediumBtag_pt40++;
+				rec_njet_passLooseBtag_pt40++;
+			}
+			else if ( passLooseBtag ) {
+				rec_njet_passLooseBtag_pt40++;
+			}
+		}//end of passPt40
+	  }
+
+	  // FIXME: Add a bool for whether event passes preselection here
+	  
+	  if ( !( rec_njet_KM_pt20 >= 6 &&  HT_pt20 > 500 ) ) passPreselection_pt20 = false;
+	  if ( !( rec_njet_KM_pt30 >= 6 &&  HT_pt30 > 500 ) ) passPreselection_pt30 = false;
+	  if ( !( rec_njet_KM_pt40 >= 6 &&  HT_pt40 > 500 ) ) passPreselection_pt40 = false;
+
+/*      // Check whether event would pass the trigger requirement
       bool passTrigger = true;
       int rec_njet_pt45(0) ;
       int rec_njet_pt20(0) ;
       int rec_njet_pt45_btag(0) ;
-      double HT_pt40 = 0.0;
+      //double HT_pt40 = 0.0;
       for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
           TLorentzVector jlv( Jets->at(rji) ) ;
           if (abs(jlv.Eta()) > 2.4) continue;
           if ( jlv.Pt() > 20 ) 
               rec_njet_pt20++;
-          if (jlv.Pt() > 40)
-              HT_pt40 += jlv.Pt();
+          //if (jlv.Pt() > 40)
+              //HT_pt40 += jlv.Pt();
           if ( jlv.Pt() > 45 ) 
           {
               rec_njet_pt45++ ;
@@ -230,10 +361,8 @@ void ExploreEventSelection::Loop(std::string runtype, double weight, int maxeven
       if ( !( HT_pt40>500 && rec_njet_pt45>=6 ) ) 
           passTrigger = false;
 
-      bool passLoose = passTrigger && rec_njet_pt45_btag>1;
-      bool passBaseline = HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>1 && tops.size()>1;
-
-	  int nBTags = BTags;
+      //bool passLoose = passTrigger && rec_njet_pt45_btag>1;
+      //bool passBaseline = HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>1 && tops.size()>1;
 
       // Fill event selection efficiencies
       my_efficiencies["event_sel_total"]->Fill(true,0);
@@ -271,20 +400,138 @@ void ExploreEventSelection::Loop(std::string runtype, double weight, int maxeven
               }
           }
       }
-	  
-	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > -1,0);
-	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 0 ,1);
-	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 1 ,2);
-	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 2 ,3);
-	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 3 ,4);
-	  my_efficiencies["event_btag_sel_total"]->Fill(nBTags > 4 ,5);
-	  
-	  
-	  
- 
+*/	 
+
+		
       my_histos["h_met"]->Fill(MET, weight);
       my_histos["h_ht"]->Fill(HT, weight);
-	  my_histos["h_nbtags"]->Fill(nBTags, weight);
+	
+	if ( passPreselection_pt20 ) {
+	  my_histos["h_nbtags_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20, weight);
+	  my_histos["h_nbtags_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20, weight);
+	  my_histos["h_nbtags_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20, weight);
+	  
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > -1,0);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 0,1);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 1,2);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 2,3);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 3,4);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 4,5);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 5,6);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 6,7);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 7,8);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 8,9);
+	  my_efficiencies["event_btag_loose_pt20"]->Fill(rec_njet_passLooseBtag_pt20 > 9,10);
+
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > -1,0);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 0,1);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 1,2);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 2,3);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 3,4);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 4,5);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 5,6);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 6,7);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 7,8);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 8,9);
+	  my_efficiencies["event_btag_medium_pt20"]->Fill(rec_njet_passMediumBtag_pt20 > 9,10);
+
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > -1,0);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 0,1);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 1,2);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 2,3);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 3,4);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 4,5);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 5,6);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 6,7);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 7,8);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 8,9);
+	  my_efficiencies["event_btag_tight_pt20"]->Fill(rec_njet_passTightBtag_pt20 > 9,10);
+
+	}
+
+	if ( passPreselection_pt30 ) {
+	  my_histos["h_nbtags_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30, weight);
+	  my_histos["h_nbtags_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30, weight);
+	  my_histos["h_nbtags_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30, weight);
+	  
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > -1,0);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 0,1);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 1,2);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 2,3);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 3,4);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 4,5);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 5,6);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 6,7);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 7,8);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 8,9);
+	  my_efficiencies["event_btag_loose_pt30"]->Fill(rec_njet_passLooseBtag_pt30 > 9,10);
+
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > -1,0);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 0,1);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 1,2);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 2,3);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 3,4);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 4,5);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 5,6);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 6,7);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 7,8);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 8,9);
+	  my_efficiencies["event_btag_medium_pt30"]->Fill(rec_njet_passMediumBtag_pt30 > 9,10);
+
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > -1,0);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 0,1);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 1,2);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 2,3);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 3,4);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 4,5);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 5,6);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 6,7);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 7,8);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 8,9);
+	  my_efficiencies["event_btag_tight_pt30"]->Fill(rec_njet_passTightBtag_pt30 > 9,10);
+	}
+
+	if ( passPreselection_pt40 ) {
+	  my_histos["h_nbtags_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40, weight);
+	  my_histos["h_nbtags_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40, weight);
+	  my_histos["h_nbtags_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40, weight);
+	  
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > -1,0);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 0,1);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 1,2);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 2,3);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 3,4);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 4,5);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 5,6);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 6,7);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 7,8);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 8,9);
+	  my_efficiencies["event_btag_loose_pt40"]->Fill(rec_njet_passLooseBtag_pt40 > 9,10);
+
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > -1,0);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 0,1);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 1,2);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 2,3);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 3,4);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 4,5);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 5,6);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 6,7);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 7,8);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 8,9);
+	  my_efficiencies["event_btag_medium_pt40"]->Fill(rec_njet_passMediumBtag_pt40 > 9,10);
+
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > -1,0);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 0,1);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 1,2);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 2,3);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 3,4);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 4,5);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 5,6);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 6,7);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 7,8);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 8,9);
+	  my_efficiencies["event_btag_tight_pt40"]->Fill(rec_njet_passTightBtag_pt40 > 9,10);
+	}
 
 
    } // end of event loop
