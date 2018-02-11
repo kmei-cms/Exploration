@@ -44,7 +44,7 @@ void ExploreBackground::InitHistos()
 
 }
 
-void ExploreBackground::Loop(std::string runtype, double weight, int maxevents, bool isQuiet)
+void ExploreBackground::Loop(double weight, int maxevents, bool isQuiet)
 {
    if (fChain == 0) return;
 
@@ -56,13 +56,14 @@ void ExploreBackground::Loop(std::string runtype, double weight, int maxevents, 
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) 
    {
+      if (maxevents > 0 && jentry >= maxevents) break;
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
    
       nbytes = fChain->GetEntry(jentry);   
       nbytes_total += nbytes;
 
-      if ( jentry % (nentries/10) == 0 ) printf("  Event %9llu / %9llu  (%2.0f%%)\n", jentry, nentries, 100*(jentry*1.)/(nentries*1.) ) ;
+      if ( jentry % 1000 == 0 ) printf("  Event %9llu\n", jentry ) ;
 
       // -----------------
       // check for number of hadronic tops at gen level

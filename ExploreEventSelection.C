@@ -52,7 +52,7 @@ void ExploreEventSelection::InitHistos()
     my_efficiencies.emplace("event_btag_tight_pt40", new TEfficiency("event_btag_tight_pt40","Total btag event selection efficiency;Cut;#epsilon",12,0,12));
 }
 
-void ExploreEventSelection::Loop(std::string runtype, double weight, int maxevents, bool isQuiet)
+void ExploreEventSelection::Loop(double weight, int maxevents, bool isQuiet)
 {
    if (fChain == 0) return;
 

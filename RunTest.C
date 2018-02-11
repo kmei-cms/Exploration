@@ -1,4 +1,4 @@
-#include "ExploreEventSelection.h"
+#include "NtupleClass.h"
 
 #include "TH1D.h"
 #include "TFile.h"
@@ -77,10 +77,8 @@ int main(int argc, char *argv[])
     TFile* myfile = TFile::Open(outfile.c_str(), "RECREATE");
     
     bool isQuiet = true;
-    ExploreEventSelection t = ExploreEventSelection( ch );
-    t.InitHistos();
-    t.Loop(1.0, -1, isQuiet);
-    t.WriteHistos();
+    NtupleClass t = NtupleClass( ch );
+    t.Loop("");
 
     myfile->Close();
 

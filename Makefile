@@ -30,13 +30,25 @@ LIBSTOPTAGGER += -L$(TTTDIR) -lTopTagger
 #OBJS       = $(patsubst %, $(ODIR)/%, $(OBJ))
 
 
-PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple RunExploreTopTagger RunExploreEventSelection
+PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple RunExploreTopTagger RunExploreEventSelection RunTest
 
 
-all: mkobj $(PROGRAMS)
+all: mkobj sampPyWrap $(PROGRAMS)
 
 mkobj:
 	@mkdir -p obj
+
+#code to compile shared library to link samples to python
+sampPyWrap: $(ODIR)/samplesModule.so
+
+$(ODIR)/samplesModule.so: $(ODIR)/samplesPyWrap.o $(ODIR)/samplesModulePyWrap.o
+	$(CXX) -shared -o $@ $^
+
+$(ODIR)/samplesPyWrap.o: $(SDIR)/samples.cc $(SDIR)/samples.h 
+	$(CXX) --std=c++11 -c -fPIC -o $@ $<
+
+$(ODIR)/samplesModulePyWrap.o: $(SDIR)/samplesModule.cc
+	$(CXX) --std=c++11 -c -fPIC -o $@ $<
 
 $(ODIR)/%.o : $(SDIR)/%.C
 	$(CXX) $(CXXFLAGS) $(CXXDEPFLAGS)  -o $@ -c $<
@@ -68,7 +80,7 @@ $(ODIR)/%.o : $(TTSDIR)/%.cc
 $(ODIR)/%.o : $(TTSDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXDEPFLAGS)  -o $@ -c $<
 
-MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/ExploreBackground.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/ExploreBackground.o $(ODIR)/ExploreTopTagger.o $(ODIR)/ExploreEventSelection.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o $(ODIR)/samples.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 MyAnalysisMultiFile: $(ODIR)/MyAnalysisMultiFile.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
@@ -87,8 +99,16 @@ MicroNtuple: $(ODIR)/MicroNtuple.o $(ODIR)/NtupleClassMicroNtuple.o $(ODIR)/Even
 RunExploreTopTagger: $(ODIR)/RunExploreTopTagger.o $(ODIR)/ExploreTopTagger.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
+RunTest: $(ODIR)/RunTest.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
 RunExploreEventSelection: $(ODIR)/RunExploreEventSelection.o $(ODIR)/ExploreEventSelection.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
+#nEvts: $(ODIR)/nEvts.o $(ODIR)/NtupleClass.o $(ODIR)/samples.o
+#	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
 clean:
 	rm -f $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.d $(PROGRAMS) core 
+
+-include $(ODIR)/*.d
