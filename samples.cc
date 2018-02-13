@@ -191,7 +191,7 @@ namespace AnaSamples
         //Define sets of samples for later use
         addSampleSet(samples, "TT", {"TT"});
 
-        addSampleSet(samples, "WJetsToLNu", {"WJetsToLNu_HT_2500toInf", "WJetsToLNu_HT_1200to2500", "WJetsToLNu_HT_800to1200", "WJetsToLNu_HT_600to800", "WJetsToLNu_HT_400to600", "WJetsToLNu_HT_200to400", "WJetsToLNu_HT_100to200", "WJetsToLNu_HT_70to100"});
+        addSampleSet(samples, "WJetsToLNu", {"WJetsToLNu_HT-2500toInf", "WJetsToLNu_HT-1200to2500", "WJetsToLNu_HT-800to1200", "WJetsToLNu_HT-600to800", "WJetsToLNu_HT-400to600", "WJetsToLNu_HT-200to400", "WJetsToLNu_HT-100to200", "WJetsToLNu_HT-70to100"});
 
         addSampleSet(samples, "QCD", {"QCD_HT2000toInf", "QCD_HT1500to2000", "QCD_HT1000to1500", "QCD_HT700to1000", "QCD_HT500to700", "QCD_HT300to500", "QCD_HT200to300"});
 
