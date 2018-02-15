@@ -92,7 +92,8 @@ class EventShapeVariables {
   std::vector<math::XYZVector> inputVectors_;
 
   /// Owen ; save computed Fox-Wolfram moments
-  const static int fwmom_maxl_ = 30 ;
+  /////////////const static int fwmom_maxl_ = 30 ;
+  const static int fwmom_maxl_ = 10 ;
   double fwmom_[fwmom_maxl_+1] ;
   bool   fwmom_computed_ ;
 
