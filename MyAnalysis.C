@@ -166,7 +166,10 @@ int main(int argc, char *argv[])
             file.addFilesToChain(new_ch, startFile, nFiles);
             double weight = file.getWeight();
             std::cout << "starting loop" << std::endl;
-            t.Loop(weight, maxEvts);            
+            std::string runtype = "";
+            if(file.tag.find("Data") != std::string::npos)
+                runtype = "Data";
+            t.Loop(weight, maxEvts, runtype);            
         }
         std::cout << "Writing histograms..." << std::endl;
         t.WriteHistos();

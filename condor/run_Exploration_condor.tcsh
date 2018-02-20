@@ -66,8 +66,8 @@ printf "\n\n ls output\n"
 ls -l
 
 printf "Copy over the needed filelist"
-mkdir filelists
-xrdcp root://cmseos.fnal.gov//store/user/lpcsusyhad/StealthStop/${filelist} filelists/
+mkdir filelists_Kevin
+xrdcp root://cmseos.fnal.gov//store/user/lpcsusyhad/StealthStop/${filelist} filelists_Kevin/
 
 printf "\n\n Attempting to run MyAnalysis executable.\n\n"
 #./MyAnalysis root://cmseos.fnal.gov/${input_fpat} ${output_file} ${weight}

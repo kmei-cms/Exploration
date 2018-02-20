@@ -112,7 +112,7 @@ namespace AnaSamples
         
         // NLO --> negative weights!
         // (sign of gen weight) * (lumi*xsec)/(effective number of events): effective number of events = N(evt) with positive weight - N(evt) with negative weight
-        addSample("TTZToLLNuNu", flistdir+"/TTZToLLNuNu.txt", "TreeMaker2/PreSelection", 0.2529, lumi, 6488085,  1.0,  kOrange+2);
+        addSample("TTZToLLNuNu", flistdir+"/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8.txt", "TreeMaker2/PreSelection", 0.2529, lumi, 6488085,  1.0,  kOrange+2);
         addSample("TTZToQQ",     flistdir+"/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.txt", "TreeMaker2/PreSelection", 0.5297, lumi, 351164,  1.0,  kOrange+2); // 749400
 
         // NLO --> negative weights!
@@ -146,9 +146,9 @@ namespace AnaSamples
         
         // Tri-boson: negative weights!
         //addSample("WWW", flistdir+"/WWW.txt", "TreeMaker2/PreSelection", 0.2086,  lumi, 225269 - 14731,  1.0,  kViolet+2);
-        addSample("WWZ", flistdir+"/WWZ.txt", "TreeMaker2/PreSelection", 0.1651,  lumi, 221468,  1.0,  kViolet+2);
-        addSample("WZZ", flistdir+"/WZZ.txt", "TreeMaker2/PreSelection", 0.05565, lumi, 216366,  1.0,  kViolet+2);
-        addSample("ZZZ", flistdir+"/ZZZ.txt", "TreeMaker2/PreSelection", 0.01398, lumi, 213197,  1.0,  kViolet+2);
+        addSample("WWZ", flistdir+"/WWZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.txt", "TreeMaker2/PreSelection", 0.1651,  lumi, 221468,  1.0,  kViolet+2);
+        addSample("WZZ", flistdir+"/WZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.txt", "TreeMaker2/PreSelection", 0.05565, lumi, 216366,  1.0,  kViolet+2);
+        addSample("ZZZ", flistdir+"/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.txt", "TreeMaker2/PreSelection", 0.01398, lumi, 213197,  1.0,  kViolet+2);
         //addSample("WZG", flistdir+"/WZG.txt", "TreeMaker2/PreSelection", 0.04123, lumi, 921527 - 76673,  1.0,  kViolet+2);
         //addSample("WWG", flistdir+"/WWG.txt", "TreeMaker2/PreSelection", 0.2147 , lumi, 913515 - 85885,  1.0,  kViolet+2);
 
@@ -201,7 +201,7 @@ namespace AnaSamples
 
         addSampleSet(samples, "QCD", {"QCD_HT2000toInf", "QCD_HT1500to2000", "QCD_HT1000to1500", "QCD_HT700to1000", "QCD_HT500to700", "QCD_HT300to500", "QCD_HT200to300"});
 
-        addSampleSet(samples, "ST", {"ST_tW_top", "ST_tW_antitop", "ST_s", "ST_t-channel_top", "ST_t-channel_antitop", "tZq_W_lept_Z_hadron"});
+        addSampleSet(samples, "ST", {"ST_tW_top", "ST_tW_antitop", "ST_s-channel", "ST_t-channel_top", "ST_t-channel_antitop", "tZq_W_lept_Z_hadron"});
 
         addSampleSet(samples, "Diboson", {"WW", "WZ", "ZZ"});
 
