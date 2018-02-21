@@ -145,6 +145,11 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
 
       if ( jentry % 10000 == 0 ) printf("  Event %9llu\n", jentry ) ;
 
+      // Make sure event weight is not 0 for data
+      double eventweight = 1.;
+      if(type != "Data")
+          eventweight = Weight;
+      
       // -----------------
       // check for number of hadronic tops at gen level
       // -----------------
@@ -281,7 +286,7 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
 
       // get reconstructed top
       const std::vector<TopObject*>& tops = ttr.getTops();
-      my_histos["h_ntops"]->Fill(tops.size(), Weight);
+      my_histos["h_ntops"]->Fill(tops.size(), eventweight);
 
       // get set of all constituents (i.e. AK4 and AK8 jets) used in one of the tops
       std::set<Constituent const *> usedConstituents = ttr.getUsedConstituents();
@@ -515,12 +520,12 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       {
           if(kv.second)
           {
-              my_histos["h_njets_0l_"+kv.first]->Fill(rec_njet_pt30, Weight);
-              my_histos["h_ntops_0l_"+kv.first]->Fill(tops.size(), Weight);
-              my_histos["h_nb_0l_"+kv.first]->Fill(rec_njet_pt30_btag, Weight);
-              my_histos["h_HT_0l_"+kv.first]->Fill(HT_trigger, Weight);
-              my_histos["h_bdt_0l_"+kv.first]->Fill(eventshape_bdt_val, Weight);
-              my_2d_histos["h_njets_bdt_0l_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, Weight);
+              my_histos["h_njets_0l_"+kv.first]->Fill(rec_njet_pt30, eventweight);
+              my_histos["h_ntops_0l_"+kv.first]->Fill(tops.size(), eventweight);
+              my_histos["h_nb_0l_"+kv.first]->Fill(rec_njet_pt30_btag, eventweight);
+              my_histos["h_HT_0l_"+kv.first]->Fill(HT_trigger, eventweight);
+              my_histos["h_bdt_0l_"+kv.first]->Fill(eventshape_bdt_val, eventweight);
+              my_2d_histos["h_njets_bdt_0l_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, eventweight);
           }
       }
 
@@ -552,13 +557,13 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       {
           if(kv.second)
           {
-              my_histos["h_njets_1l_"+kv.first]->Fill(rec_njet_pt30, Weight);
-              my_histos["h_ntops_1l_"+kv.first]->Fill(tops.size(), Weight);
-              my_histos["h_nb_1l_"+kv.first]->Fill(rec_njet_pt30_btag, Weight);
-              my_histos["h_HT_1l_"+kv.first]->Fill(HT_trigger, Weight);
-              my_histos["h_bdt_1l_"+kv.first]->Fill(eventshape_bdt_val, Weight);
-              my_histos["h_mbl_1l_"+kv.first]->Fill(mbl, Weight);
-              my_2d_histos["h_njets_bdt_1l_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, Weight);
+              my_histos["h_njets_1l_"+kv.first]->Fill(rec_njet_pt30, eventweight);
+              my_histos["h_ntops_1l_"+kv.first]->Fill(tops.size(), eventweight);
+              my_histos["h_nb_1l_"+kv.first]->Fill(rec_njet_pt30_btag, eventweight);
+              my_histos["h_HT_1l_"+kv.first]->Fill(HT_trigger, eventweight);
+              my_histos["h_bdt_1l_"+kv.first]->Fill(eventshape_bdt_val, eventweight);
+              my_histos["h_mbl_1l_"+kv.first]->Fill(mbl, eventweight);
+              my_2d_histos["h_njets_bdt_1l_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, eventweight);
           }
       }
 
@@ -573,12 +578,12 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       {
           if(kv.second)
           {
-              my_histos["h_njets_2l_"+kv.first]->Fill(rec_njet_pt30, Weight);
-              my_histos["h_ntops_2l_"+kv.first]->Fill(tops.size(), Weight);
-              my_histos["h_nb_2l_"+kv.first]->Fill(rec_njet_pt30_btag, Weight);
-              my_histos["h_HT_2l_"+kv.first]->Fill(HT_trigger, Weight);
-              my_histos["h_bdt_2l_"+kv.first]->Fill(eventshape_bdt_val, Weight);
-              my_2d_histos["h_njets_bdt_2l_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, Weight);
+              my_histos["h_njets_2l_"+kv.first]->Fill(rec_njet_pt30, eventweight);
+              my_histos["h_ntops_2l_"+kv.first]->Fill(tops.size(), eventweight);
+              my_histos["h_nb_2l_"+kv.first]->Fill(rec_njet_pt30_btag, eventweight);
+              my_histos["h_HT_2l_"+kv.first]->Fill(HT_trigger, eventweight);
+              my_histos["h_bdt_2l_"+kv.first]->Fill(eventshape_bdt_val, eventweight);
+              my_2d_histos["h_njets_bdt_2l_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, eventweight);
           }
       }
 
@@ -619,8 +624,8 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
           }
       }
  
-      my_histos["h_met"]->Fill(MET, Weight);
-      my_histos["h_ht"]->Fill(HT, Weight);
+      my_histos["h_met"]->Fill(MET, eventweight);
+      my_histos["h_ht"]->Fill(HT, eventweight);
 
 
    } // end of event loop
