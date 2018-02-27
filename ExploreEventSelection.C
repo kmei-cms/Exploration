@@ -96,7 +96,7 @@ void ExploreEventSelection::InitHistos()
 
 }
 
-void ExploreEventSelection::Loop(double weight, int maxevents, std::string type, bool isQuiet)
+void ExploreEventSelection::Loop(double weight, int maxevents, std::string type, std::string filetag, bool isQuiet)
 {
    if (fChain == 0) return;
 
@@ -246,9 +246,12 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       bool passTriggerAllHad = PassTriggerAllHad();
       bool passTriggerMuon = PassTriggerMuon();
       bool passTriggerElectron = PassTriggerElectron();
-      if (type == "Data" && !(passTriggerAllHad || passTriggerMuon || passTriggerElectron))
-          continue;
-
+      if (type == "Data")
+      {
+          if (filetag == "Data_JetHT" && !passTriggerAllHad) continue;
+          if (filetag == "Data_SingleMuon" && !passTriggerMuon) continue;
+          if (filetag == "Data_SingleElectron" && !passTriggerElectron) continue;
+      }
 
       // ------------------
       // --- TOP TAGGER ---
@@ -419,7 +422,20 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       bool passBaseline0l = nleptons==0 && rec_njet_pt45>=6 && HT_trigger > 500 && rec_njet_pt45_btag >= 1;
       bool passBaseline1l = nleptons==1 && rec_njet_pt30>=6 ;
       bool passBaseline2l = nleptons==2;
-
+      if(type == "Data")
+      {
+          passBaseline0l = passBaseline0l && passTriggerAllHad && (filetag == "Data_JetHT");
+          if (rec_muon_pt30.size() > 0)
+          {
+              passBaseline1l = passBaseline1l && passTriggerMuon && (filetag == "Data_SingleMuon");
+              passBaseline2l = passBaseline2l && passTriggerMuon && (filetag == "Data_SingleMuon");
+          } 
+          else if (rec_electron_pt30.size() > 0)
+          {
+              passBaseline1l = passBaseline1l && passTriggerElectron && (filetag == "Data_SingleElectron");
+              passBaseline2l = passBaseline2l && passTriggerElectron && (filetag == "Data_SingleElectron");
+          }
+      }
       bool pass_g1b = rec_njet_pt30_btag >= 1;
       bool pass_0t = tops.size()==0, pass_1t = tops.size()==1, pass_2t = tops.size()==2;
       bool pass_1t1 = tops.size()==1 && ntops_1jet==1, pass_1t2 = tops.size()==1 && ntops_2jet==1, pass_1t3 = tops.size()==1 && ntops_3jet==1;
@@ -655,7 +671,7 @@ bool ExploreEventSelection::PassTriggerAllHad()
 {
     std::vector<std::string> mytriggers {
         //"HLT_PFHT1050", // 2017 trigger
-            "HLT_PFHT900"
+        //"HLT_PFHT900"
             //"HLT_PFHT380_SixPFJet32_DoublePFBTagCSV", // 2017 trigger
             //"HLT_PFHT430_SixPFJet40_PFBTagCSV", // 2017 trigger
             "HLT_PFHT450_SixJet40_BTagCSV",

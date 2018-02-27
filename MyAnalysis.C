@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
             std::string runtype = "";
             if(file.tag.find("Data") != std::string::npos)
                 runtype = "Data";
-            t.Loop(weight, maxEvts, runtype);            
+            t.Loop(weight, maxEvts, runtype, file.tag);
         }
         std::cout << "Writing histograms..." << std::endl;
         t.WriteHistos();

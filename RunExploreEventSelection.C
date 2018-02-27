@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 
     TChain* ch = new TChain( "TreeMaker2/PreSelection" ) ;
     std::string runtype = "";
+    std::string filetag = "";
 
     std::ifstream ifs_files ;
     ifs_files.open( "eos-files.txt" ) ;
@@ -66,7 +67,15 @@ int main(int argc, char *argv[])
           sscanf( tsline.Data(), "%s", fname ) ;
           std::string strfname(fname);
           if(strfname.find("Run2016") != std::string::npos)
+          {
               runtype = "Data";
+              if(strfname.find("JetHT") != std::string::npos)
+                  filetag = "Data_JetHT";
+              else if(strfname.find("SingleMuon") != std::string::npos)
+                  filetag = "Data_SingleMuon";
+              else if(strfname.find("SingleElectron") != std::string::npos)
+                  filetag = "Data_SingleElectron";
+          }
           char fnamewithpath[1000] ;
           sprintf( fnamewithpath, "root://cmsxrootd.fnal.gov/%s/%s", eos_dir_name, fname ) ;
           printf("  Adding file %s\n", fnamewithpath ) ;
@@ -83,7 +92,7 @@ int main(int argc, char *argv[])
     bool isQuiet = true;
     ExploreEventSelection t = ExploreEventSelection( ch );
     t.InitHistos();
-    t.Loop(1.0, -1, runtype, isQuiet);
+    t.Loop(1.0, -1, runtype, filetag, isQuiet);
     t.WriteHistos();
 
     myfile->Close();
