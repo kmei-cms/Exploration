@@ -52,6 +52,12 @@ void ExploreEventSelection::InitHistos()
             "6j","6j_g1b", "6j_g1b_mbl", "6j_g1b_mbl_0t", "6j_g1b_mbl_1t1", "6j_g1b_mbl_1t2", "6j_g1b_mbl_1t3",
             "g7j","g7j_g1b", "g7j_g1b_mbl", "g7j_g1b_mbl_0t", "g7j_g1b_mbl_1t1", "g7j_g1b_mbl_1t2", "g7j_g1b_mbl_1t3",
             };
+    std::vector<std::string> mycuts_1mu {
+            "6j","6j_g1b", "6j_g1b_mbl", "6j_g1b_mbl_0t", "6j_g1b_mbl_1t1", "6j_g1b_mbl_1t2", "6j_g1b_mbl_1t3",
+            };
+    std::vector<std::string> mycuts_1el {
+            "6j","6j_g1b", "6j_g1b_mbl", "6j_g1b_mbl_0t", "6j_g1b_mbl_1t1", "6j_g1b_mbl_1t2", "6j_g1b_mbl_1t3",
+            };
     for(std::string mycut : mycuts_1l)
     {
         my_histos.emplace("h_njets_1l_"+mycut, new TH1D(("h_njets_1l_"+mycut).c_str(),("h_njets_1l_"+mycut).c_str(), 15, 0, 15));
@@ -62,6 +68,30 @@ void ExploreEventSelection::InitHistos()
         my_histos.emplace("h_bdt_1l_"+mycut, new TH1D(("h_bdt_1l_"+mycut).c_str(),("h_bdt_1l_"+mycut).c_str(), 40, -1, 1));
 
         my_2d_histos.emplace("h_njets_bdt_1l_"+mycut, new TH2D(("h_njets_bdt_1l_"+mycut).c_str(),("h_njets_bdt_1l_"+mycut).c_str(), 15, 0, 15, 40, -1, 1));
+    }
+    for(std::string mycut : mycuts_1mu)
+    {
+        my_histos.emplace("h_mupt_1mu_"+mycut, new TH1D(("h_mupt_1mu_"+mycut).c_str(),("h_mupt_1mu_"+mycut).c_str(), 50, 0, 500));
+        my_histos.emplace("h_njets_1mu_"+mycut, new TH1D(("h_njets_1mu_"+mycut).c_str(),("h_njets_1mu_"+mycut).c_str(), 15, 0, 15));
+        my_histos.emplace("h_ntops_1mu_"+mycut, new TH1D(("h_ntops_1mu_"+mycut).c_str(),("h_ntops_1mu_"+mycut).c_str(), 5, 0, 5));
+        my_histos.emplace("h_nb_1mu_"+mycut, new TH1D(("h_nb_1mu_"+mycut).c_str(),("h_nb_1mu_"+mycut).c_str(), 10, 0, 10));
+        my_histos.emplace("h_HT_1mu_"+mycut, new TH1D(("h_HT_1mu_"+mycut).c_str(),("h_HT_1mu_"+mycut).c_str(), 60, 0, 3000));
+        my_histos.emplace("h_mbl_1mu_"+mycut, new TH1D(("h_mbl_1mu_"+mycut).c_str(),("h_mbl_1mu_"+mycut).c_str(), 30, 0, 300));
+        my_histos.emplace("h_bdt_1mu_"+mycut, new TH1D(("h_bdt_1mu_"+mycut).c_str(),("h_bdt_1mu_"+mycut).c_str(), 40, -1, 1));
+
+        my_2d_histos.emplace("h_njets_bdt_1mu_"+mycut, new TH2D(("h_njets_bdt_1mu_"+mycut).c_str(),("h_njets_bdt_1mu_"+mycut).c_str(), 15, 0, 15, 40, -1, 1));
+    }
+    for(std::string mycut : mycuts_1el)
+    {
+        my_histos.emplace("h_elpt_1el_"+mycut, new TH1D(("h_elpt_1el_"+mycut).c_str(),("h_elpt_1el_"+mycut).c_str(), 50, 0, 500));
+        my_histos.emplace("h_njets_1el_"+mycut, new TH1D(("h_njets_1el_"+mycut).c_str(),("h_njets_1el_"+mycut).c_str(), 15, 0, 15));
+        my_histos.emplace("h_ntops_1el_"+mycut, new TH1D(("h_ntops_1el_"+mycut).c_str(),("h_ntops_1el_"+mycut).c_str(), 5, 0, 5));
+        my_histos.emplace("h_nb_1el_"+mycut, new TH1D(("h_nb_1el_"+mycut).c_str(),("h_nb_1el_"+mycut).c_str(), 10, 0, 10));
+        my_histos.emplace("h_HT_1el_"+mycut, new TH1D(("h_HT_1el_"+mycut).c_str(),("h_HT_1el_"+mycut).c_str(), 60, 0, 3000));
+        my_histos.emplace("h_mbl_1el_"+mycut, new TH1D(("h_mbl_1el_"+mycut).c_str(),("h_mbl_1el_"+mycut).c_str(), 30, 0, 300));
+        my_histos.emplace("h_bdt_1el_"+mycut, new TH1D(("h_bdt_1el_"+mycut).c_str(),("h_bdt_1el_"+mycut).c_str(), 40, -1, 1));
+
+        my_2d_histos.emplace("h_njets_bdt_1el_"+mycut, new TH2D(("h_njets_bdt_1el_"+mycut).c_str(),("h_njets_bdt_1el_"+mycut).c_str(), 15, 0, 15, 40, -1, 1));
     }
 
     
@@ -402,25 +432,48 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       }
       int nleptons = rec_muon_pt30.size() + rec_electron_pt30.size();
       bool onZ = false;
+      bool passMbl_2l = false;
       if ( nleptons == 2 )
       {
           if ( (rec_muon_pt30.size() == 2) && (rec_charge_muon_pt30[0] != rec_charge_muon_pt30[1]) )
           {
               double mll = (rec_muon_pt30[0] + rec_muon_pt30[1]).M();
               if( mll > 81 && mll < 101)
-                  onZ = true;          
+                  onZ = true; 
+              // check whether a bl pair passes the M(b,l) cut
+              for (TLorentzVector myb : rec_bjets_pt30)
+              {
+                  double mass_bl_1 = (rec_muon_pt30[0] + myb).M();
+                  if(mass_bl_1 < 180 && mass_bl_1 > 30)
+                      passMbl_2l = true;
+                  double mass_bl_2 = (rec_muon_pt30[1] + myb).M();
+                  if(mass_bl_2 < 180 && mass_bl_2 > 30)
+                      passMbl_2l = true;
+              }
           } 
           else if ( (rec_electron_pt30.size() == 2) && (rec_charge_electron_pt30[0] != rec_charge_electron_pt30[1]) )
           {
               double mll = (rec_electron_pt30[0] + rec_electron_pt30[1]).M();
               if( mll > 81 && mll < 101)
                   onZ = true;  
+              // check whether a bl pair passes the M(b,l) cut
+              for (TLorentzVector myb : rec_bjets_pt30)
+              {
+                  double mass_bl_1 = (rec_electron_pt30[0] + myb).M();
+                  if(mass_bl_1 < 180 && mass_bl_1 > 30)
+                      passMbl_2l = true;
+                  double mass_bl_2 = (rec_electron_pt30[1] + myb).M();
+                  if(mass_bl_2 < 180 && mass_bl_2 > 30)
+                      passMbl_2l = true;
+              }
           }
       }
 
 
       bool passBaseline0l = nleptons==0 && rec_njet_pt45>=6 && HT_trigger > 500 && rec_njet_pt45_btag >= 1;
       bool passBaseline1l = nleptons==1 && rec_njet_pt30>=6 ;
+      bool passBaseline1mu = rec_muon_pt30.size()==1 && rec_njet_pt30>=6 ;
+      bool passBaseline1el = rec_electron_pt30.size()==1 && rec_njet_pt30>=6 ;
       bool passBaseline2l = nleptons==2;
       if(type == "Data")
       {
@@ -568,6 +621,25 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
           {"g7j_g1b_mbl_1t2", passBaseline1l && rec_njet_pt30>=7 && pass_g1b && pass_mbl && pass_1t2},
           {"g7j_g1b_mbl_1t3", passBaseline1l && rec_njet_pt30>=7 && pass_g1b && pass_mbl && pass_1t3},
       };
+      const std::map<std::string, bool> cut_map_1mu {
+          {"6j", passBaseline1mu && rec_njet_pt30==6},
+          {"6j_g1b", passBaseline1mu && rec_njet_pt30==6 && pass_g1b},
+          {"6j_g1b_mbl", passBaseline1mu && rec_njet_pt30==6 && pass_g1b && pass_mbl},
+          {"6j_g1b_mbl_0t",  passBaseline1mu && rec_njet_pt30==6 && pass_g1b && pass_mbl && pass_0t},
+          {"6j_g1b_mbl_1t1", passBaseline1mu && rec_njet_pt30==6 && pass_g1b && pass_mbl && pass_1t1},
+          {"6j_g1b_mbl_1t2", passBaseline1mu && rec_njet_pt30==6 && pass_g1b && pass_mbl && pass_1t2},
+          {"6j_g1b_mbl_1t3", passBaseline1mu && rec_njet_pt30==6 && pass_g1b && pass_mbl && pass_1t3},
+      };
+      const std::map<std::string, bool> cut_map_1el {
+          {"6j", passBaseline1el && rec_njet_pt30==6},
+          {"6j_g1b", passBaseline1el && rec_njet_pt30==6 && pass_g1b},
+          {"6j_g1b_mbl", passBaseline1el && rec_njet_pt30==6 && pass_g1b && pass_mbl},
+          {"6j_g1b_mbl_0t",  passBaseline1el && rec_njet_pt30==6 && pass_g1b && pass_mbl && pass_0t},
+          {"6j_g1b_mbl_1t1", passBaseline1el && rec_njet_pt30==6 && pass_g1b && pass_mbl && pass_1t1},
+          {"6j_g1b_mbl_1t2", passBaseline1el && rec_njet_pt30==6 && pass_g1b && pass_mbl && pass_1t2},
+          {"6j_g1b_mbl_1t3", passBaseline1el && rec_njet_pt30==6 && pass_g1b && pass_mbl && pass_1t3},
+      };
+
 
       for(auto& kv : cut_map_1l)
       {
@@ -582,11 +654,41 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
               my_2d_histos["h_njets_bdt_1l_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, eventweight);
           }
       }
+      for(auto& kv : cut_map_1mu)
+      {
+          if(kv.second)
+          {
+              my_histos["h_mupt_1mu_"+kv.first]->Fill(rec_muon_pt30[0].Pt(), eventweight);
+              my_histos["h_njets_1mu_"+kv.first]->Fill(rec_njet_pt30, eventweight);
+              my_histos["h_ntops_1mu_"+kv.first]->Fill(tops.size(), eventweight);
+              my_histos["h_nb_1mu_"+kv.first]->Fill(rec_njet_pt30_btag, eventweight);
+              my_histos["h_HT_1mu_"+kv.first]->Fill(HT_trigger, eventweight);
+              my_histos["h_bdt_1mu_"+kv.first]->Fill(eventshape_bdt_val, eventweight);
+              my_histos["h_mbl_1mu_"+kv.first]->Fill(mbl, eventweight);
+              my_2d_histos["h_njets_bdt_1mu_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, eventweight);
+          }
+      }
+      for(auto& kv : cut_map_1el)
+      {
+          if(kv.second)
+          {
+              my_histos["h_elpt_1el_"+kv.first]->Fill(rec_electron_pt30[0].Pt(), eventweight);
+              my_histos["h_njets_1el_"+kv.first]->Fill(rec_njet_pt30, eventweight);
+              my_histos["h_ntops_1el_"+kv.first]->Fill(tops.size(), eventweight);
+              my_histos["h_nb_1el_"+kv.first]->Fill(rec_njet_pt30_btag, eventweight);
+              my_histos["h_HT_1el_"+kv.first]->Fill(HT_trigger, eventweight);
+              my_histos["h_bdt_1el_"+kv.first]->Fill(eventshape_bdt_val, eventweight);
+              my_histos["h_mbl_1el_"+kv.first]->Fill(mbl, eventweight);
+              my_2d_histos["h_njets_bdt_1el_"+kv.first]->Fill(rec_njet_pt30, eventshape_bdt_val, eventweight);
+          }
+      }
 
       const std::map<std::string, bool> cut_map_2l {
           {"onZ", passBaseline2l && onZ},
           {"onZ_g1b", passBaseline2l && onZ && pass_g1b},
+          {"onZ_g1b_nombl", passBaseline2l && onZ && pass_g1b && passMbl_2l},
           {"onZ_g1b_g1t", passBaseline2l && onZ && pass_g1b && pass_1t}, 
+          {"onZ_g1b_nombl_g1t", passBaseline2l && onZ && pass_g1b && passMbl_2l && pass_1t}, 
           {"2b", passBaseline2l && rec_njet_pt30_btag == 2} 
       };
 

@@ -25,23 +25,23 @@ void ExploreBackground::InitHistos()
         std::string base = "h_njets_" + jettype;
         my_histos.emplace(base,new TH1D(base.c_str(),base.c_str(),15,0,15));
         
-        my_histos.emplace(base + "_0l",new TH1D( (base+"_0l").c_str(),(base+"_0l").c_str(),15,0,15));
+        my_histos.emplace(base + "_0l",new TH1D( (base+"_0l").c_str(),(base+"_0l").c_str(),17,0,17));
         my_histos.emplace(base + "_1l",new TH1D((base+"_1l").c_str(),(base+"_1l").c_str(),15,0,15));
         my_histos.emplace(base + "_2l",new TH1D((base+"_2l").c_str(),(base+"_2l").c_str(),15,0,15));
         
-        my_histos.emplace(base + "_0l_g1b",new TH1D((base+"_0l_g1b").c_str(),(base+"_0l_g1b").c_str(),15,0,15));
+        my_histos.emplace(base + "_0l_g1b",new TH1D((base+"_0l_g1b").c_str(),(base+"_0l_g1b").c_str(),17,0,17));
         my_histos.emplace(base + "_1l_g1b",new TH1D((base+"_1l_g1b").c_str(),(base+"_1l_g1b").c_str(),15,0,15));
         my_histos.emplace(base + "_2l_g1b",new TH1D((base+"_2l_g1b").c_str(),(base+"_2l_g1b").c_str(),15,0,15));
         
-        my_histos.emplace(base + "_0l_g1b_ht500",new TH1D((base+"_0l_g1b_ht500").c_str(),(base+"_0l_g1b_ht500").c_str(),15,0,15));
+        my_histos.emplace(base + "_0l_g1b_ht500",new TH1D((base+"_0l_g1b_ht500").c_str(),(base+"_0l_g1b_ht500").c_str(),17,0,17));
         my_histos.emplace(base + "_1l_g1b_ht500",new TH1D((base+"_1l_g1b_ht500").c_str(),(base+"_1l_g1b_ht500").c_str(),15,0,15));
         my_histos.emplace(base + "_2l_g1b_ht500",new TH1D((base+"_2l_g1b_ht500").c_str(),(base+"_2l_g1b_ht500").c_str(),15,0,15));
         
-        my_histos.emplace(base + "_0l_g1b_g1t",new TH1D((base+"_0l_g1b_g1t").c_str(),(base+"_0l_g1b_g1t").c_str(),15,0,15));
+        my_histos.emplace(base + "_0l_g1b_g1t",new TH1D((base+"_0l_g1b_g1t").c_str(),(base+"_0l_g1b_g1t").c_str(),17,0,17));
         my_histos.emplace(base + "_1l_g1b_g1t",new TH1D((base+"_1l_g1b_g1t").c_str(),(base+"_1l_g1b_g1t").c_str(),15,0,15));
         my_histos.emplace(base + "_2l_g1b_g1t",new TH1D((base+"_2l_g1b_g1t").c_str(),(base+"_2l_g1b_g1t").c_str(),15,0,15));
         
-        my_histos.emplace(base + "_0l_g1b_g1t_ht500",new TH1D((base+"_0l_g1b_g1t_ht500").c_str(),(base+"_0l_g1b_g1t_ht500").c_str(),15,0,15));
+        my_histos.emplace(base + "_0l_g1b_g1t_ht500",new TH1D((base+"_0l_g1b_g1t_ht500").c_str(),(base+"_0l_g1b_g1t_ht500").c_str(),17,0,17));
         my_histos.emplace(base + "_1l_g1b_g1t_ht500",new TH1D((base+"_1l_g1b_g1t_ht500").c_str(),(base+"_1l_g1b_g1t_ht500").c_str(),15,0,15));
         my_histos.emplace(base + "_2l_g1b_g1t_ht500",new TH1D((base+"_2l_g1b_g1t_ht500").c_str(),(base+"_2l_g1b_g1t_ht500").c_str(),15,0,15));
 
@@ -51,6 +51,7 @@ void ExploreBackground::InitHistos()
         // For Z->ll control region
         my_histos.emplace(base + "_2l_onZ",new TH1D((base+"_2l_onZ").c_str(),(base+"_2l_onZ").c_str(),15,0,15));
         my_histos.emplace(base + "_2l_onZ_g1b",new TH1D((base+"_2l_onZ_g1b").c_str(),(base+"_2l_onZ_g1b").c_str(),15,0,15));
+        my_histos.emplace(base + "_2l_onZ_g1b_nombl",new TH1D((base+"_2l_onZ_g1b_nombl").c_str(),(base+"_2l_onZ_g1b_nombl").c_str(),15,0,15));
         my_histos.emplace(base + "_2l_onZ_g1b_g1t",new TH1D((base+"_2l_onZ_g1b_g1t").c_str(),(base+"_2l_onZ_g1b_g1t").c_str(),15,0,15));
     }
 }
@@ -76,6 +77,7 @@ void ExploreBackground::Loop(double weight, int maxevents, bool isQuiet)
 
       if ( jentry % 1000 == 0 ) printf("  Event %9llu\n", jentry ) ;
 
+      double eventweight = Weight;
       // -----------------
       // check for number of hadronic tops at gen level
       // -----------------
@@ -212,72 +214,101 @@ void ExploreBackground::Loop(double weight, int maxevents, bool isQuiet)
       // Check whether event would pass the trigger requirement
       bool passTrigger = true;
       int rec_njet_pt45(0) ;
-      int rec_njet_pt20(0) ;
       int rec_njet_pt30(0) ;
       int rec_njet_pt45_btag(0) ;
-      double HT_pt40 = 0.0;
-      std::vector<TLorentzVector> rec_bjets;
+      int rec_njet_pt30_btag(0) ;
+      double HT_trigger = 0.0;
+      std::vector<TLorentzVector> rec_bjets_pt30;
       for ( unsigned int rji=0; rji < Jets->size() ; rji++ ) {
           TLorentzVector jlv( Jets->at(rji) ) ;
           if (abs(jlv.Eta()) > 2.4) continue;
-          if ( jlv.Pt() > 20 ) 
-              rec_njet_pt20++;
           if ( jlv.Pt() > 30 ) 
+          {
               rec_njet_pt30++;
+              if ( Jets_bDiscriminatorCSV->at(rji) > 0.8484) 
+              {
+                  rec_njet_pt30_btag++;
+                  rec_bjets_pt30.push_back(jlv);
+              }
+          }
           if (jlv.Pt() > 40)
-              HT_pt40 += jlv.Pt();
+              HT_trigger += jlv.Pt();
           if ( jlv.Pt() > 45 ) 
           {
               rec_njet_pt45++ ;
               if ( Jets_bDiscriminatorCSV->at(rji) > 0.8484) 
               {
                   rec_njet_pt45_btag++;
-                  rec_bjets.push_back(jlv);
               }
           }
       } 
-      if ( !( HT_pt40>500 && rec_njet_pt45>=6 ) ) 
+      if ( !( HT_trigger>500 && rec_njet_pt45>=6 ) ) 
           passTrigger = false;
 
       // Count leptons > 30 GeV
       std::vector<TLorentzVector> rec_muon_pt30;
       std::vector<int> rec_charge_muon_pt30;
-      std::vector<TLorentzVector> rec_electron_pt30;
-      std::vector<int> rec_charge_electron_pt30;
       for (unsigned int imu = 0; imu < Muons->size(); ++imu)
       {
           TLorentzVector lvmu(Muons->at(imu));
-          if( abs(lvmu.Eta()) < 2.4 && lvmu.Pt() > 30)
+          if( abs(lvmu.Eta()) < 2.4 && lvmu.Pt() > 30 && Muons_passIso->at(imu))
           {
               rec_muon_pt30.push_back(lvmu);
               rec_charge_muon_pt30.push_back(Muons_charge->at(imu));
           }
       }
+      std::vector<TLorentzVector> rec_electron_pt30;
+      std::vector<int> rec_charge_electron_pt30;
       for (unsigned int iel = 0; iel < Electrons->size(); ++iel)
       {
           TLorentzVector lvel(Electrons->at(iel));
-          if( abs(lvel.Eta()) < 2.4 && lvel.Pt() > 30)
+          if( abs(lvel.Eta()) < 2.4 && lvel.Pt() > 30 && Electrons_tightID->at(iel) && Electrons_passIso->at(iel))
           {
               rec_electron_pt30.push_back(lvel);
               rec_charge_electron_pt30.push_back(Electrons_charge->at(iel));
           }
       }
       int nleptons = rec_muon_pt30.size() + rec_electron_pt30.size();
-      bool passBaseline = HT_pt40>500 && rec_njet_pt45>=6 && rec_njet_pt45_btag>1 && tops.size()>1;
+      bool passBaseline0l = nleptons==0 && rec_njet_pt45>=6 && HT_trigger > 500 && rec_njet_pt45_btag >= 1;
+      bool passBaseline1l = nleptons==1 && rec_njet_pt30>=6 ;
+      bool passBaseline2l = nleptons==2;
+
       bool passNtop = tops.size() >= 1;
       bool passNb = rec_njet_pt45_btag >= 1;
       bool onZ = false;
+      bool passMbl_2l = false;
       if ( (rec_muon_pt30.size() == 2) && (rec_charge_muon_pt30[0] != rec_charge_muon_pt30[1]) )
       {
           double mll = (rec_muon_pt30[0] + rec_muon_pt30[1]).M();
           if( mll > 81.2 && mll < 101.2)
               onZ = true;          
+
+          // check whether a bl pair passes the M(b,l) cut
+          for (TLorentzVector myb : rec_bjets_pt30)
+          {
+              double mass_bl_1 = (rec_muon_pt30[0] + myb).M();
+              if(mass_bl_1 < 180 && mass_bl_1 > 30)
+                  passMbl_2l = true;
+              double mass_bl_2 = (rec_muon_pt30[1] + myb).M();
+              if(mass_bl_2 < 180 && mass_bl_2 > 30)
+                  passMbl_2l = true;
+          }
       } 
       else if ( (rec_electron_pt30.size() == 2) && (rec_charge_electron_pt30[0] != rec_charge_electron_pt30[1]) )
       {
           double mll = (rec_electron_pt30[0] + rec_electron_pt30[1]).M();
           if( mll > 81.2 && mll < 101.2)
               onZ = true;  
+          // check whether a bl pair passes the M(b,l) cut
+          for (TLorentzVector myb : rec_bjets_pt30)
+          {
+              double mass_bl_1 = (rec_electron_pt30[0] + myb).M();
+              if(mass_bl_1 < 180 && mass_bl_1 > 30)
+                  passMbl_2l = true;
+              double mass_bl_2 = (rec_electron_pt30[1] + myb).M();
+              if(mass_bl_2 < 180 && mass_bl_2 > 30)
+                  passMbl_2l = true;
+          }
       }
         
       // -------------------------
@@ -294,49 +325,49 @@ void ExploreBackground::Loop(double weight, int maxevents, bool isQuiet)
               njets_rj = rec_njet_pt45;
           std::string base = "h_njets_" + jettype;
 
-          my_histos[base]->Fill(njets_rj, weight);
+          my_histos[base]->Fill(njets_rj, eventweight);
           if(nleptons == 0)
-              my_histos[base+"_0l"]->Fill(njets_rj, weight);
+              my_histos[base+"_0l"]->Fill(njets_rj, eventweight);
           else if(nleptons == 1)
-              my_histos[base+"_1l"]->Fill(njets_rj, weight);
+              my_histos[base+"_1l"]->Fill(njets_rj, eventweight);
           else if(nleptons == 2)
-              my_histos[base+"_2l"]->Fill(njets_rj, weight);
+              my_histos[base+"_2l"]->Fill(njets_rj, eventweight);
           if (passNb)
           {
               if(nleptons == 0)
-                  my_histos[base+"_0l_g1b"]->Fill(njets_rj, weight);
+                  my_histos[base+"_0l_g1b"]->Fill(njets_rj, eventweight);
               else if(nleptons == 1)
-                  my_histos[base+"_1l_g1b"]->Fill(njets_rj, weight);
+                  my_histos[base+"_1l_g1b"]->Fill(njets_rj, eventweight);
               else if(nleptons == 2)
-                  my_histos[base+"_2l_g1b"]->Fill(njets_rj, weight);
+                  my_histos[base+"_2l_g1b"]->Fill(njets_rj, eventweight);
               
-              if (HT_pt40 > 500)
+              if (HT_trigger > 500)
               {
                   if(nleptons == 0)
-                      my_histos[base+"_0l_g1b_ht500"]->Fill(njets_rj, weight);
+                      my_histos[base+"_0l_g1b_ht500"]->Fill(njets_rj, eventweight);
                   else if(nleptons == 1)
-                      my_histos[base+"_1l_g1b_ht500"]->Fill(njets_rj, weight);
+                      my_histos[base+"_1l_g1b_ht500"]->Fill(njets_rj, eventweight);
                   else if(nleptons == 2)
-                      my_histos[base+"_2l_g1b_ht500"]->Fill(njets_rj, weight);
+                      my_histos[base+"_2l_g1b_ht500"]->Fill(njets_rj, eventweight);
               }
               
               if (passNtop)
               {
                   if(nleptons == 0)
-                      my_histos[base+"_0l_g1b_g1t"]->Fill(njets_rj, weight);
+                      my_histos[base+"_0l_g1b_g1t"]->Fill(njets_rj, eventweight);
                   else if(nleptons == 1)
-                      my_histos[base+"_1l_g1b_g1t"]->Fill(njets_rj, weight);
+                      my_histos[base+"_1l_g1b_g1t"]->Fill(njets_rj, eventweight);
                   else if(nleptons == 2)
-                      my_histos[base+"_2l_g1b_g1t"]->Fill(njets_rj, weight);
+                      my_histos[base+"_2l_g1b_g1t"]->Fill(njets_rj, eventweight);
                   
-                  if (HT_pt40 > 500)
+                  if (HT_trigger > 500)
                   {
                       if(nleptons == 0)
-                          my_histos[base+"_0l_g1b_g1t_ht500"]->Fill(njets_rj, weight);
+                          my_histos[base+"_0l_g1b_g1t_ht500"]->Fill(njets_rj, eventweight);
                       else if(nleptons == 1)
-                          my_histos[base+"_1l_g1b_g1t_ht500"]->Fill(njets_rj, weight);
+                          my_histos[base+"_1l_g1b_g1t_ht500"]->Fill(njets_rj, eventweight);
                       else if(nleptons == 2)
-                          my_histos[base+"_2l_g1b_g1t_ht500"]->Fill(njets_rj, weight);
+                          my_histos[base+"_2l_g1b_g1t_ht500"]->Fill(njets_rj, eventweight);
                   }
               }
           }
@@ -346,7 +377,7 @@ void ExploreBackground::Loop(double weight, int maxevents, bool isQuiet)
           {
               TLorentzVector mylepton = (rec_electron_pt30.size() == 1) ? rec_electron_pt30[0] : rec_muon_pt30[0];
               bool passMtop = false;
-              for (TLorentzVector myb : rec_bjets)
+              for (TLorentzVector myb : rec_bjets_pt30)
               {
                   double mass_bl = (mylepton + myb).M();
                   if(mass_bl < 180 && mass_bl > 30)
@@ -354,10 +385,10 @@ void ExploreBackground::Loop(double weight, int maxevents, bool isQuiet)
               }
               if(passMtop)
               {
-                  my_histos[base+"_1l_g1b_mbl"]->Fill(njets_rj, weight);
+                  my_histos[base+"_1l_g1b_mbl"]->Fill(njets_rj, eventweight);
                   if(passNtop)
                   {
-                      my_histos[base+"_1l_g1b_mbl_g1t"]->Fill(njets_rj, weight);
+                      my_histos[base+"_1l_g1b_mbl_g1t"]->Fill(njets_rj, eventweight);
                   }
               }
           }
@@ -366,13 +397,18 @@ void ExploreBackground::Loop(double weight, int maxevents, bool isQuiet)
           // h_njets_2l_onZ_g1b_g1t
           if (onZ)
           {
-              my_histos[base+"_2l_onZ"]->Fill(njets_rj, weight);
+              my_histos[base+"_2l_onZ"]->Fill(njets_rj, eventweight);
               if(passNb)
               {
-                  my_histos[base+"_2l_onZ_g1b"]->Fill(njets_rj, weight);
+                  my_histos[base+"_2l_onZ_g1b"]->Fill(njets_rj, eventweight);
+                  if(!passMbl_2l)
+                  {
+                      my_histos[base+"_2l_onZ_g1b_nombl"]->Fill(njets_rj, eventweight);
+                  }
+                  
                   if(passNtop)
                   {
-                      my_histos[base+"_2l_onZ_g1b_g1t"]->Fill(njets_rj, weight);
+                      my_histos[base+"_2l_onZ_g1b_g1t"]->Fill(njets_rj, eventweight);
                   }
               }
           }
