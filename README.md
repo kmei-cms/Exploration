@@ -75,7 +75,7 @@ The Makefile currently assumes that you are in a CMSSW environment. If you set u
 
 To run: 
 ```
-./RunTest "pattern" outputfilename "/store/user/lpcsusyhad/StealtStop/TreeMaker_ntuples/"
+./RunTest "pattern" outputfilename "/store/user/lpcsusyhad/StealthStop/TreeMaker_ntuples/"
 ```
 This will give a printout for the first 10 event containing the number of tops it found, and some information on each top. 
 You can customize TopTagger.cfg to enable/disable certain top candidates, i.e. in the TTMBasicClusterAlgo block, set doTrijet/doDijet/doMonojet to true or false. 
