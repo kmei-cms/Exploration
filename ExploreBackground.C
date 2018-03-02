@@ -18,6 +18,8 @@
 
 void ExploreBackground::InitHistos()
 {
+    TH1::SetDefaultSumw2();
+
     // Declare all your histograms here, that way we can fill them for multiple chains
     std::vector<std::string> jettypes {"pt30", "pt45"};
     for(std::string jettype : jettypes)

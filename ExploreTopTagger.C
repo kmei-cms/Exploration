@@ -19,6 +19,8 @@
 
 void ExploreTopTagger::InitHistos()
 {
+    TH1::SetDefaultSumw2();
+
     // Declare all your histograms here, that way we can fill them for multiple chains
     my_histos.emplace("HT",new TH1D("HT","HT",60,0,3000));
 
