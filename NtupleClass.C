@@ -180,7 +180,17 @@ void NtupleClass::Loop(std::string runtype)
           *Jets_qgLikelihood, 
           hadtops, 
           hadtopdaughters);
-    
+
+      AK4Inputs.addSupplamentalVector("qgPtD",   *Jets_ptD);
+      AK4Inputs.addSupplamentalVector("qgAxis1", *Jets_axismajor);
+      AK4Inputs.addSupplamentalVector("qgAxis2", *Jets_axisminor);
+      std::vector<double> qgMult;
+      for(int i = 0; i<Jets_multiplicity->size(); i++){
+	double entrie = (*Jets_multiplicity)[i];
+	qgMult.push_back(entrie);
+      }
+      AK4Inputs.addSupplamentalVector("qgMult", qgMult);
+          
       // Create AK8 inputs object
       ttUtility::ConstAK8Inputs AK8Inputs = ttUtility::ConstAK8Inputs(
           *JetsAK8,

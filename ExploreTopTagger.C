@@ -460,6 +460,16 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
           hadtops, 
           hadtopdaughters);
     
+      AK4Inputs.addSupplamentalVector("qgPtD",   *Jets_ptD);
+      AK4Inputs.addSupplamentalVector("qgAxis1", *Jets_axismajor);
+      AK4Inputs.addSupplamentalVector("qgAxis2", *Jets_axisminor);
+      std::vector<double> qgMult;
+      for(int i = 0; i<Jets_multiplicity->size(); i++){
+	double entrie = (*Jets_multiplicity)[i];
+	qgMult.push_back(entrie);
+      }
+      AK4Inputs.addSupplamentalVector("qgMult", qgMult);
+      
       // Create AK8 inputs object
       ttUtility::ConstAK8Inputs AK8Inputs = ttUtility::ConstAK8Inputs(
           *JetsAK8,
@@ -679,13 +689,14 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
       myvars.push_back("j3_CSV");
       std::vector<float> mydata;
       mydata.resize(myvars.size());
-      TIC.mapVars(myvars, mydata.data());
+      TIC.mapVars(myvars);
+      TIC.setPtr(mydata.data());
 
       // --- Check input variables for resolved tagger ---
       const std::vector<TopObject> topcandidates = ttr.getTopCandidates();
       for(const TopObject top : topcandidates)
       {
-          TIC.calculateVars(top);
+          TIC.calculateVars(top, 0);
           my_histos["h_cand_m"]->Fill(mydata[0], weight);
           my_histos["h_cand_p"]->Fill(mydata[1], weight);
           my_histos["h_j12_m"]->Fill(mydata[2], weight);

@@ -95,7 +95,7 @@ cmsenv
 Then, check out the latest tagged version of the top tagger repository. 
 
 ```
-git clone git@github.com:susy2015/TopTagger.git -b IntermediateRecipeV0
+git clone git@github.com:susy2015/TopTagger.git
 cd TopTagger
 ```
 
@@ -116,7 +116,7 @@ source setup.csh
 
 Last step is to get the cfg file for the top tagger, and the TF output model file for the resolved part.
 ```
-$CMSSW_BASE/src/TopTagger/Tools/getTaggerCfg.sh  -t Tensorflow_Example_v1.0.1
+$CMSSW_BASE/src/TopTagger/Tools/getTaggerCfg.sh  -t Tensorflow_Medium_Example_v1.0.1
 ```
 
 No changes to the analysis code should be needed. 
