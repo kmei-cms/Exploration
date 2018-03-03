@@ -83,7 +83,7 @@ $(ODIR)/%.o : $(TTSDIR)/%.cpp
 MyAnalysis: $(ODIR)/MyAnalysis.o $(ODIR)/ExploreBackground.o $(ODIR)/ExploreTopTagger.o $(ODIR)/ExploreEventSelection.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o $(ODIR)/samples.o $(ODIR)/EventShapeVariables.o $(ODIR)/SetUpTopTagger.o 
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
-MyAnalysisMultiFile: $(ODIR)/MyAnalysisMultiFile.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+MyAnalysisMultiFile: $(ODIR)/MyAnalysisMultiFile.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o $(ODIR)/SetUpTopTagger.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 AddTopVars: $(ODIR)/AddTopVars.o $(ODIR)/NtupleClassAddTopVars.o
@@ -96,10 +96,10 @@ AddTopVarsBatch: $(ODIR)/AddTopVarsBatch.o $(ODIR)/NtupleClassAddTopVars.o
 MicroNtuple: $(ODIR)/MicroNtuple.o $(ODIR)/NtupleClassMicroNtuple.o $(ODIR)/EventShapeVariables.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
-RunExploreTopTagger: $(ODIR)/RunExploreTopTagger.o $(ODIR)/ExploreTopTagger.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+RunExploreTopTagger: $(ODIR)/RunExploreTopTagger.o $(ODIR)/ExploreTopTagger.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o $(ODIR)/SetUpTopTagger.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
-RunTest: $(ODIR)/RunTest.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o
+RunTest: $(ODIR)/RunTest.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o $(ODIR)/SetUpTopTagger.o
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
 
 RunExploreEventSelection: $(ODIR)/RunExploreEventSelection.o $(ODIR)/ExploreEventSelection.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o $(ODIR)/EventShapeVariables.o $(ODIR)/SetUpTopTagger.o 

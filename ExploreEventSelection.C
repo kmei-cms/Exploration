@@ -144,7 +144,7 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       nbytes = fChain->GetEntry(jentry);   
       nbytes_total += nbytes;
 
-      if ( jentry % 1 == 0 ) printf("  Event %9llu\n", jentry ) ;
+      if ( jentry % 10000 == 0 ) printf("  Event %9llu\n", jentry ) ;
 
       // Make sure event weight is not 0 for data
       double eventweight = 1.;
