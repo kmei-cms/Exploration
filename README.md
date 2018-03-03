@@ -109,7 +109,7 @@ make -j4
 Now also check out our repository if not done already:
 ```
 cd $CMSSW_BASE/src
-git clone git@github.com:StealthStop/Exploration.git
+git clone -b NtuplesV2_TopTaggerV2 git@github.com:StealthStop/Exploration.git
 cd Exploration
 source setup.csh
 ```
