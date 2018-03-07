@@ -17,7 +17,7 @@
 #include "TopTagger/CfgParser/include/TTException.h"
 
 // includes for the event shapes
-#include "bdt_350to650_fwm10_jmtev_top6.c"
+#include "bdt_350to650_fwm10_jmtev_top6.h"
 #include "EventShapeVariables.h"
 #include "get_cmframe_jets.c"
 
@@ -99,7 +99,8 @@ void ExploreEventSelection::InitHistos()
     
     // 2 lepton plots
     // onZ control region only for now, also check for 1top to see if a fake top changes any behavior
-    std::vector<std::string> mycuts_2l {"onZ", "onZ_g1b", "onZ_g1b_g1t", "2b"};
+    std::vector<std::string> mycuts_2l {"onZ", "onZ_g1b", "onZ_g1b_nombl", "onZ_g1b_g1t", "onZ_g1b_nombl_g1t", "2b",
+            "onZ_g1b_nombl_bdt1","onZ_g1b_nombl_bdt2","onZ_g1b_nombl_bdt3","onZ_g1b_nombl_bdt4"};
     for(std::string mycut : mycuts_2l)
     {
         my_histos.emplace("h_njets_2l_"+mycut, new TH1D(("h_njets_2l_"+mycut).c_str(),("h_njets_2l_"+mycut).c_str(), 15, 0, 15));
@@ -111,7 +112,6 @@ void ExploreEventSelection::InitHistos()
         my_2d_histos.emplace("h_njets_bdt_2l_"+mycut, new TH2D(("h_njets_bdt_2l_"+mycut).c_str(),("h_njets_bdt_2l_"+mycut).c_str(), 15, 0, 15, 40, -0.5, 0.5));
 
     }
-
 
     // Cut flows
     my_efficiencies.emplace("event_sel", new TEfficiency("event_sel","Event selection efficiency wrt previous cut;Cut;#epsilon",8,0,8));
@@ -176,6 +176,9 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       nbytes_total += nbytes;
 
       if ( jentry % 10000 == 0 ) printf("  Event %9llu\n", jentry ) ;
+
+      // Exclude events with MadGraph HT > 100 from the DY inclusive sample
+      if(filetag == "DYJetsToLL_M-50_Incl" && madHT > 100) continue;
 
       // Make sure event weight is not 0 for data
       double eventweight = 1.;
