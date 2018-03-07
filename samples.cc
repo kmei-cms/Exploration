@@ -92,6 +92,7 @@ namespace AnaSamples
 
         // DY
         // From https://twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns#DY_Z, kz = 1.23
+        addSample("DYJetsToLL_M-50_Incl",   flistdir+"/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.txt",   "TreeMaker2/PreSelection", 6025.2, lumi, 49144274, 1.0,  kTeal+4);
         addSample("DYJetsToLL_M-50_HT-100to200",   flistdir+"/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.txt",   "TreeMaker2/PreSelection", 181.302,    lumi, 10607207, 1.0,  kTeal+4);
         addSample("DYJetsToLL_M-50_HT-200to400",   flistdir+"/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.txt",   "TreeMaker2/PreSelection", 50.4177,     lumi, 9653731, 1.0,  kTeal+4);
         addSample("DYJetsToLL_M-50_HT-400to600",   flistdir+"/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.txt",   "TreeMaker2/PreSelection", 6.98394,     lumi, 10008776,  1.0,  kTeal+4);
@@ -197,7 +198,7 @@ namespace AnaSamples
 
         addSampleSet(samples, "WJetsToLNu", {"WJetsToLNu_HT-2500toInf", "WJetsToLNu_HT-1200to2500", "WJetsToLNu_HT-800to1200", "WJetsToLNu_HT-600to800", "WJetsToLNu_HT-400to600", "WJetsToLNu_HT-200to400", "WJetsToLNu_HT-100to200"});
 
-        addSampleSet(samples, "DYJetsToLL_M-50", {"DYJetsToLL_M-50_HT-100to200", "DYJetsToLL_M-50_HT-200to400", "DYJetsToLL_M-50_HT-400to600", "DYJetsToLL_M-50_HT-600to800", "DYJetsToLL_M-50_HT-800to1200", "DYJetsToLL_M-50_HT-1200to2500", "DYJetsToLL_M-50_HT-2500toInf"});
+        addSampleSet(samples, "DYJetsToLL_M-50", {"DYJetsToLL_M-50_Incl","DYJetsToLL_M-50_HT-100to200", "DYJetsToLL_M-50_HT-200to400", "DYJetsToLL_M-50_HT-400to600", "DYJetsToLL_M-50_HT-600to800", "DYJetsToLL_M-50_HT-800to1200", "DYJetsToLL_M-50_HT-1200to2500", "DYJetsToLL_M-50_HT-2500toInf"});
 
         addSampleSet(samples, "QCD", {"QCD_HT2000toInf", "QCD_HT1500to2000", "QCD_HT1000to1500", "QCD_HT700to1000", "QCD_HT500to700", "QCD_HT300to500", "QCD_HT200to300"});
 
