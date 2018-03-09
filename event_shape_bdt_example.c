@@ -20,6 +20,7 @@
 #include "TSystem.h"
 
 #include "bdt_350to650_fwm10_jmtev_top6.c"
+#include "fisher_350to650_fwm10_jmtev_top6.c"
 #include "EventShapeVariables.c"
 #include "get_cmframe_jets.c"
 
@@ -79,7 +80,8 @@ using std::vector ;
 
       }
 
-      ReadBDT_350to650_fwm10_jmtev_top6 read_bdt_350to650_fwm10_jmtev_top6( inputVarNames_top6 ) ;
+      ReadBDT_350to650_fwm10_jmtev_top6    read_bdt_350to650_fwm10_jmtev_top6( inputVarNames_top6 ) ;
+      ReadFisher_350to650_fwm10_jmtev_top6 read_fisher_350to650_fwm10_jmtev_top6( inputVarNames_top6 ) ;
 
 
 
@@ -117,6 +119,7 @@ using std::vector ;
          }
 
          double bdt_val_350to650_fwm10_jmtev_top6 = read_bdt_350to650_fwm10_jmtev_top6.GetMvaValue( bdtInputVals_top6 ) ;
+         double fisher_val_350to650_fwm10_jmtev_top6 = read_fisher_350to650_fwm10_jmtev_top6.GetMvaValue( bdtInputVals_top6 ) ;
 
 
 
@@ -155,7 +158,8 @@ using std::vector ;
          printf("  jmt_ev2 = %7.4f\n", eigen_vals_norm_top6[2] ) ;
          printf("\n") ;
 
-         printf("\n  BDT output : %7.3f\n", bdt_val_350to650_fwm10_jmtev_top6 ) ;
+         printf("\n  BDT    output : %7.3f\n", bdt_val_350to650_fwm10_jmtev_top6 ) ;
+         printf("\n  Fisher output : %7.3f\n", fisher_val_350to650_fwm10_jmtev_top6 ) ;
 
          printf("\n\n") ;
 
