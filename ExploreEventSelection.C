@@ -29,6 +29,7 @@ void ExploreEventSelection::InitHistos()
     my_histos.emplace("h_met", new TH1D("h_met","h_met", 20, 0, 200));
     my_histos.emplace("h_ht", new TH1D("h_ht","h_ht", 60, 0, 3000));
     my_histos.emplace("h_ntops", new TH1D("h_ntops","h_ntops", 5, 0, 5));
+    my_histos.emplace("h_mbl_2l_test", new TH1D("h_mbl_2l_test","h_mbl_2l_test", 50, 0, 200));
     
     // 0 lepton plots
     // "6j" is the control region only. Only look at data for that region
@@ -454,6 +455,8 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
                   double mass_bl_2 = (rec_muon_pt30[1] + myb).M();
                   if(mass_bl_2 < 180 && mass_bl_2 > 30)
                       passMbl_2l = true;
+                  my_histos["h_mbl_2l_test"]->Fill(mass_bl_1,eventweight);
+                  my_histos["h_mbl_2l_test"]->Fill(mass_bl_2,eventweight);
               }
           } 
           else if ( (rec_electron_pt30.size() == 2) && (rec_charge_electron_pt30[0] != rec_charge_electron_pt30[1]) )
@@ -470,6 +473,8 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
                   double mass_bl_2 = (rec_electron_pt30[1] + myb).M();
                   if(mass_bl_2 < 180 && mass_bl_2 > 30)
                       passMbl_2l = true;
+                  my_histos["h_mbl_2l_test"]->Fill(mass_bl_1,eventweight);
+                  my_histos["h_mbl_2l_test"]->Fill(mass_bl_2,eventweight);
               }
           }
       }
@@ -518,7 +523,7 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
                   mblmet = mass_blmet;
                   used_bjet = myb;
               }
-              else if(mass_bl < mbl)
+              else if( abs(mass_bl-172.5) < abs(mbl-172.5))
               {
                   mbl = mass_bl;
                   mblmet = mass_blmet;
@@ -569,9 +574,11 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
           //std::cout << "New top counting: " << pass_0t << " " << pass_1t << " " << pass_2t << " " << pass_1t1 << " " << pass_1t2 << " " << pass_1t3 << std::endl;
       }
 
-      bool eventshape_bdt_val_low = eventshape_bdt_val < -0.1;
-      bool eventshape_bdt_val_medium = eventshape_bdt_val > -0.1 && eventshape_bdt_val < 0.0;
-      bool eventshape_bdt_val_high = eventshape_bdt_val > 0.0;
+      bool bdt_bin1 = eventshape_bdt_val > -1.   && eventshape_bdt_val <= -0.04;
+      bool bdt_bin2 = eventshape_bdt_val > -0.04 && eventshape_bdt_val <= 0;
+      bool bdt_bin3 = eventshape_bdt_val > 0     && eventshape_bdt_val <= 0.04;
+      bool bdt_bin4 = eventshape_bdt_val > 0.04  && eventshape_bdt_val <= 1;
+
       
       const std::map<std::string, bool> cut_map_0l {
           {"g6j_HT500_g1b", passBaseline0l},
@@ -691,9 +698,13 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       const std::map<std::string, bool> cut_map_2l {
           {"onZ", passBaseline2l && onZ},
           {"onZ_g1b", passBaseline2l && onZ && pass_g1b},
-          {"onZ_g1b_nombl", passBaseline2l && onZ && pass_g1b && passMbl_2l},
+          {"onZ_g1b_nombl", passBaseline2l && onZ && pass_g1b && !passMbl_2l},
+          {"onZ_g1b_nombl_bdt1", passBaseline2l && onZ && pass_g1b && !passMbl_2l && bdt_bin1},
+          {"onZ_g1b_nombl_bdt2", passBaseline2l && onZ && pass_g1b && !passMbl_2l && bdt_bin2},
+          {"onZ_g1b_nombl_bdt3", passBaseline2l && onZ && pass_g1b && !passMbl_2l && bdt_bin3},
+          {"onZ_g1b_nombl_bdt4", passBaseline2l && onZ && pass_g1b && !passMbl_2l && bdt_bin4},
           {"onZ_g1b_g1t", passBaseline2l && onZ && pass_g1b && pass_1t}, 
-          {"onZ_g1b_nombl_g1t", passBaseline2l && onZ && pass_g1b && passMbl_2l && pass_1t}, 
+          {"onZ_g1b_nombl_g1t", passBaseline2l && onZ && pass_g1b && !passMbl_2l && pass_1t}, 
           {"2b", passBaseline2l && rec_njet_pt30_btag == 2} 
       };
 
