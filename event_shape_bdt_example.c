@@ -21,6 +21,7 @@
 
 #include "bdt_350to650_fwm10_jmtev_top6.c"
 #include "fisher_350to650_fwm10_jmtev_top6.c"
+#include "fisher_350to650_fwm6_jmtev_top6_gt_v2.c"
 #include "EventShapeVariables.c"
 #include "get_cmframe_jets.c"
 
@@ -88,6 +89,30 @@ using std::vector ;
 
 
 
+      std::vector<std::string> inputVarNames_top6_fwm6 ;
+      std::vector<double> bdtInputVals_top6_fwm6 ;
+
+      {
+         std::string vname ;
+         vname = "fwm2_top6" ; inputVarNames_top6_fwm6.push_back( vname ) ;
+         vname = "fwm3_top6" ; inputVarNames_top6_fwm6.push_back( vname ) ;
+         vname = "fwm4_top6" ; inputVarNames_top6_fwm6.push_back( vname ) ;
+         vname = "fwm5_top6" ; inputVarNames_top6_fwm6.push_back( vname ) ;
+         vname = "fwm6_top6" ; inputVarNames_top6_fwm6.push_back( vname ) ;
+         vname = "jmt_ev0_top6" ; inputVarNames_top6_fwm6.push_back( vname ) ;
+         vname = "jmt_ev1_top6" ; inputVarNames_top6_fwm6.push_back( vname ) ;
+         vname = "jmt_ev2_top6" ; inputVarNames_top6_fwm6.push_back( vname ) ;
+
+         for ( unsigned int i=0; i < inputVarNames_top6_fwm6.size() ; i++ ) {
+            bdtInputVals_top6_fwm6.push_back( 0.5 ) ; //--- load vector with dummy values.
+         } // i
+
+      }
+
+      ReadFisherG_350to650_fwm6_jmtev_top6_gt_v2 read_fisher_350to650_fwm6_jmtev_top6_gt_v2( inputVarNames_top6_fwm6 ) ;
+
+
+
 
 
       if ( max_evts > 0 && max_evts < n_entries ) n_entries = max_evts ;
@@ -121,7 +146,19 @@ using std::vector ;
          double bdt_val_350to650_fwm10_jmtev_top6 = read_bdt_350to650_fwm10_jmtev_top6.GetMvaValue( bdtInputVals_top6 ) ;
          double fisher_val_350to650_fwm10_jmtev_top6 = read_fisher_350to650_fwm10_jmtev_top6.GetMvaValue( bdtInputVals_top6 ) ;
 
+         {
+            int vi(0) ;
+            bdtInputVals_top6_fwm6.at(vi) = esv_top6.getFWmoment(2) ; vi++ ;
+            bdtInputVals_top6_fwm6.at(vi) = esv_top6.getFWmoment(3) ; vi++ ;
+            bdtInputVals_top6_fwm6.at(vi) = esv_top6.getFWmoment(4) ; vi++ ;
+            bdtInputVals_top6_fwm6.at(vi) = esv_top6.getFWmoment(5) ; vi++ ;
+            bdtInputVals_top6_fwm6.at(vi) = esv_top6.getFWmoment(6) ; vi++ ;
+            bdtInputVals_top6_fwm6.at(vi) = eigen_vals_norm_top6[0] ; vi++ ;
+            bdtInputVals_top6_fwm6.at(vi) = eigen_vals_norm_top6[1] ; vi++ ;
+            bdtInputVals_top6_fwm6.at(vi) = eigen_vals_norm_top6[2] ; vi++ ;
+         }
 
+         double fisher_val_350to650_fwm6_jmtev_top6_gt_v2 = read_fisher_350to650_fwm6_jmtev_top6_gt_v2.GetMvaValue( bdtInputVals_top6_fwm6 ) ;
 
 
 
@@ -160,6 +197,7 @@ using std::vector ;
 
          printf("\n  BDT    output : %7.3f\n", bdt_val_350to650_fwm10_jmtev_top6 ) ;
          printf("\n  Fisher output : %7.3f\n", fisher_val_350to650_fwm10_jmtev_top6 ) ;
+         printf("\n  Fisher output using fwm2-fwm6 and jmtevs : %7.3f\n", fisher_val_350to650_fwm6_jmtev_top6_gt_v2 ) ;
 
          printf("\n\n") ;
 
