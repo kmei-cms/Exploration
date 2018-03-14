@@ -19,6 +19,7 @@
 #include "bdt_350to650_fwm10_jmtev_top6.h"
 #include "EventShapeVariables.h"
 #include "get_cmframe_jets.c"
+#include "fisher_350to650_fwm10_jmtev_top6.h"
 
 void ExploreBackground::InitHistos()
 {
@@ -58,6 +59,10 @@ void ExploreBackground::InitHistos()
         my_histos.emplace(base + "_1l_g1b_mbl_bdt2",new TH1D((base+"_1l_g1b_mbl_bdt2").c_str(),(base+"_1l_g1b_mbl_bdt2").c_str(),15,0,15));
         my_histos.emplace(base + "_1l_g1b_mbl_bdt3",new TH1D((base+"_1l_g1b_mbl_bdt3").c_str(),(base+"_1l_g1b_mbl_bdt3").c_str(),15,0,15));
         my_histos.emplace(base + "_1l_g1b_mbl_bdt4",new TH1D((base+"_1l_g1b_mbl_bdt4").c_str(),(base+"_1l_g1b_mbl_bdt4").c_str(),15,0,15));
+        my_histos.emplace(base + "_1l_g1b_mbl_fisher1",new TH1D((base+"_1l_g1b_mbl_fisher1").c_str(),(base+"_1l_g1b_mbl_fisher1").c_str(),15,0,15));
+        my_histos.emplace(base + "_1l_g1b_mbl_fisher2",new TH1D((base+"_1l_g1b_mbl_fisher2").c_str(),(base+"_1l_g1b_mbl_fisher2").c_str(),15,0,15));
+        my_histos.emplace(base + "_1l_g1b_mbl_fisher3",new TH1D((base+"_1l_g1b_mbl_fisher3").c_str(),(base+"_1l_g1b_mbl_fisher3").c_str(),15,0,15));
+        my_histos.emplace(base + "_1l_g1b_mbl_fisher4",new TH1D((base+"_1l_g1b_mbl_fisher4").c_str(),(base+"_1l_g1b_mbl_fisher4").c_str(),15,0,15));
         my_histos.emplace(base + "_1l_g1b_mbl_g1t",new TH1D((base+"_1l_g1b_mbl_g1t").c_str(),(base+"_1l_g1b_mbl_g1t").c_str(),15,0,15));
         my_histos.emplace(base + "_1l_g1b_mbl_0t",new TH1D((base+"_1l_g1b_mbl_0t").c_str(),(base+"_1l_g1b_mbl_0t").c_str(),15,0,15));
         my_histos.emplace(base + "_1l_g1b_mbl_1t1",new TH1D((base+"_1l_g1b_mbl_1t1").c_str(),(base+"_1l_g1b_mbl_1t1").c_str(),15,0,15));
@@ -73,6 +78,10 @@ void ExploreBackground::InitHistos()
         my_histos.emplace(base + "_2l_onZ_g1b_nombl_bdt2",new TH1D((base+"_2l_onZ_g1b_nombl_bdt2").c_str(),(base+"_2l_onZ_g1b_nombl_bdt2").c_str(),15,0,15));
         my_histos.emplace(base + "_2l_onZ_g1b_nombl_bdt3",new TH1D((base+"_2l_onZ_g1b_nombl_bdt3").c_str(),(base+"_2l_onZ_g1b_nombl_bdt3").c_str(),15,0,15));
         my_histos.emplace(base + "_2l_onZ_g1b_nombl_bdt4",new TH1D((base+"_2l_onZ_g1b_nombl_bdt4").c_str(),(base+"_2l_onZ_g1b_nombl_bdt4").c_str(),15,0,15));
+        my_histos.emplace(base + "_2l_onZ_g1b_fisher1",new TH1D((base+"_2l_onZ_g1b_fisher1").c_str(),(base+"_2l_onZ_g1b_fisher1").c_str(),15,0,15));
+        my_histos.emplace(base + "_2l_onZ_g1b_fisher2",new TH1D((base+"_2l_onZ_g1b_fisher2").c_str(),(base+"_2l_onZ_g1b_fisher2").c_str(),15,0,15));
+        my_histos.emplace(base + "_2l_onZ_g1b_fisher3",new TH1D((base+"_2l_onZ_g1b_fisher3").c_str(),(base+"_2l_onZ_g1b_fisher3").c_str(),15,0,15));
+        my_histos.emplace(base + "_2l_onZ_g1b_fisher4",new TH1D((base+"_2l_onZ_g1b_fisher4").c_str(),(base+"_2l_onZ_g1b_fisher4").c_str(),15,0,15));
     }
 }
 
@@ -111,6 +120,7 @@ void ExploreBackground::Loop(double weight, int maxevents, std::string type, std
        
    }
    ReadBDT_350to650_fwm10_jmtev_top6 eventshapeBDT( inputVarNames_top6 ) ;
+   ReadFisher_350to650_fwm10_jmtev_top6 read_fisher_350to650_fwm10_jmtev_top6( inputVarNames_top6 ) ;
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) 
    {
@@ -346,11 +356,17 @@ void ExploreBackground::Loop(double weight, int maxevents, std::string type, std
       }
 
       double eventshape_bdt_val = eventshapeBDT.GetMvaValue( bdtInputVals_top6 ) ;
+      double fisher_val = read_fisher_350to650_fwm10_jmtev_top6.GetMvaValue( bdtInputVals_top6 ) ;
 
       bool bdt_bin1 = eventshape_bdt_val > -1.   && eventshape_bdt_val <= -0.04;
       bool bdt_bin2 = eventshape_bdt_val > -0.04 && eventshape_bdt_val <= 0;
       bool bdt_bin3 = eventshape_bdt_val > 0     && eventshape_bdt_val <= 0.04;
       bool bdt_bin4 = eventshape_bdt_val > 0.04  && eventshape_bdt_val <= 1;
+
+      bool fisher_bin1 = fisher_val > -1.    && fisher_val <= -0.035;
+      bool fisher_bin2 = fisher_val > -0.035 && fisher_val <= 0.03;
+      bool fisher_bin3 = fisher_val > 0.03   && fisher_val <= 0.095;
+      bool fisher_bin4 = fisher_val > 0.095  && fisher_val <= 1;
 
       // -------------------------------
       // -- Basic event selection stuff
@@ -576,6 +592,15 @@ void ExploreBackground::Loop(double weight, int maxevents, std::string type, std
                   if(bdt_bin4)
                       my_histos[base+"_1l_g1b_mbl_bdt4"]->Fill(njets_rj, eventweight);
 
+                  if(fisher_bin1)
+                      my_histos[base+"_1l_g1b_mbl_fisher1"]->Fill(njets_rj, eventweight);
+                  if(fisher_bin2)
+                      my_histos[base+"_1l_g1b_mbl_fisher2"]->Fill(njets_rj, eventweight);
+                  if(fisher_bin3)
+                      my_histos[base+"_1l_g1b_mbl_fisher3"]->Fill(njets_rj, eventweight);
+                  if(fisher_bin4)
+                      my_histos[base+"_1l_g1b_mbl_fisher4"]->Fill(njets_rj, eventweight);
+
                   if(passNtop)
                   {
                       my_histos[base+"_1l_g1b_mbl_g1t"]->Fill(njets_rj, eventweight);
@@ -602,6 +627,16 @@ void ExploreBackground::Loop(double weight, int maxevents, std::string type, std
               if(passNb)
               {
                   my_histos[base+"_2l_onZ_g1b"]->Fill(njets_rj, eventweight);
+
+                  if(fisher_bin1)
+                      my_histos[base+"_2l_onZ_g1b_fisher1"]->Fill(njets_rj, eventweight);
+                  if(fisher_bin2)
+                      my_histos[base+"_2l_onZ_g1b_fisher2"]->Fill(njets_rj, eventweight);
+                  if(fisher_bin3)
+                      my_histos[base+"_2l_onZ_g1b_fisher3"]->Fill(njets_rj, eventweight);
+                  if(fisher_bin4)
+                      my_histos[base+"_2l_onZ_g1b_fisher4"]->Fill(njets_rj, eventweight);
+                  
                   if(!passMbl_2l)
                   {
                       my_histos[base+"_2l_onZ_g1b_nombl"]->Fill(njets_rj, eventweight);

@@ -20,6 +20,7 @@
 #include "bdt_350to650_fwm10_jmtev_top6.h"
 #include "EventShapeVariables.h"
 #include "get_cmframe_jets.c"
+//#include "fisher_350to650_fwm10_jmtev_top6.h"
 
 void ExploreEventSelection::InitHistos()
 {
@@ -165,6 +166,7 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
        
    }
    ReadBDT_350to650_fwm10_jmtev_top6 eventshapeBDT( inputVarNames_top6 ) ;
+   //ReadFisher_350to650_fwm10_jmtev_top6 read_fisher_350to650_fwm10_jmtev_top6( inputVarNames_top6 ) ;
 
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) 
@@ -377,6 +379,7 @@ void ExploreEventSelection::Loop(double weight, int maxevents, std::string type,
       }
 
       double eventshape_bdt_val = eventshapeBDT.GetMvaValue( bdtInputVals_top6 ) ;
+      //double fisher_val = read_fisher_350to650_fwm10_jmtev_top6.GetMvaValue( bdtInputVals_top6 ) ;
 
 
 
