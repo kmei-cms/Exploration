@@ -19,9 +19,13 @@ public :
 
    ExploreEventSelection(TTree* tree) : NtupleClass(tree) {}
 
-   void     Loop(double weight, int maxevents = -1, bool isQuiet = false);
+   void     Loop(double weight, int maxevents = -1, std::string type = "", std::string filetag = "", bool isQuiet = false);
    virtual void     InitHistos();
    virtual void     WriteHistos();
+   bool     PassTriggerGeneral(std::vector<std::string> &mytriggers);
+   bool     PassTriggerAllHad();
+   bool     PassTriggerMuon();
+   bool     PassTriggerElectron();
 
 };
 
