@@ -20,7 +20,7 @@
 #include "bdt_350to650_fwm10_jmtev_top6.h"
 #include "EventShapeVariables.h"
 #include "get_cmframe_jets.c"
-#include "fisher_350to650_fwm10_jmtev_top6.h"
+#include "fisher_350to650_fwm10_jmtev_top6.c"
 #include "fisher_350to650_fwm6_jmtev_top6_gt_v2.c"
 
 void ExploreBackground::InitHistos()
