@@ -10,11 +10,11 @@
 #include <vector>
 using std::vector ;
 
-bool compare_p( math::RThetaPhiVector v1, math::RThetaPhiVector v2 ) { return (v1.R() > v2.R() ) ; }
+static bool compare_p( math::RThetaPhiVector v1, math::RThetaPhiVector v2 ) { return (v1.R() > v2.R() ) ; }
 
-   void get_cmframe_jets( std::vector<TLorentzVector>* lab_frame_jets,
-                          std::vector<math::RThetaPhiVector>& cm_frame_jets,
-                          int max_number_of_jets = -1 ) {
+static void get_cmframe_jets( std::vector<TLorentzVector>* lab_frame_jets,
+                              std::vector<math::RThetaPhiVector>& cm_frame_jets,
+                              int max_number_of_jets = -1 ) {
 
       if ( lab_frame_jets == 0x0 ) {
          printf("\n\n *** get_cmframe_jets : null pointer for input vector of lab frame jets (1st argument).\n\n" ) ;
