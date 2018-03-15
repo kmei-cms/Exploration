@@ -15,7 +15,7 @@
 #include "TopTagger/TopTagger/include/TopTaggerResults.h"
 #include "TopTagger/TopTagger/include/TopTaggerUtilities.h"
 #include "TopTagger/CfgParser/include/TTException.h"
-
+#include "SetUpTopTagger.h"
 
 void ExploreTopTagger::InitHistos()
 {
@@ -453,30 +453,10 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
       // --- TOP TAGGER ---
       // ------------------
       
-      // Use helper function to create input list 
-      // Create AK4 inputs object
-      ttUtility::ConstAK4Inputs AK4Inputs = ttUtility::ConstAK4Inputs(
-          *Jets, 
-          *Jets_bDiscriminatorCSV,
-          *Jets_qgLikelihood, 
-          hadtops, 
-          hadtopdaughters);
-    
-      // Create AK8 inputs object
-      ttUtility::ConstAK8Inputs AK8Inputs = ttUtility::ConstAK8Inputs(
-          *JetsAK8,
-          *JetsAK8_NsubjettinessTau1,
-          *JetsAK8_NsubjettinessTau2,
-          *JetsAK8_NsubjettinessTau3,
-          *JetsAK8_softDropMass,
-          *JetsAK8_subjets,    // These should be the subjets!
-          hadtops,
-          hadtopdaughters);
+      // setup variables needed for top tagger
+      SetUpTopTagger st(*static_cast<const NtupleClass*> (this) , hadtops, hadtopdaughters);
+      std::vector<Constituent> constituents = st.getConstituents();
       
-      // Create jets constituents list combining AK4 and AK8 jets, these are used to construct top candiates
-      // The vector of input constituents can also be constructed "by hand"
-      std::vector<Constituent> constituents = ttUtility::packageConstituents(AK4Inputs, AK8Inputs);
-
       // run the top tagger
       tt.runTagger(constituents);
 
@@ -681,13 +661,14 @@ void ExploreTopTagger::Loop(std::string runtype, double weight, int maxevents, b
       myvars.push_back("j3_CSV");
       std::vector<float> mydata;
       mydata.resize(myvars.size());
-      TIC.mapVars(myvars, mydata.data());
+      TIC.mapVars(myvars);
+      TIC.setPtr(mydata.data());
 
       // --- Check input variables for resolved tagger ---
       const std::vector<TopObject> topcandidates = ttr.getTopCandidates();
       for(const TopObject top : topcandidates)
       {
-          TIC.calculateVars(top);
+          TIC.calculateVars(top, 0);
           my_histos["h_cand_m"]->Fill(mydata[0], weight);
           my_histos["h_cand_p"]->Fill(mydata[1], weight);
           my_histos["h_j12_m"]->Fill(mydata[2], weight);
