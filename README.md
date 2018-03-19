@@ -109,14 +109,15 @@ make -j4
 Now also check out our repository if not done already:
 ```
 cd $CMSSW_BASE/src
-git clone -b NtuplesV2_TopTaggerV2 git@github.com:StealthStop/Exploration.git
+git clone git@github.com:StealthStop/Exploration.git
 cd Exploration
 source setup.csh
+make -j4
 ```
 
 Last step is to get the cfg file for the top tagger, and the TF output model file for the resolved part.
 ```
-$CMSSW_BASE/src/TopTagger/Tools/getTaggerCfg.sh  -t Tensorflow_Medium_Example_v1.0.1
+getTaggerCfg.sh -t Tensorflow_Medium_Example_v1.0.1 -o
 ```
 
 No changes to the analysis code should be needed. 
