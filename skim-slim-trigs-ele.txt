@@ -1,0 +1,2 @@
+  HLT_Ele27_WPTight_Gsf_v
+  HLT_Ele45_WPLoose_Gsf_v
