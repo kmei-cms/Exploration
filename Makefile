@@ -30,8 +30,7 @@ LIBSTOPTAGGER += -L$(TTTDIR) -lTopTagger
 #OBJS       = $(patsubst %, $(ODIR)/%, $(OBJ))
 
 
-PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple RunExploreTopTagger RunExploreEventSelection RunExploreEventSelection_locally RunTest
-
+PROGRAMS = MyAnalysis MyAnalysisMultiFile AddTopVars AddTopVarsBatch MicroNtuple RunExploreTopTagger RunExploreEventSelection RunExploreEventSelection_locally RunTest skim_and_slim_exe
 
 all: mkobj sampPyWrap $(PROGRAMS)
 
@@ -107,6 +106,9 @@ RunExploreEventSelection: $(ODIR)/RunExploreEventSelection.o $(ODIR)/ExploreEven
 
 RunExploreEventSelection_locally: $(ODIR)/RunExploreEventSelection_locally.o $(ODIR)/ExploreEventSelection.o $(ODIR)/NtupleClass.o $(ODIR)/Utility.o $(ODIR)/EventShapeVariables.o $(ODIR)/bdt_350to650_fwm10_jmtev_top6.o $(ODIR)/SetUpTopTagger.o 
 	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
+
+skim_and_slim_exe: $(ODIR)/skim_and_slim_exe.o
+	$(LD) $^ $(LIBS) -o $@
 
 #nEvts: $(ODIR)/nEvts.o $(ODIR)/NtupleClass.o $(ODIR)/samples.o
 #	$(LD) $^ $(LIBSTOPTAGGER) $(LIBS) -o $@
